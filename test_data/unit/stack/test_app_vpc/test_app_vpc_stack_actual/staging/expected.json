@@ -1,0 +1,1311 @@
+{
+  "Resources": {
+    "StarterStagingAppVpcAppVpc6F713F16": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.47.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ]
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1SubnetED553DB6": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.47.0.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-staging-app-vpc_public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableCF2E413D": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableAssociationD8A614B9": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableCF2E413D"
+        },
+        "SubnetId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1SubnetED553DB6"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1DefaultRouteAA2C8CAC": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "StarterStagingAppVpcAppVpcIGW120009BD"
+        },
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableCF2E413D"
+        }
+      },
+      "DependsOn": [
+        "StarterStagingAppVpcAppVpcVPCGWF7191420"
+      ]
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1EIP0D82EBB0": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet1"
+          }
+        ]
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1NATGateway5E8BFB36": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1EIP0D82EBB0",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1SubnetED553DB6"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet1"
+          }
+        ]
+      },
+      "DependsOn": [
+        "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1DefaultRouteAA2C8CAC",
+        "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableAssociationD8A614B9"
+      ]
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2Subnet46DC1519": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.47.32.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-staging-app-vpc_public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTable157699C9": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTableAssociation6C155947": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTable157699C9"
+        },
+        "SubnetId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2Subnet46DC1519"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2DefaultRouteC101784B": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "StarterStagingAppVpcAppVpcIGW120009BD"
+        },
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTable157699C9"
+        }
+      },
+      "DependsOn": [
+        "StarterStagingAppVpcAppVpcVPCGWF7191420"
+      ]
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2EIP15E67648": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet2"
+          }
+        ]
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2NATGateway3D91FAED": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2EIP15E67648",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2Subnet46DC1519"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet2"
+          }
+        ]
+      },
+      "DependsOn": [
+        "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2DefaultRouteC101784B",
+        "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTableAssociation6C155947"
+      ]
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.47.64.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-staging-app-vpc_private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_privateSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1RouteTable0C48DFFB": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_privateSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1RouteTableAssociation1C1C7D39": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1RouteTable0C48DFFB"
+        },
+        "SubnetId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1DefaultRouteC21859FF": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1NATGateway5E8BFB36"
+        },
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1RouteTable0C48DFFB"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.47.96.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-staging-app-vpc_private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_privateSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2RouteTableA9E98A58": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_privateSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2RouteTableAssociation7C70A31A": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2RouteTableA9E98A58"
+        },
+        "SubnetId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2DefaultRoute01FB299C": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2NATGateway3D91FAED"
+        },
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2RouteTableA9E98A58"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1Subnet734EB678": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.47.128.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-staging-app-vpc_isolated"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_isolatedSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1RouteTableE682C11C": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_isolatedSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1RouteTableAssociation2850E5A4": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1RouteTableE682C11C"
+        },
+        "SubnetId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1Subnet734EB678"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2SubnetF9DAD253": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.47.160.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-staging-app-vpc_isolated"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_isolatedSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2RouteTableAC83B084": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_isolatedSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2RouteTableAssociation23C87C33": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2RouteTableAC83B084"
+        },
+        "SubnetId": {
+          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2SubnetF9DAD253"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcIGW120009BD": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ]
+      }
+    },
+    "StarterStagingAppVpcAppVpcVPCGWF7191420": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "StarterStagingAppVpcAppVpcIGW120009BD"
+        },
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcEC2SecurityGroupC6D63DDC": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/EC2/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterStagingAppVpcAppVpc6F713F16",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcEC2C2B26990": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterStagingAppVpcAppVpcEC2SecurityGroupC6D63DDC",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ec2"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          },
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcEC2MESSAGESSecurityGroup50EAFBD0": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterStagingAppVpcAppVpc6F713F16",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcEC2MESSAGESF37E4D33": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterStagingAppVpcAppVpcEC2MESSAGESSecurityGroup50EAFBD0",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ec2messages"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          },
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcSSMSecurityGroupC80609A6": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/SSM/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterStagingAppVpcAppVpc6F713F16",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcSSM6EA6DEA2": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterStagingAppVpcAppVpcSSMSecurityGroupC80609A6",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssm"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          },
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcSSMMESSAGESSecurityGroupECAD425B": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterStagingAppVpcAppVpc6F713F16",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcSSMMESSAGES74395206": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterStagingAppVpcAppVpcSSMMESSAGESSecurityGroupECAD425B",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssmmessages"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          },
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcSECRETSMANAGERSecurityGroup1298D98B": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterStagingAppVpcAppVpc6F713F16",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcSECRETSMANAGER97BCC4CA": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterStagingAppVpcAppVpcSECRETSMANAGERSecurityGroup1298D98B",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".secretsmanager"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          },
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcECSAGENTSecurityGroupBF66DC30": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/ECS_AGENT/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterStagingAppVpcAppVpc6F713F16",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcECSAGENTCD8EA05B": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterStagingAppVpcAppVpcECSAGENTSecurityGroupBF66DC30",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs-agent"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          },
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcECSSecurityGroupB3AD423F": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/ECS/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterStagingAppVpcAppVpc6F713F16",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcECS175C55B1": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterStagingAppVpcAppVpcECSSecurityGroupB3AD423F",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          },
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcECSTELEMETRYSecurityGroupD0167592": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterStagingAppVpcAppVpc6F713F16",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcAppVpcECSTELEMETRYE125B77C": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterStagingAppVpcAppVpcECSTELEMETRYSecurityGroupD0167592",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs-telemetry"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          },
+          {
+            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+        }
+      }
+    },
+    "StarterStagingAppVpcPrivateR53Zone51FACB17": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "Name": "staging.internal.staging.daisy.com.",
+        "VPCs": [
+          {
+            "VPCId": {
+              "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+            },
+            "VPCRegion": {
+              "Ref": "AWS::Region"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

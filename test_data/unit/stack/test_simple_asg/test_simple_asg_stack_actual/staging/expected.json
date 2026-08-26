@@ -1,0 +1,221 @@
+{
+  "Resources": {
+    "StarterStagingSimpleAsgBbbSecurityGroupB68B6811": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterStagingSimpleAsgBbbStack/StarterStagingSimpleAsgBbbSecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "StarterStagingAppVpcStack:ExportsOutputRefStarterStagingAppVpcAppVpc6F713F160C16DDE3"
+        }
+      }
+    },
+    "StarterStagingSimpleAsgBbbASGRole912CC472": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "StarterStagingSimpleAsgBbbLaunchTplProfile893E0134": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "StarterStagingSimpleAsgBbbASGRole912CC472"
+          }
+        ]
+      }
+    },
+    "StarterStagingSimpleAsgBbbLaunchTpl745F39C0": {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Properties": {
+        "LaunchTemplateData": {
+          "BlockDeviceMappings": [
+            {
+              "DeviceName": "/dev/xvda",
+              "Ebs": {
+                "VolumeSize": 100
+              }
+            }
+          ],
+          "IamInstanceProfile": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "StarterStagingSimpleAsgBbbLaunchTplProfile893E0134",
+                "Arn"
+              ]
+            }
+          },
+          "ImageId": {
+            "Fn::FindInMap": [
+              "StarterStagingSimpleAsgBbbLaunchTplAmiMap2597D369",
+              {
+                "Ref": "AWS::Region"
+              },
+              "ami"
+            ]
+          },
+          "InstanceType": "t3.micro",
+          "MetadataOptions": {
+            "HttpPutResponseHopLimit": 1,
+            "HttpTokens": "required"
+          },
+          "NetworkInterfaces": [
+            {
+              "AssociatePublicIpAddress": false,
+              "DeviceIndex": 0,
+              "Groups": [
+                {
+                  "Fn::GetAtt": [
+                    "StarterStagingSimpleAsgBbbSecurityGroupB68B6811",
+                    "GroupId"
+                  ]
+                }
+              ]
+            }
+          ],
+          "TagSpecifications": [
+            {
+              "ResourceType": "instance",
+              "Tags": [
+                {
+                  "Key": "Name",
+                  "Value": "StarterStagingSimpleAsgBbbStack/StarterStagingSimpleAsgBbbLaunchTpl"
+                }
+              ]
+            },
+            {
+              "ResourceType": "volume",
+              "Tags": [
+                {
+                  "Key": "Name",
+                  "Value": "StarterStagingSimpleAsgBbbStack/StarterStagingSimpleAsgBbbLaunchTpl"
+                }
+              ]
+            }
+          ],
+          "UserData": {
+            "Fn::Base64": "#!/usr/bin/env bash\ncd /tmp\n# sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\n# sudo systemctl enable amazon-ssm-agent\n# sudo systemctl start amazon-ssm-agent\n"
+          }
+        },
+        "TagSpecifications": [
+          {
+            "ResourceType": "launch-template",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "StarterStagingSimpleAsgBbbStack/StarterStagingSimpleAsgBbbLaunchTpl"
+              }
+            ]
+          }
+        ]
+      },
+      "DependsOn": [
+        "StarterStagingSimpleAsgBbbASGRole912CC472"
+      ]
+    },
+    "StarterStagingSimpleAsgBbbASG4E8911F4": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "LaunchTemplate": {
+          "LaunchTemplateId": {
+            "Ref": "StarterStagingSimpleAsgBbbLaunchTpl745F39C0"
+          },
+          "Version": {
+            "Fn::GetAtt": [
+              "StarterStagingSimpleAsgBbbLaunchTpl745F39C0",
+              "LatestVersionNumber"
+            ]
+          }
+        },
+        "MaxSize": "1",
+        "MinSize": "1",
+        "VPCZoneIdentifier": [
+          {
+            "Fn::ImportValue": "StarterStagingAppVpcStack:ExportsOutputRefStarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91DD159FEA5"
+          },
+          {
+            "Fn::ImportValue": "StarterStagingAppVpcStack:ExportsOutputRefStarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E5900C6F1EDB"
+          }
+        ]
+      },
+      "UpdatePolicy": {
+        "AutoScalingScheduledAction": {
+          "IgnoreUnmodifiedGroupSizeProperties": true
+        }
+      }
+    }
+  },
+  "Mappings": {
+    "StarterStagingSimpleAsgBbbLaunchTplAmiMap2597D369": {
+      "us-east-2": {
+        "ami": "ami-0448a709165fd89ff"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

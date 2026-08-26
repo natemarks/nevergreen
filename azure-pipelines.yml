@@ -1,0 +1,319 @@
+# azure-pipelines.yml
+#
+# CDK deployment pipeline: dev → staging → production.
+#
+# Each environment stage runs in two steps:
+#   1. Prepare job  — discover (update config from external AWS data) then diff
+#   2. Deploy job   — approval-gated deployment using an ADO environment resource
+#
+# AWS credentials are supplied per environment via ADO variable groups.
+# Create one variable group per environment in ADO → Pipelines → Library:
+#
+#   aws-credentials-dev
+#   aws-credentials-staging
+#   aws-credentials-production
+#
+# Each group must contain these three secret variables:
+#   AWS_ACCESS_KEY_ID
+#   AWS_SECRET_ACCESS_KEY
+#   AWS_DEFAULT_REGION
+#
+# Approval gates live on ADO environment resources, not in this file.
+# Create three environments in ADO → Pipelines → Environments:
+#
+#   cdk-dev
+#   cdk-staging
+#   cdk-production
+#
+# Configure required approvers on each environment in the ADO UI. The pipeline
+# pauses at each deployment job until the required approvals are granted.
+#
+# Triggers:
+#   - Automatic: any push or merge to main.
+#   - Manual:    run via "Run pipeline" in the ADO UI; choose any branch.
+#                No automatic builds are triggered on pull requests.
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr: none
+
+variables:
+  pythonVersion: '3.12.13'
+  cdkVersion: '2.70.0'
+
+stages:
+
+  # ── Dev ──────────────────────────────────────────────────────────────────────
+
+  - stage: Dev
+    displayName: 'Dev'
+    variables:
+      - group: aws-credentials-dev
+    jobs:
+
+      - job: Prepare
+        displayName: 'Discover & Diff'
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: 'Install Node.js'
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: $(pythonVersion)
+            displayName: 'Set Python version'
+
+          # Install CDK CLI locally. The Makefile locates it via:
+          #   find . -type f -name cdk
+          # Bypassing `make node_modules` because that target also runs
+          # clean-venv, which expects pyenv and would clobber the CI venv.
+          - script: npm install aws-cdk@$(cdkVersion)
+            displayName: 'Install CDK CLI'
+
+          # Bypass `make .venv` for the same reason (pyenv not available in CI).
+          - script: |
+              python -m venv .venv
+              source .venv/bin/activate
+              pip install --upgrade pip setuptools
+              pip install -r requirements.txt
+            displayName: 'Create Python venv'
+
+          - script: source .venv/bin/activate && make discover app_env=dev
+            displayName: 'Discover (dev)'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+          - script: source .venv/bin/activate && make cdk-diff-all app_env=dev
+            displayName: 'Diff (dev)'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+      - deployment: Deploy
+        displayName: 'Deploy'
+        dependsOn: Prepare
+        environment: cdk-dev
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Deployment jobs do not auto-checkout source; must be explicit.
+                - checkout: self
+
+                - task: NodeTool@0
+                  inputs:
+                    versionSpec: '18.x'
+                  displayName: 'Install Node.js'
+
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: $(pythonVersion)
+                  displayName: 'Set Python version'
+
+                - script: npm install aws-cdk@$(cdkVersion)
+                  displayName: 'Install CDK CLI'
+
+                - script: |
+                    python -m venv .venv
+                    source .venv/bin/activate
+                    pip install --upgrade pip setuptools
+                    pip install -r requirements.txt
+                  displayName: 'Create Python venv'
+
+                - script: source .venv/bin/activate && make cdk-deploy-all app_env=dev
+                  displayName: 'Deploy (dev)'
+                  env:
+                    AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+                    AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+                    AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+  # ── Staging ───────────────────────────────────────────────────────────────────
+
+  - stage: Staging
+    displayName: 'Staging'
+    dependsOn: Dev
+    variables:
+      - group: aws-credentials-staging
+    jobs:
+
+      - job: Prepare
+        displayName: 'Discover & Diff'
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: 'Install Node.js'
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: $(pythonVersion)
+            displayName: 'Set Python version'
+
+          - script: npm install aws-cdk@$(cdkVersion)
+            displayName: 'Install CDK CLI'
+
+          - script: |
+              python -m venv .venv
+              source .venv/bin/activate
+              pip install --upgrade pip setuptools
+              pip install -r requirements.txt
+            displayName: 'Create Python venv'
+
+          - script: source .venv/bin/activate && make discover app_env=staging
+            displayName: 'Discover (staging)'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+          - script: source .venv/bin/activate && make cdk-diff-all app_env=staging
+            displayName: 'Diff (staging)'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+      - deployment: Deploy
+        displayName: 'Deploy'
+        dependsOn: Prepare
+        environment: cdk-staging
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: NodeTool@0
+                  inputs:
+                    versionSpec: '18.x'
+                  displayName: 'Install Node.js'
+
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: $(pythonVersion)
+                  displayName: 'Set Python version'
+
+                - script: npm install aws-cdk@$(cdkVersion)
+                  displayName: 'Install CDK CLI'
+
+                - script: |
+                    python -m venv .venv
+                    source .venv/bin/activate
+                    pip install --upgrade pip setuptools
+                    pip install -r requirements.txt
+                  displayName: 'Create Python venv'
+
+                - script: source .venv/bin/activate && make cdk-deploy-all app_env=staging
+                  displayName: 'Deploy (staging)'
+                  env:
+                    AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+                    AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+                    AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+  # ── Production ────────────────────────────────────────────────────────────────
+
+  - stage: Production
+    displayName: 'Production'
+    dependsOn: Staging
+    variables:
+      - group: aws-credentials-production
+    jobs:
+
+      - job: Prepare
+        displayName: 'Discover & Diff'
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: 'Install Node.js'
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: $(pythonVersion)
+            displayName: 'Set Python version'
+
+          - script: npm install aws-cdk@$(cdkVersion)
+            displayName: 'Install CDK CLI'
+
+          - script: |
+              python -m venv .venv
+              source .venv/bin/activate
+              pip install --upgrade pip setuptools
+              pip install -r requirements.txt
+            displayName: 'Create Python venv'
+
+          - script: source .venv/bin/activate && make discover app_env=production
+            displayName: 'Discover (production)'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+          - script: source .venv/bin/activate && make cdk-diff-all app_env=production
+            displayName: 'Diff (production)'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+      - deployment: Deploy
+        displayName: 'Deploy'
+        dependsOn: Prepare
+        environment: cdk-production
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: NodeTool@0
+                  inputs:
+                    versionSpec: '18.x'
+                  displayName: 'Install Node.js'
+
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: $(pythonVersion)
+                  displayName: 'Set Python version'
+
+                - script: npm install aws-cdk@$(cdkVersion)
+                  displayName: 'Install CDK CLI'
+
+                - script: |
+                    python -m venv .venv
+                    source .venv/bin/activate
+                    pip install --upgrade pip setuptools
+                    pip install -r requirements.txt
+                  displayName: 'Create Python venv'
+
+                - script: source .venv/bin/activate && make cdk-deploy-all app_env=production
+                  displayName: 'Deploy (production)'
+                  env:
+                    AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+                    AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+                    AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)

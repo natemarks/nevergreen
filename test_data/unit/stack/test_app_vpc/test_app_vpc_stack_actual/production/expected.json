@@ -1,0 +1,1311 @@
+{
+  "Resources": {
+    "StarterProductionAppVpcAppVpc9179387E": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.57.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ]
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1SubnetCD11FFC0": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.57.0.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-production-app-vpc_public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTable9E0F5DC1": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTableAssociation13397DA2": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTable9E0F5DC1"
+        },
+        "SubnetId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1SubnetCD11FFC0"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1DefaultRouteD8499569": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "StarterProductionAppVpcAppVpcIGW73974067"
+        },
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTable9E0F5DC1"
+        }
+      },
+      "DependsOn": [
+        "StarterProductionAppVpcAppVpcVPCGW3FD73E67"
+      ]
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1EIP92E805FC": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet1"
+          }
+        ]
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1NATGatewayB6AE456F": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1EIP92E805FC",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1SubnetCD11FFC0"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet1"
+          }
+        ]
+      },
+      "DependsOn": [
+        "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1DefaultRouteD8499569",
+        "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTableAssociation13397DA2"
+      ]
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2Subnet7E20AAF9": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.57.32.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-production-app-vpc_public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTable783E5776": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTableAssociation8B8FC987": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTable783E5776"
+        },
+        "SubnetId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2Subnet7E20AAF9"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2DefaultRouteC113CCD0": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "StarterProductionAppVpcAppVpcIGW73974067"
+        },
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTable783E5776"
+        }
+      },
+      "DependsOn": [
+        "StarterProductionAppVpcAppVpcVPCGW3FD73E67"
+      ]
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2EIP9640C633": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet2"
+          }
+        ]
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2NATGatewayF1C708E6": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2EIP9640C633",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2Subnet7E20AAF9"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet2"
+          }
+        ]
+      },
+      "DependsOn": [
+        "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2DefaultRouteC113CCD0",
+        "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTableAssociation8B8FC987"
+      ]
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.57.64.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-production-app-vpc_private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_privateSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1RouteTableE43C1F94": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_privateSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1RouteTableAssociation2AB1E48A": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1RouteTableE43C1F94"
+        },
+        "SubnetId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1DefaultRoute34E15456": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1NATGatewayB6AE456F"
+        },
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1RouteTableE43C1F94"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.57.96.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-production-app-vpc_private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_privateSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2RouteTable0A626686": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_privateSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2RouteTableAssociation02ED32A1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2RouteTable0A626686"
+        },
+        "SubnetId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2DefaultRouteE9487033": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2NATGatewayF1C708E6"
+        },
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2RouteTable0A626686"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1Subnet1814DE8A": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.57.128.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-production-app-vpc_isolated"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_isolatedSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1RouteTable39F30FE1": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_isolatedSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1RouteTableAssociation6178531B": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1RouteTable39F30FE1"
+        },
+        "SubnetId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1Subnet1814DE8A"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2SubnetAC93CFED": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.57.160.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-production-app-vpc_isolated"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_isolatedSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2RouteTable702C13A2": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_isolatedSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2RouteTableAssociationB9C52A53": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2RouteTable702C13A2"
+        },
+        "SubnetId": {
+          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2SubnetAC93CFED"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcIGW73974067": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ]
+      }
+    },
+    "StarterProductionAppVpcAppVpcVPCGW3FD73E67": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "StarterProductionAppVpcAppVpcIGW73974067"
+        },
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcEC2SecurityGroup89822406": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/EC2/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterProductionAppVpcAppVpc9179387E",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterProductionAppVpcAppVpc9179387E",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcEC2C6535C51": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterProductionAppVpcAppVpcEC2SecurityGroup89822406",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ec2"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          },
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcEC2MESSAGESSecurityGroup06A77580": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterProductionAppVpcAppVpc9179387E",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterProductionAppVpcAppVpc9179387E",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcEC2MESSAGES1EE8CF0B": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterProductionAppVpcAppVpcEC2MESSAGESSecurityGroup06A77580",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ec2messages"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          },
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcSSMSecurityGroup246C8D99": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/SSM/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterProductionAppVpcAppVpc9179387E",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterProductionAppVpcAppVpc9179387E",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcSSM212B264E": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterProductionAppVpcAppVpcSSMSecurityGroup246C8D99",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssm"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          },
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcSSMMESSAGESSecurityGroup6F78E97D": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterProductionAppVpcAppVpc9179387E",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterProductionAppVpcAppVpc9179387E",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcSSMMESSAGES515CA29E": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterProductionAppVpcAppVpcSSMMESSAGESSecurityGroup6F78E97D",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssmmessages"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          },
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcSECRETSMANAGERSecurityGroup9B72A63D": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterProductionAppVpcAppVpc9179387E",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterProductionAppVpcAppVpc9179387E",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcSECRETSMANAGERD07356D0": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterProductionAppVpcAppVpcSECRETSMANAGERSecurityGroup9B72A63D",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".secretsmanager"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          },
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcECSAGENTSecurityGroup12E57814": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/ECS_AGENT/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterProductionAppVpcAppVpc9179387E",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterProductionAppVpcAppVpc9179387E",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcECSAGENT024D5510": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterProductionAppVpcAppVpcECSAGENTSecurityGroup12E57814",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs-agent"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          },
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcECSSecurityGroup75F73E7D": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/ECS/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterProductionAppVpcAppVpc9179387E",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterProductionAppVpcAppVpc9179387E",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcECS1017D2CE": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterProductionAppVpcAppVpcECSSecurityGroup75F73E7D",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          },
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcECSTELEMETRYSecurityGroup85BE22CF": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterProductionAppVpcAppVpc9179387E",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterProductionAppVpcAppVpc9179387E",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcAppVpcECSTELEMETRYBBDF70F4": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterProductionAppVpcAppVpcECSTELEMETRYSecurityGroup85BE22CF",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs-telemetry"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          },
+          {
+            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+        }
+      }
+    },
+    "StarterProductionAppVpcPrivateR53ZoneACC0FCAC": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "Name": "production.internal.production.daisy.com.",
+        "VPCs": [
+          {
+            "VPCId": {
+              "Ref": "StarterProductionAppVpcAppVpc9179387E"
+            },
+            "VPCRegion": {
+              "Ref": "AWS::Region"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

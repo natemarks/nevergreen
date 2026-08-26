@@ -1,0 +1,14 @@
+{
+  "app_name": "Starter",
+  "iac_project_url": "github.com/natemarks/cdk-starter",
+  "supported_app_envs": [
+    "dev",
+    "staging",
+    "production"
+  ],
+  "app_env_to_aws_account": {
+    "dev": "709310380790",
+    "staging": "709310380790",
+    "production": "709310380790"
+  }
+}

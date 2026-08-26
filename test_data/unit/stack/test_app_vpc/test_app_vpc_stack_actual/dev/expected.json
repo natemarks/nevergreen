@@ -1,0 +1,1311 @@
+{
+  "Resources": {
+    "StarterDevAppVpcAppVpcF9E8D586": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.37.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ]
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1Subnet0DEB4C02": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.37.0.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-dev-app-vpc_public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTable980C7F85": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTableAssociationED83B74A": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTable980C7F85"
+        },
+        "SubnetId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1Subnet0DEB4C02"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1DefaultRoute5C5BA4C7": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "StarterDevAppVpcAppVpcIGWCD30F8FB"
+        },
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTable980C7F85"
+        }
+      },
+      "DependsOn": [
+        "StarterDevAppVpcAppVpcVPCGW176A9610"
+      ]
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1EIP7096E9D0": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet1"
+          }
+        ]
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1NATGateway899723C9": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1EIP7096E9D0",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1Subnet0DEB4C02"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet1"
+          }
+        ]
+      },
+      "DependsOn": [
+        "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1DefaultRoute5C5BA4C7",
+        "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTableAssociationED83B74A"
+      ]
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2Subnet82BBAFD1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.37.32.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-dev-app-vpc_public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTable49B2227D": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTableAssociation698D3F3C": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTable49B2227D"
+        },
+        "SubnetId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2Subnet82BBAFD1"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2DefaultRoute6390C68E": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "StarterDevAppVpcAppVpcIGWCD30F8FB"
+        },
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTable49B2227D"
+        }
+      },
+      "DependsOn": [
+        "StarterDevAppVpcAppVpcVPCGW176A9610"
+      ]
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2EIPD5364DF1": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet2"
+          }
+        ]
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2NATGateway1ACE0F3F": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2EIPD5364DF1",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2Subnet82BBAFD1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet2"
+          }
+        ]
+      },
+      "DependsOn": [
+        "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2DefaultRoute6390C68E",
+        "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTableAssociation698D3F3C"
+      ]
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.37.64.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-dev-app-vpc_private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_privateSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1RouteTable4781CDC3": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_privateSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1RouteTableAssociation34E46D35": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1RouteTable4781CDC3"
+        },
+        "SubnetId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1DefaultRouteCF5AC9B4": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1NATGateway899723C9"
+        },
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1RouteTable4781CDC3"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.37.96.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-dev-app-vpc_private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_privateSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2RouteTableD9E81429": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_privateSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2RouteTableAssociationF77C6E4C": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2RouteTableD9E81429"
+        },
+        "SubnetId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2DefaultRoute59C64DD1": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2NATGateway1ACE0F3F"
+        },
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2RouteTableD9E81429"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1Subnet0A59EFCE": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.37.128.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-dev-app-vpc_isolated"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_isolatedSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1RouteTableF0B6E9B8": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_isolatedSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1RouteTableAssociationCD794D66": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1RouteTableF0B6E9B8"
+        },
+        "SubnetId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1Subnet0A59EFCE"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2SubnetF452F775": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.37.160.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "starter-dev-app-vpc_isolated"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated"
+          },
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_isolatedSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2RouteTableC82ABE3E": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_isolatedSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2RouteTableAssociationBD4A6095": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2RouteTableC82ABE3E"
+        },
+        "SubnetId": {
+          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2SubnetF452F775"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcIGWCD30F8FB": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ]
+      }
+    },
+    "StarterDevAppVpcAppVpcVPCGW176A9610": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "StarterDevAppVpcAppVpcIGWCD30F8FB"
+        },
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcEC2SecurityGroup9CF45D42": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/EC2/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterDevAppVpcAppVpcF9E8D586",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcEC23D16EBF9": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterDevAppVpcAppVpcEC2SecurityGroup9CF45D42",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ec2"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          },
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcEC2MESSAGESSecurityGroupAD0EF847": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterDevAppVpcAppVpcF9E8D586",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcEC2MESSAGESA04E2863": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterDevAppVpcAppVpcEC2MESSAGESSecurityGroupAD0EF847",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ec2messages"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          },
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcSSMSecurityGroup108208C4": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/SSM/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterDevAppVpcAppVpcF9E8D586",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcSSMFD294B86": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterDevAppVpcAppVpcSSMSecurityGroup108208C4",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssm"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          },
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcSSMMESSAGESSecurityGroup883D6F3E": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterDevAppVpcAppVpcF9E8D586",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcSSMMESSAGESD1BBD74F": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterDevAppVpcAppVpcSSMMESSAGESSecurityGroup883D6F3E",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ssmmessages"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          },
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcSECRETSMANAGERSecurityGroupED663B5A": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterDevAppVpcAppVpcF9E8D586",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcSECRETSMANAGER7F4C170B": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterDevAppVpcAppVpcSECRETSMANAGERSecurityGroupED663B5A",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".secretsmanager"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          },
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcECSAGENTSecurityGroup08DE64C4": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/ECS_AGENT/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterDevAppVpcAppVpcF9E8D586",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcECSAGENTA6C5852F": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterDevAppVpcAppVpcECSAGENTSecurityGroup08DE64C4",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs-agent"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          },
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcECSSecurityGroup3B7CC02B": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/ECS/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterDevAppVpcAppVpcF9E8D586",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcECSA2292102": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterDevAppVpcAppVpcECSSecurityGroup3B7CC02B",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          },
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcECSTELEMETRYSecurityGroup6A041C98": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "StarterDevAppVpcAppVpcF9E8D586",
+                "CidrBlock"
+              ]
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "CidrBlock"
+                    ]
+                  },
+                  ":443"
+                ]
+              ]
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcAppVpcECSTELEMETRY1C0062A9": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "StarterDevAppVpcAppVpcECSTELEMETRYSecurityGroup6A041C98",
+              "GroupId"
+            ]
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".ecs-telemetry"
+            ]
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          },
+          {
+            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "starter-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+        }
+      }
+    },
+    "StarterDevAppVpcPrivateR53ZoneF886FFFE": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "Name": "dev.internal.dev.daisy.com.",
+        "VPCs": [
+          {
+            "VPCId": {
+              "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+            },
+            "VPCRegion": {
+              "Ref": "AWS::Region"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

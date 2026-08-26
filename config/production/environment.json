@@ -1,0 +1,9 @@
+{
+  "admin_team": "Operations",
+  "aws_account_name": "Daisy Production",
+  "aws_account_number": "709310380790",
+  "default_fqdn": "production.daisy.com",
+  "default_region": "us-east-2",
+  "app_env": "production",
+  "is_release": false
+}

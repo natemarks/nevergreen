@@ -1,0 +1,9 @@
+{
+  "admin_team": "Operations",
+  "aws_account_name": "Daisy Staging",
+  "aws_account_number": "709310380790",
+  "default_fqdn": "staging.daisy.com",
+  "default_region": "us-east-2",
+  "app_env": "staging",
+  "is_release": false
+}
