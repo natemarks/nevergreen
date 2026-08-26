@@ -18,7 +18,7 @@ Customize:
 - Extend shared tags in `set_environment_tags`.
 """
 
-from typing import ClassVar
+from typing import ClassVar, cast
 
 from aws_cdk import App, Environment, Stack, Tags
 
@@ -93,7 +93,7 @@ class Inventory:
         app_vpc_name = (
             f"{APP_NAME}{self.environment_setting.prefix()}AppVpcStack"
         )
-        app_vpc_stack = self._get_deployed(app_vpc_name)
+        app_vpc_stack = cast(AppVpcStack, self._get_deployed(app_vpc_name))
         s_input = SimpleAsgInput.from_config_directory(
             self.data_path,
             stack_id,
