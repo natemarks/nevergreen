@@ -1,4 +1,5 @@
-name: python checks
+name: Static Analysis
+
 on:
   pull_request:
   push:
@@ -6,13 +7,16 @@ on:
       - main
 
 jobs:
-  static_checks:
+  static-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+
+      - name: Set up Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-      - run: make static-check
+          python-version: '3.12.13'
+
+      - name: Run static checks
+        run: make static-check

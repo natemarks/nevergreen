@@ -150,3 +150,37 @@ need to know:
 
 Update documentation to explain intent and constraints, not to describe what the
 code does.
+
+---
+
+## Static Analysis & Testing Standards
+
+This project follows opinionated scaffolding standards:
+
+1. **Pinned Dependencies**: All versions pinned exactly — no `^`, `~`, or ranges
+2. **Static Analysis**: Run `make static` before committing (auto-formats); `make static-check` in CI
+3. **Pre-commit Hooks**: Configured with gitleaks and `make static` — install with `pre-commit install`
+4. **Dependabot**: Weekly updates for pip, npm, and github-actions
+5. **CI/CD**: GitHub Actions runs `make static-check` on PRs and main pushes
+
+### Key Make Targets
+
+- `make static` — shellcheck + black (auto-format) + mypy + pylint + unit tests
+- `make static-check` — same but `black-check` (CI-safe, no modification)
+- `make unit` — unit tests only (no AWS credentials needed)
+- `make unit-update-golden` — regenerate golden CloudFormation templates
+- `make integration` — tests requiring AWS credentials (`aws` marker)
+- `make test-dependabot-pr` — validate a Dependabot PR locally
+- `make mypy` — type-check all tracked Python files
+- `make pre-commit-install` — install git pre-commit hooks (uses `.venv`, no system install needed)
+
+### Notes for untracked files
+
+`git ls-files` skips untracked files, so new `.py` files are invisible to
+Makefile targets until staged. Before staging a new file, run directly:
+
+```bash
+source .venv/bin/activate
+pylint --max-line-length=90 <file>.py
+black --check --line-length=79 <file>.py
+```
