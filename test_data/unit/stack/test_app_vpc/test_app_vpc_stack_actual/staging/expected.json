@@ -1,6 +1,6 @@
 {
   "Resources": {
-    "StarterStagingAppVpcAppVpc6F713F16": {
+    "NevergreenStagingAppVpcAppVpc582963E9": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
         "CidrBlock": "10.47.0.0/16",
@@ -10,12 +10,12 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ]
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1SubnetED553DB6": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1Subnet515F5128": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -31,7 +31,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-staging-app-vpc_public"
+            "Value": "nevergreen-staging-app-vpc_public"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -39,91 +39,91 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet1"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_publicSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableCF2E413D": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1RouteTable308FD5E2": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet1"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_publicSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableAssociationD8A614B9": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1RouteTableAssociation037F3FB9": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableCF2E413D"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1RouteTable308FD5E2"
         },
         "SubnetId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1SubnetED553DB6"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1Subnet515F5128"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1DefaultRouteAA2C8CAC": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1DefaultRoute4C07577B": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": {
-          "Ref": "StarterStagingAppVpcAppVpcIGW120009BD"
+          "Ref": "NevergreenStagingAppVpcAppVpcIGW292A5D0B"
         },
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableCF2E413D"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1RouteTable308FD5E2"
         }
       },
       "DependsOn": [
-        "StarterStagingAppVpcAppVpcVPCGWF7191420"
+        "NevergreenStagingAppVpcAppVpcVPCGWA44B9998"
       ]
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1EIP0D82EBB0": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1EIP620DB0DE": {
       "Type": "AWS::EC2::EIP",
       "Properties": {
         "Domain": "vpc",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet1"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_publicSubnet1"
           }
         ]
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1NATGateway5E8BFB36": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1NATGatewayB705AF7B": {
       "Type": "AWS::EC2::NatGateway",
       "Properties": {
         "AllocationId": {
           "Fn::GetAtt": [
-            "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1EIP0D82EBB0",
+            "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1EIP620DB0DE",
             "AllocationId"
           ]
         },
         "SubnetId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1SubnetED553DB6"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1Subnet515F5128"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet1"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_publicSubnet1"
           }
         ]
       },
       "DependsOn": [
-        "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1DefaultRouteAA2C8CAC",
-        "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1RouteTableAssociationD8A614B9"
+        "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1DefaultRoute4C07577B",
+        "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1RouteTableAssociation037F3FB9"
       ]
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2Subnet46DC1519": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2SubnetB627659B": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -139,7 +139,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-staging-app-vpc_public"
+            "Value": "nevergreen-staging-app-vpc_public"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -147,91 +147,91 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet2"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_publicSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTable157699C9": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2RouteTableFEF45904": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet2"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_publicSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTableAssociation6C155947": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2RouteTableAssociationC1B1029F": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTable157699C9"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2RouteTableFEF45904"
         },
         "SubnetId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2Subnet46DC1519"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2SubnetB627659B"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2DefaultRouteC101784B": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2DefaultRoute01E90BEB": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": {
-          "Ref": "StarterStagingAppVpcAppVpcIGW120009BD"
+          "Ref": "NevergreenStagingAppVpcAppVpcIGW292A5D0B"
         },
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTable157699C9"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2RouteTableFEF45904"
         }
       },
       "DependsOn": [
-        "StarterStagingAppVpcAppVpcVPCGWF7191420"
+        "NevergreenStagingAppVpcAppVpcVPCGWA44B9998"
       ]
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2EIP15E67648": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2EIPF38FC095": {
       "Type": "AWS::EC2::EIP",
       "Properties": {
         "Domain": "vpc",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet2"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_publicSubnet2"
           }
         ]
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2NATGateway3D91FAED": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2NATGateway26EE839D": {
       "Type": "AWS::EC2::NatGateway",
       "Properties": {
         "AllocationId": {
           "Fn::GetAtt": [
-            "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2EIP15E67648",
+            "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2EIPF38FC095",
             "AllocationId"
           ]
         },
         "SubnetId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2Subnet46DC1519"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2SubnetB627659B"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_publicSubnet2"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_publicSubnet2"
           }
         ]
       },
       "DependsOn": [
-        "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2DefaultRouteC101784B",
-        "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2RouteTableAssociation6C155947"
+        "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2DefaultRoute01E90BEB",
+        "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2RouteTableAssociationC1B1029F"
       ]
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -247,7 +247,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-staging-app-vpc_private"
+            "Value": "nevergreen-staging-app-vpc_private"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -255,52 +255,52 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_privateSubnet1"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_privateSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1RouteTable0C48DFFB": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1RouteTable303DE9EC": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_privateSubnet1"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_privateSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1RouteTableAssociation1C1C7D39": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1RouteTableAssociation524CDFD0": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1RouteTable0C48DFFB"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1RouteTable303DE9EC"
         },
         "SubnetId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1DefaultRouteC21859FF": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1DefaultRouteBA1497F5": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "NatGatewayId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet1NATGateway5E8BFB36"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1NATGatewayB705AF7B"
         },
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1RouteTable0C48DFFB"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1RouteTable303DE9EC"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -316,7 +316,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-staging-app-vpc_private"
+            "Value": "nevergreen-staging-app-vpc_private"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -324,52 +324,52 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_privateSubnet2"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_privateSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2RouteTableA9E98A58": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2RouteTableCDD8EEF2": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_privateSubnet2"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_privateSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2RouteTableAssociation7C70A31A": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2RouteTableAssociation20F499F9": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2RouteTableA9E98A58"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2RouteTableCDD8EEF2"
         },
         "SubnetId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2DefaultRoute01FB299C": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2DefaultRoute0FBC697A": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "NatGatewayId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcpublicSubnet2NATGateway3D91FAED"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2NATGateway26EE839D"
         },
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2RouteTableA9E98A58"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2RouteTableCDD8EEF2"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1Subnet734EB678": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet1Subnet2004618B": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -385,7 +385,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-staging-app-vpc_isolated"
+            "Value": "nevergreen-staging-app-vpc_isolated"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -393,40 +393,40 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_isolatedSubnet1"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_isolatedSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1RouteTableE682C11C": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet1RouteTable32675096": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_isolatedSubnet1"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_isolatedSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1RouteTableAssociation2850E5A4": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet1RouteTableAssociationA225037E": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1RouteTableE682C11C"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet1RouteTable32675096"
         },
         "SubnetId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet1Subnet734EB678"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet1Subnet2004618B"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2SubnetF9DAD253": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet2Subnet35353EAD": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -442,7 +442,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-staging-app-vpc_isolated"
+            "Value": "nevergreen-staging-app-vpc_isolated"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -450,65 +450,65 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_isolatedSubnet2"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_isolatedSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2RouteTableAC83B084": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet2RouteTableD54EA489": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/starter-staging-app-vpc_isolatedSubnet2"
+            "Value": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/nevergreen-staging-app-vpc_isolatedSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2RouteTableAssociation23C87C33": {
+    "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet2RouteTableAssociation2F0DD12E": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2RouteTableAC83B084"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet2RouteTableD54EA489"
         },
         "SubnetId": {
-          "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcisolatedSubnet2SubnetF9DAD253"
+          "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet2Subnet35353EAD"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcIGW120009BD": {
+    "NevergreenStagingAppVpcAppVpcIGW292A5D0B": {
       "Type": "AWS::EC2::InternetGateway",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ]
       }
     },
-    "StarterStagingAppVpcAppVpcVPCGWF7191420": {
+    "NevergreenStagingAppVpcAppVpcVPCGWA44B9998": {
       "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
         "InternetGatewayId": {
-          "Ref": "StarterStagingAppVpcAppVpcIGW120009BD"
+          "Ref": "NevergreenStagingAppVpcAppVpcIGW292A5D0B"
         },
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcEC2SecurityGroupC6D63DDC": {
+    "NevergreenStagingAppVpcAppVpcEC2SecurityGroup80A762E2": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/EC2/SecurityGroup",
+        "GroupDescription": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/EC2/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -520,7 +520,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterStagingAppVpcAppVpc6F713F16",
+                "NevergreenStagingAppVpcAppVpc582963E9",
                 "CidrBlock"
               ]
             },
@@ -531,7 +531,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "NevergreenStagingAppVpcAppVpc582963E9",
                       "CidrBlock"
                     ]
                   },
@@ -547,22 +547,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcEC2C2B26990": {
+    "NevergreenStagingAppVpcAppVpcEC27DC0529A": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterStagingAppVpcAppVpcEC2SecurityGroupC6D63DDC",
+              "NevergreenStagingAppVpcAppVpcEC2SecurityGroup80A762E2",
               "GroupId"
             ]
           }
@@ -581,28 +581,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
           },
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcEC2MESSAGESSecurityGroup50EAFBD0": {
+    "NevergreenStagingAppVpcAppVpcEC2MESSAGESSecurityGroup2C4B6FE4": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
+        "GroupDescription": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -614,7 +614,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterStagingAppVpcAppVpc6F713F16",
+                "NevergreenStagingAppVpcAppVpc582963E9",
                 "CidrBlock"
               ]
             },
@@ -625,7 +625,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "NevergreenStagingAppVpcAppVpc582963E9",
                       "CidrBlock"
                     ]
                   },
@@ -641,22 +641,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcEC2MESSAGESF37E4D33": {
+    "NevergreenStagingAppVpcAppVpcEC2MESSAGES56D6AA78": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterStagingAppVpcAppVpcEC2MESSAGESSecurityGroup50EAFBD0",
+              "NevergreenStagingAppVpcAppVpcEC2MESSAGESSecurityGroup2C4B6FE4",
               "GroupId"
             ]
           }
@@ -675,28 +675,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
           },
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcSSMSecurityGroupC80609A6": {
+    "NevergreenStagingAppVpcAppVpcSSMSecurityGroupC9C92D91": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/SSM/SecurityGroup",
+        "GroupDescription": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/SSM/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -708,7 +708,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterStagingAppVpcAppVpc6F713F16",
+                "NevergreenStagingAppVpcAppVpc582963E9",
                 "CidrBlock"
               ]
             },
@@ -719,7 +719,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "NevergreenStagingAppVpcAppVpc582963E9",
                       "CidrBlock"
                     ]
                   },
@@ -735,22 +735,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcSSM6EA6DEA2": {
+    "NevergreenStagingAppVpcAppVpcSSM9E6B1688": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterStagingAppVpcAppVpcSSMSecurityGroupC80609A6",
+              "NevergreenStagingAppVpcAppVpcSSMSecurityGroupC9C92D91",
               "GroupId"
             ]
           }
@@ -769,28 +769,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
           },
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcSSMMESSAGESSecurityGroupECAD425B": {
+    "NevergreenStagingAppVpcAppVpcSSMMESSAGESSecurityGroup2E02A250": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
+        "GroupDescription": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -802,7 +802,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterStagingAppVpcAppVpc6F713F16",
+                "NevergreenStagingAppVpcAppVpc582963E9",
                 "CidrBlock"
               ]
             },
@@ -813,7 +813,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "NevergreenStagingAppVpcAppVpc582963E9",
                       "CidrBlock"
                     ]
                   },
@@ -829,22 +829,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcSSMMESSAGES74395206": {
+    "NevergreenStagingAppVpcAppVpcSSMMESSAGESD632649B": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterStagingAppVpcAppVpcSSMMESSAGESSecurityGroupECAD425B",
+              "NevergreenStagingAppVpcAppVpcSSMMESSAGESSecurityGroup2E02A250",
               "GroupId"
             ]
           }
@@ -863,28 +863,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
           },
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcSECRETSMANAGERSecurityGroup1298D98B": {
+    "NevergreenStagingAppVpcAppVpcSECRETSMANAGERSecurityGroup196E4967": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
+        "GroupDescription": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -896,7 +896,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterStagingAppVpcAppVpc6F713F16",
+                "NevergreenStagingAppVpcAppVpc582963E9",
                 "CidrBlock"
               ]
             },
@@ -907,7 +907,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "NevergreenStagingAppVpcAppVpc582963E9",
                       "CidrBlock"
                     ]
                   },
@@ -923,22 +923,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcSECRETSMANAGER97BCC4CA": {
+    "NevergreenStagingAppVpcAppVpcSECRETSMANAGER30B626A8": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterStagingAppVpcAppVpcSECRETSMANAGERSecurityGroup1298D98B",
+              "NevergreenStagingAppVpcAppVpcSECRETSMANAGERSecurityGroup196E4967",
               "GroupId"
             ]
           }
@@ -957,28 +957,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
           },
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcECSAGENTSecurityGroupBF66DC30": {
+    "NevergreenStagingAppVpcAppVpcECSAGENTSecurityGroup61D51801": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/ECS_AGENT/SecurityGroup",
+        "GroupDescription": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/ECS_AGENT/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -990,7 +990,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterStagingAppVpcAppVpc6F713F16",
+                "NevergreenStagingAppVpcAppVpc582963E9",
                 "CidrBlock"
               ]
             },
@@ -1001,7 +1001,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "NevergreenStagingAppVpcAppVpc582963E9",
                       "CidrBlock"
                     ]
                   },
@@ -1017,22 +1017,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcECSAGENTCD8EA05B": {
+    "NevergreenStagingAppVpcAppVpcECSAGENT704F9354": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterStagingAppVpcAppVpcECSAGENTSecurityGroupBF66DC30",
+              "NevergreenStagingAppVpcAppVpcECSAGENTSecurityGroup61D51801",
               "GroupId"
             ]
           }
@@ -1051,28 +1051,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
           },
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcECSSecurityGroupB3AD423F": {
+    "NevergreenStagingAppVpcAppVpcECSSecurityGroup01376A54": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/ECS/SecurityGroup",
+        "GroupDescription": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/ECS/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -1084,7 +1084,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterStagingAppVpcAppVpc6F713F16",
+                "NevergreenStagingAppVpcAppVpc582963E9",
                 "CidrBlock"
               ]
             },
@@ -1095,7 +1095,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "NevergreenStagingAppVpcAppVpc582963E9",
                       "CidrBlock"
                     ]
                   },
@@ -1111,22 +1111,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcECS175C55B1": {
+    "NevergreenStagingAppVpcAppVpcECS01C26B21": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterStagingAppVpcAppVpcECSSecurityGroupB3AD423F",
+              "NevergreenStagingAppVpcAppVpcECSSecurityGroup01376A54",
               "GroupId"
             ]
           }
@@ -1145,28 +1145,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
           },
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcECSTELEMETRYSecurityGroupD0167592": {
+    "NevergreenStagingAppVpcAppVpcECSTELEMETRYSecurityGroup884B01A0": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingAppVpcStack/StarterStagingAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
+        "GroupDescription": "NevergreenStagingAppVpcStack/NevergreenStagingAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -1178,7 +1178,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterStagingAppVpcAppVpc6F713F16",
+                "NevergreenStagingAppVpcAppVpc582963E9",
                 "CidrBlock"
               ]
             },
@@ -1189,7 +1189,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterStagingAppVpcAppVpc6F713F16",
+                      "NevergreenStagingAppVpcAppVpc582963E9",
                       "CidrBlock"
                     ]
                   },
@@ -1205,22 +1205,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcAppVpcECSTELEMETRYE125B77C": {
+    "NevergreenStagingAppVpcAppVpcECSTELEMETRY78DCD9D6": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterStagingAppVpcAppVpcECSTELEMETRYSecurityGroupD0167592",
+              "NevergreenStagingAppVpcAppVpcECSTELEMETRYSecurityGroup884B01A0",
               "GroupId"
             ]
           }
@@ -1239,32 +1239,79 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91D"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E846560"
           },
           {
-            "Ref": "StarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E590"
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-staging-app-vpc"
+            "Value": "nevergreen-staging-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
         }
       }
     },
-    "StarterStagingAppVpcPrivateR53Zone51FACB17": {
+    "NevergreenStagingAppVpcAppVpcS3F049E633": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "RouteTableIds": [
+          {
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1RouteTable303DE9EC"
+          },
+          {
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2RouteTableCDD8EEF2"
+          },
+          {
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet1RouteTable308FD5E2"
+          },
+          {
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcpublicSubnet2RouteTableFEF45904"
+          },
+          {
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet1RouteTable32675096"
+          },
+          {
+            "Ref": "NevergreenStagingAppVpcAppVpcnevergreenstagingappvpcisolatedSubnet2RouteTableD54EA489"
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".s3"
+            ]
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "nevergreen-staging-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Gateway",
+        "VpcId": {
+          "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
+        }
+      }
+    },
+    "NevergreenStagingAppVpcPrivateR53ZoneE1D7F1B4": {
       "Type": "AWS::Route53::HostedZone",
       "Properties": {
         "Name": "staging.internal.staging.daisy.com.",
         "VPCs": [
           {
             "VPCId": {
-              "Ref": "StarterStagingAppVpcAppVpc6F713F16"
+              "Ref": "NevergreenStagingAppVpcAppVpc582963E9"
             },
             "VPCRegion": {
               "Ref": "AWS::Region"

@@ -1,0 +1,411 @@
+{
+  "Resources": {
+    "NevergreenStagingSecureS3PhiCmk1EB25459": {
+      "Type": "AWS::KMS::Key",
+      "Properties": {
+        "Description": "CMK for nevergreen-staging-phi SecureS3 bucket",
+        "EnableKeyRotation": true,
+        "KeyPolicy": {
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":root"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "RotationPeriodInDays": 180
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "NevergreenStagingSecureS3PhiLoggingBucket8AD33FD1": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "BucketName": "nevergreen-staging-phi-access-logs",
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "ObjectWriter"
+            }
+          ]
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "NevergreenStagingSecureS3PhiBucket8A19100A": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "NevergreenStagingSecureS3PhiCmk1EB25459",
+                    "Arn"
+                  ]
+                },
+                "SSEAlgorithm": "aws:kms:dsse"
+              }
+            }
+          ]
+        },
+        "BucketName": "nevergreen-staging-phi",
+        "LoggingConfiguration": {
+          "DestinationBucketName": {
+            "Ref": "NevergreenStagingSecureS3PhiLoggingBucket8AD33FD1"
+          }
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "NevergreenStagingSecureS3PhiBucketPolicy09C6E50E": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "NevergreenStagingSecureS3PhiBucket8A19100A"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenStagingSecureS3PhiBucket8A19100A",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenStagingSecureS3PhiBucket8A19100A",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "DenyNonHttps"
+            },
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "StringNotEqualsIfExists": {
+                  "s3:x-amz-server-side-encryption": "aws:kms:dsse"
+                }
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "NevergreenStagingSecureS3PhiBucket8A19100A",
+                        "Arn"
+                      ]
+                    },
+                    "/*"
+                  ]
+                ]
+              },
+              "Sid": "EnforceDsseKms"
+            },
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "StringNotEquals": {
+                  "aws:sourceVpce": {
+                    "Fn::ImportValue": "NevergreenStagingAppVpcStack:ExportsOutputRefNevergreenStagingAppVpcAppVpcS3F049E633EEC8BC43"
+                  }
+                }
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenStagingSecureS3PhiBucket8A19100A",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenStagingSecureS3PhiBucket8A19100A",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "DenyNonVpcEndpoint"
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenStagingSecureS3PhiReadPolicyD72DDAFD": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "",
+        "ManagedPolicyName": "NevergreenStagingSecureS3Phi-read",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenStagingSecureS3PhiBucket8A19100A",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenStagingSecureS3PhiBucket8A19100A",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "NevergreenStagingSecureS3PhiCmk1EB25459",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenStagingSecureS3PhiReadWritePolicy4EA6731D": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "",
+        "ManagedPolicyName": "NevergreenStagingSecureS3Phi-read-write",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject",
+                "s3:DeleteObject"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenStagingSecureS3PhiBucket8A19100A",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenStagingSecureS3PhiBucket8A19100A",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "NevergreenStagingSecureS3PhiCmk1EB25459",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenStagingSecureS3PhiCmkArnParam276D9E42": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "CMK ARN for nevergreen-staging-phi SecureS3 bucket",
+        "Name": "/nevergreen/staging/secure_s3/phi/cmk-arn",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenStagingSecureS3PhiCmk1EB25459",
+            "Arn"
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "BucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NevergreenStagingSecureS3PhiBucket8A19100A",
+          "Arn"
+        ]
+      }
+    },
+    "CmkArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NevergreenStagingSecureS3PhiCmk1EB25459",
+          "Arn"
+        ]
+      }
+    },
+    "ReadPolicyArn": {
+      "Value": {
+        "Ref": "NevergreenStagingSecureS3PhiReadPolicyD72DDAFD"
+      }
+    },
+    "ReadWritePolicyArn": {
+      "Value": {
+        "Ref": "NevergreenStagingSecureS3PhiReadWritePolicy4EA6731D"
+      }
+    },
+    "CmkArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenStagingSecureS3PhiCmkArnParam276D9E42"
+      }
+    },
+    "LoggingBucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NevergreenStagingSecureS3PhiLoggingBucket8AD33FD1",
+          "Arn"
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

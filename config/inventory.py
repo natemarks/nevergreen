@@ -26,6 +26,7 @@ from config.helper import APP_NAME, check_app_env, check_aws_account
 from config.registry import STACKS_BY_ENV
 from config.settings import EnvironmentSetting, get_actual_path
 from stack.app_vpc import AppVpcInput, AppVpcStack
+from stack.secure_s3 import SecureS3Input, SecureS3Stack
 from stack.simple_asg import SimpleAsgInput, SimpleAsgStack
 
 
@@ -100,6 +101,31 @@ class Inventory:
             env_setting=self.environment_setting,
         )
         return SimpleAsgStack(
+            scope=app,
+            cdk_env=cdk_env,
+            s_input=s_input,
+            app_vpc_stack=app_vpc_stack,
+            termination_protection=self.TERMINATION_PROTECTION,
+        )
+
+    def _deploy_secure_s3(
+        self, app: App, cdk_env: Environment, stack_id: str
+    ) -> SecureS3Stack:
+        """Create and return one SecureS3 stack.
+
+        AppVpc must already be deployed because SecureS3 enforces VPC endpoint
+        access via the gateway endpoint created in AppVpcStack.
+        """
+        app_vpc_name = (
+            f"{APP_NAME}{self.environment_setting.prefix()}AppVpcStack"
+        )
+        app_vpc_stack = cast(AppVpcStack, self._get_deployed(app_vpc_name))
+        s_input = SecureS3Input.from_config_directory(
+            self.data_path,
+            stack_id,
+            env_setting=self.environment_setting,
+        )
+        return SecureS3Stack(
             scope=app,
             cdk_env=cdk_env,
             s_input=s_input,

@@ -131,6 +131,12 @@ class AppVpcStack(Stack):
             "ECS_TELEMETRY",
             service=ec2.InterfaceVpcEndpointAwsService.ECS_TELEMETRY,
         )
+        # add S3 gateway endpoint — free, routes S3 traffic within the VPC;
+        # exposed so SecureS3Stack bucket policies can reference the endpoint ID
+        self.s3_gateway_endpoint = self.vpc.add_gateway_endpoint(
+            "S3",
+            service=ec2.GatewayVpcEndpointAwsService.S3,
+        )
         self.internal_r53_zone = r53.PrivateHostedZone(
             self,
             f"{self._prefix}PrivateR53Zone",

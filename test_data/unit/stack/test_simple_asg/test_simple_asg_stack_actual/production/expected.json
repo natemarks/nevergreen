@@ -1,9 +1,9 @@
 {
   "Resources": {
-    "StarterProductionSimpleAsgCccSecurityGroupBD38AFEC": {
+    "NevergreenProductionSimpleAsgCccSecurityGroup7B43AFE9": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionSimpleAsgCccStack/StarterProductionSimpleAsgCccSecurityGroup",
+        "GroupDescription": "NevergreenProductionSimpleAsgCccStack/NevergreenProductionSimpleAsgCccSecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -12,11 +12,11 @@
           }
         ],
         "VpcId": {
-          "Fn::ImportValue": "StarterProductionAppVpcStack:ExportsOutputRefStarterProductionAppVpcAppVpc9179387E97A73ACD"
+          "Fn::ImportValue": "NevergreenProductionAppVpcStack:ExportsOutputRefNevergreenProductionAppVpcAppVpc5A7B00F75B6FBF17"
         }
       }
     },
-    "StarterProductionSimpleAsgCccASGRole3EA49BAD": {
+    "NevergreenProductionSimpleAsgCccASGRole78AA1459": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -47,17 +47,17 @@
         ]
       }
     },
-    "StarterProductionSimpleAsgCccLaunchTplProfileD6E152BD": {
+    "NevergreenProductionSimpleAsgCccLaunchTplProfileEAD2D295": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Roles": [
           {
-            "Ref": "StarterProductionSimpleAsgCccASGRole3EA49BAD"
+            "Ref": "NevergreenProductionSimpleAsgCccASGRole78AA1459"
           }
         ]
       }
     },
-    "StarterProductionSimpleAsgCccLaunchTpl4A7723B7": {
+    "NevergreenProductionSimpleAsgCccLaunchTpl08CE7A9D": {
       "Type": "AWS::EC2::LaunchTemplate",
       "Properties": {
         "LaunchTemplateData": {
@@ -72,14 +72,14 @@
           "IamInstanceProfile": {
             "Arn": {
               "Fn::GetAtt": [
-                "StarterProductionSimpleAsgCccLaunchTplProfileD6E152BD",
+                "NevergreenProductionSimpleAsgCccLaunchTplProfileEAD2D295",
                 "Arn"
               ]
             }
           },
           "ImageId": {
             "Fn::FindInMap": [
-              "StarterProductionSimpleAsgCccLaunchTplAmiMapC0226EF0",
+              "NevergreenProductionSimpleAsgCccLaunchTplAmiMap38B35A3B",
               {
                 "Ref": "AWS::Region"
               },
@@ -98,7 +98,7 @@
               "Groups": [
                 {
                   "Fn::GetAtt": [
-                    "StarterProductionSimpleAsgCccSecurityGroupBD38AFEC",
+                    "NevergreenProductionSimpleAsgCccSecurityGroup7B43AFE9",
                     "GroupId"
                   ]
                 }
@@ -111,7 +111,7 @@
               "Tags": [
                 {
                   "Key": "Name",
-                  "Value": "StarterProductionSimpleAsgCccStack/StarterProductionSimpleAsgCccLaunchTpl"
+                  "Value": "NevergreenProductionSimpleAsgCccStack/NevergreenProductionSimpleAsgCccLaunchTpl"
                 }
               ]
             },
@@ -120,7 +120,7 @@
               "Tags": [
                 {
                   "Key": "Name",
-                  "Value": "StarterProductionSimpleAsgCccStack/StarterProductionSimpleAsgCccLaunchTpl"
+                  "Value": "NevergreenProductionSimpleAsgCccStack/NevergreenProductionSimpleAsgCccLaunchTpl"
                 }
               ]
             }
@@ -135,26 +135,26 @@
             "Tags": [
               {
                 "Key": "Name",
-                "Value": "StarterProductionSimpleAsgCccStack/StarterProductionSimpleAsgCccLaunchTpl"
+                "Value": "NevergreenProductionSimpleAsgCccStack/NevergreenProductionSimpleAsgCccLaunchTpl"
               }
             ]
           }
         ]
       },
       "DependsOn": [
-        "StarterProductionSimpleAsgCccASGRole3EA49BAD"
+        "NevergreenProductionSimpleAsgCccASGRole78AA1459"
       ]
     },
-    "StarterProductionSimpleAsgCccASG29B961FF": {
+    "NevergreenProductionSimpleAsgCccASG67D424E5": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "LaunchTemplate": {
           "LaunchTemplateId": {
-            "Ref": "StarterProductionSimpleAsgCccLaunchTpl4A7723B7"
+            "Ref": "NevergreenProductionSimpleAsgCccLaunchTpl08CE7A9D"
           },
           "Version": {
             "Fn::GetAtt": [
-              "StarterProductionSimpleAsgCccLaunchTpl4A7723B7",
+              "NevergreenProductionSimpleAsgCccLaunchTpl08CE7A9D",
               "LatestVersionNumber"
             ]
           }
@@ -163,10 +163,10 @@
         "MinSize": "1",
         "VPCZoneIdentifier": [
           {
-            "Fn::ImportValue": "StarterProductionAppVpcStack:ExportsOutputRefStarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A406A7586AB"
+            "Fn::ImportValue": "NevergreenProductionAppVpcStack:ExportsOutputRefNevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88C3EB3B90"
           },
           {
-            "Fn::ImportValue": "StarterProductionAppVpcStack:ExportsOutputRefStarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF9B81D9D4"
+            "Fn::ImportValue": "NevergreenProductionAppVpcStack:ExportsOutputRefNevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A960B50ABB"
           }
         ]
       },
@@ -178,7 +178,7 @@
     }
   },
   "Mappings": {
-    "StarterProductionSimpleAsgCccLaunchTplAmiMapC0226EF0": {
+    "NevergreenProductionSimpleAsgCccLaunchTplAmiMap38B35A3B": {
       "us-east-2": {
         "ami": "ami-0448a709165fd89ff"
       }

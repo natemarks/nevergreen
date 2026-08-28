@@ -110,6 +110,70 @@ class SimpleAsgSetting(JsonSettingBase):
 
 
 @dataclass(frozen=True, kw_only=True)
+class SecureS3Setting(
+    JsonSettingBase
+):  # pylint: disable=too-many-instance-attributes
+    """Settings for each SecureS3Stack instance.
+
+    Preflight validation in __post_init__ raises ValueError for incompatible
+    combinations. All checks run before any CDK construct is created.
+    """
+
+    RELATIVE_PATH_TEMPLATE: ClassVar[str] = "secure_s3/{0}/secure_s3.json"
+
+    rotation_period_days: int = 180
+    enable_access_logging_bucket: bool = False
+    worm_enabled: bool = False
+    worm_mode: str = "GOVERNANCE"
+    worm_retention_days: int = 2555
+    enable_lifecycle_expiration: bool = False
+    deletion_days: int = 1095
+    removal_policy: str = "DESTROY"
+
+    def __post_init__(self) -> None:
+        if self.worm_mode not in {"GOVERNANCE", "COMPLIANCE"}:
+            raise ValueError(
+                f"worm_mode must be 'GOVERNANCE' or 'COMPLIANCE', "
+                f"got '{self.worm_mode}'."
+            )
+        if self.removal_policy not in {"DESTROY", "RETAIN"}:
+            raise ValueError(
+                f"removal_policy must be 'DESTROY' or 'RETAIN', "
+                f"got '{self.removal_policy}'."
+            )
+        if not 90 <= self.rotation_period_days <= 2560:
+            raise ValueError(
+                f"rotation_period_days must be between 90 and 2560, "
+                f"got {self.rotation_period_days}."
+            )
+        if self.worm_enabled and self.worm_retention_days < 1:
+            raise ValueError(
+                "worm_retention_days must be >= 1 when worm_enabled=True, "
+                f"got {self.worm_retention_days}."
+            )
+        if self.enable_lifecycle_expiration and self.deletion_days < 1:
+            raise ValueError(
+                "deletion_days must be >= 1 when "
+                f"enable_lifecycle_expiration=True, got {self.deletion_days}."
+            )
+        if (
+            self.enable_lifecycle_expiration
+            and self.worm_enabled
+            and self.deletion_days <= self.worm_retention_days
+        ):
+            raise ValueError(
+                f"enable_lifecycle_expiration=True with "
+                f"deletion_days={self.deletion_days} conflicts with "
+                f"worm_enabled=True and "
+                f"worm_retention_days={self.worm_retention_days}. "
+                "The lifecycle rule cannot delete WORM-locked objects before "
+                "their retention period expires. Fix: either set "
+                "enable_lifecycle_expiration=False, set "
+                "deletion_days > worm_retention_days, or set worm_enabled=False."
+            )
+
+
+@dataclass(frozen=True, kw_only=True)
 class AppVpcSetting(JsonSettingBase):
     """Settings for the AppVpc stack template.
 

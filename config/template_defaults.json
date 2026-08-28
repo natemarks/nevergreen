@@ -1,6 +1,6 @@
 {
-  "app_name": "Starter",
-  "iac_project_url": "github.com/natemarks/cdk-starter",
+  "app_name": "Nevergreen",
+  "iac_project_url": "github.com/natemarks/nevergreen",
   "supported_app_envs": [
     "dev",
     "staging",

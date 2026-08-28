@@ -1,9 +1,9 @@
 {
   "Resources": {
-    "StarterStagingSimpleAsgBbbSecurityGroupB68B6811": {
+    "NevergreenStagingSimpleAsgBbbSecurityGroupA78C558D": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterStagingSimpleAsgBbbStack/StarterStagingSimpleAsgBbbSecurityGroup",
+        "GroupDescription": "NevergreenStagingSimpleAsgBbbStack/NevergreenStagingSimpleAsgBbbSecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -12,11 +12,11 @@
           }
         ],
         "VpcId": {
-          "Fn::ImportValue": "StarterStagingAppVpcStack:ExportsOutputRefStarterStagingAppVpcAppVpc6F713F160C16DDE3"
+          "Fn::ImportValue": "NevergreenStagingAppVpcStack:ExportsOutputRefNevergreenStagingAppVpcAppVpc582963E9840BC44C"
         }
       }
     },
-    "StarterStagingSimpleAsgBbbASGRole912CC472": {
+    "NevergreenStagingSimpleAsgBbbASGRole732B9140": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -47,17 +47,17 @@
         ]
       }
     },
-    "StarterStagingSimpleAsgBbbLaunchTplProfile893E0134": {
+    "NevergreenStagingSimpleAsgBbbLaunchTplProfile4ECCF308": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Roles": [
           {
-            "Ref": "StarterStagingSimpleAsgBbbASGRole912CC472"
+            "Ref": "NevergreenStagingSimpleAsgBbbASGRole732B9140"
           }
         ]
       }
     },
-    "StarterStagingSimpleAsgBbbLaunchTpl745F39C0": {
+    "NevergreenStagingSimpleAsgBbbLaunchTplE7DC5C51": {
       "Type": "AWS::EC2::LaunchTemplate",
       "Properties": {
         "LaunchTemplateData": {
@@ -72,14 +72,14 @@
           "IamInstanceProfile": {
             "Arn": {
               "Fn::GetAtt": [
-                "StarterStagingSimpleAsgBbbLaunchTplProfile893E0134",
+                "NevergreenStagingSimpleAsgBbbLaunchTplProfile4ECCF308",
                 "Arn"
               ]
             }
           },
           "ImageId": {
             "Fn::FindInMap": [
-              "StarterStagingSimpleAsgBbbLaunchTplAmiMap2597D369",
+              "NevergreenStagingSimpleAsgBbbLaunchTplAmiMap1F157BEB",
               {
                 "Ref": "AWS::Region"
               },
@@ -98,7 +98,7 @@
               "Groups": [
                 {
                   "Fn::GetAtt": [
-                    "StarterStagingSimpleAsgBbbSecurityGroupB68B6811",
+                    "NevergreenStagingSimpleAsgBbbSecurityGroupA78C558D",
                     "GroupId"
                   ]
                 }
@@ -111,7 +111,7 @@
               "Tags": [
                 {
                   "Key": "Name",
-                  "Value": "StarterStagingSimpleAsgBbbStack/StarterStagingSimpleAsgBbbLaunchTpl"
+                  "Value": "NevergreenStagingSimpleAsgBbbStack/NevergreenStagingSimpleAsgBbbLaunchTpl"
                 }
               ]
             },
@@ -120,7 +120,7 @@
               "Tags": [
                 {
                   "Key": "Name",
-                  "Value": "StarterStagingSimpleAsgBbbStack/StarterStagingSimpleAsgBbbLaunchTpl"
+                  "Value": "NevergreenStagingSimpleAsgBbbStack/NevergreenStagingSimpleAsgBbbLaunchTpl"
                 }
               ]
             }
@@ -135,26 +135,26 @@
             "Tags": [
               {
                 "Key": "Name",
-                "Value": "StarterStagingSimpleAsgBbbStack/StarterStagingSimpleAsgBbbLaunchTpl"
+                "Value": "NevergreenStagingSimpleAsgBbbStack/NevergreenStagingSimpleAsgBbbLaunchTpl"
               }
             ]
           }
         ]
       },
       "DependsOn": [
-        "StarterStagingSimpleAsgBbbASGRole912CC472"
+        "NevergreenStagingSimpleAsgBbbASGRole732B9140"
       ]
     },
-    "StarterStagingSimpleAsgBbbASG4E8911F4": {
+    "NevergreenStagingSimpleAsgBbbASGAF45531A": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "LaunchTemplate": {
           "LaunchTemplateId": {
-            "Ref": "StarterStagingSimpleAsgBbbLaunchTpl745F39C0"
+            "Ref": "NevergreenStagingSimpleAsgBbbLaunchTplE7DC5C51"
           },
           "Version": {
             "Fn::GetAtt": [
-              "StarterStagingSimpleAsgBbbLaunchTpl745F39C0",
+              "NevergreenStagingSimpleAsgBbbLaunchTplE7DC5C51",
               "LatestVersionNumber"
             ]
           }
@@ -163,10 +163,10 @@
         "MinSize": "1",
         "VPCZoneIdentifier": [
           {
-            "Fn::ImportValue": "StarterStagingAppVpcStack:ExportsOutputRefStarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet1SubnetE8A2A91DD159FEA5"
+            "Fn::ImportValue": "NevergreenStagingAppVpcStack:ExportsOutputRefNevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet1Subnet3E8465606BA8EF47"
           },
           {
-            "Fn::ImportValue": "StarterStagingAppVpcStack:ExportsOutputRefStarterStagingAppVpcAppVpcstarterstagingappvpcprivateSubnet2SubnetEB24E5900C6F1EDB"
+            "Fn::ImportValue": "NevergreenStagingAppVpcStack:ExportsOutputRefNevergreenStagingAppVpcAppVpcnevergreenstagingappvpcprivateSubnet2Subnet3FE4327D8D9D9273"
           }
         ]
       },
@@ -178,7 +178,7 @@
     }
   },
   "Mappings": {
-    "StarterStagingSimpleAsgBbbLaunchTplAmiMap2597D369": {
+    "NevergreenStagingSimpleAsgBbbLaunchTplAmiMap1F157BEB": {
       "us-east-2": {
         "ami": "ami-0448a709165fd89ff"
       }

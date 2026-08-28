@@ -1,3 +1,9 @@
 # Gitleaks ignore patterns
 # Add file paths or patterns for false positives
 # Format: path/to/file.py:rule-name:line-number
+
+# "S3Key" in CloudFormation golden files is the CDK auto-delete Lambda zip
+# filename (a SHA256 hash), not a real secret.
+test_data/unit/stack/test_secure_s3/test_secure_s3_stack_actual/dev/expected.json:generic-api-key:272
+test_data/unit/stack/test_secure_s3/test_secure_s3_stack_custom/lifecycle_expiration/expected.json:generic-api-key:284
+test_data/unit/stack/test_secure_s3/test_secure_s3_stack_custom/with_logging/expected.json:generic-api-key:175

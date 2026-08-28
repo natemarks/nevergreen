@@ -1,6 +1,6 @@
 {
   "Resources": {
-    "StarterProductionAppVpcAppVpc9179387E": {
+    "NevergreenProductionAppVpcAppVpc5A7B00F7": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
         "CidrBlock": "10.57.0.0/16",
@@ -10,12 +10,12 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ]
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1SubnetCD11FFC0": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1Subnet5A07D1A5": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -31,7 +31,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-production-app-vpc_public"
+            "Value": "nevergreen-production-app-vpc_public"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -39,91 +39,91 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet1"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_publicSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTable9E0F5DC1": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1RouteTable31CA5BA6": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet1"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_publicSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTableAssociation13397DA2": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1RouteTableAssociation2878195D": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTable9E0F5DC1"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1RouteTable31CA5BA6"
         },
         "SubnetId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1SubnetCD11FFC0"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1Subnet5A07D1A5"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1DefaultRouteD8499569": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1DefaultRoute3B58F78C": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": {
-          "Ref": "StarterProductionAppVpcAppVpcIGW73974067"
+          "Ref": "NevergreenProductionAppVpcAppVpcIGWC10C71B5"
         },
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTable9E0F5DC1"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1RouteTable31CA5BA6"
         }
       },
       "DependsOn": [
-        "StarterProductionAppVpcAppVpcVPCGW3FD73E67"
+        "NevergreenProductionAppVpcAppVpcVPCGW13F6B2A9"
       ]
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1EIP92E805FC": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1EIPDA8B4909": {
       "Type": "AWS::EC2::EIP",
       "Properties": {
         "Domain": "vpc",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet1"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_publicSubnet1"
           }
         ]
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1NATGatewayB6AE456F": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1NATGateway4AB83773": {
       "Type": "AWS::EC2::NatGateway",
       "Properties": {
         "AllocationId": {
           "Fn::GetAtt": [
-            "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1EIP92E805FC",
+            "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1EIPDA8B4909",
             "AllocationId"
           ]
         },
         "SubnetId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1SubnetCD11FFC0"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1Subnet5A07D1A5"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet1"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_publicSubnet1"
           }
         ]
       },
       "DependsOn": [
-        "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1DefaultRouteD8499569",
-        "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1RouteTableAssociation13397DA2"
+        "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1DefaultRoute3B58F78C",
+        "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1RouteTableAssociation2878195D"
       ]
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2Subnet7E20AAF9": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2Subnet5AFA37D0": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -139,7 +139,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-production-app-vpc_public"
+            "Value": "nevergreen-production-app-vpc_public"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -147,91 +147,91 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet2"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_publicSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTable783E5776": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2RouteTable4D2CCD11": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet2"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_publicSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTableAssociation8B8FC987": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2RouteTableAssociationC8E6895C": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTable783E5776"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2RouteTable4D2CCD11"
         },
         "SubnetId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2Subnet7E20AAF9"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2Subnet5AFA37D0"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2DefaultRouteC113CCD0": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2DefaultRouteD531BA23": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": {
-          "Ref": "StarterProductionAppVpcAppVpcIGW73974067"
+          "Ref": "NevergreenProductionAppVpcAppVpcIGWC10C71B5"
         },
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTable783E5776"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2RouteTable4D2CCD11"
         }
       },
       "DependsOn": [
-        "StarterProductionAppVpcAppVpcVPCGW3FD73E67"
+        "NevergreenProductionAppVpcAppVpcVPCGW13F6B2A9"
       ]
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2EIP9640C633": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2EIPB5222391": {
       "Type": "AWS::EC2::EIP",
       "Properties": {
         "Domain": "vpc",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet2"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_publicSubnet2"
           }
         ]
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2NATGatewayF1C708E6": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2NATGatewayF5FF3905": {
       "Type": "AWS::EC2::NatGateway",
       "Properties": {
         "AllocationId": {
           "Fn::GetAtt": [
-            "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2EIP9640C633",
+            "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2EIPB5222391",
             "AllocationId"
           ]
         },
         "SubnetId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2Subnet7E20AAF9"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2Subnet5AFA37D0"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_publicSubnet2"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_publicSubnet2"
           }
         ]
       },
       "DependsOn": [
-        "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2DefaultRouteC113CCD0",
-        "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2RouteTableAssociation8B8FC987"
+        "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2DefaultRouteD531BA23",
+        "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2RouteTableAssociationC8E6895C"
       ]
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -247,7 +247,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-production-app-vpc_private"
+            "Value": "nevergreen-production-app-vpc_private"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -255,52 +255,52 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_privateSubnet1"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_privateSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1RouteTableE43C1F94": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1RouteTable2E7FF861": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_privateSubnet1"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_privateSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1RouteTableAssociation2AB1E48A": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1RouteTableAssociationD7A7ED0A": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1RouteTableE43C1F94"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1RouteTable2E7FF861"
         },
         "SubnetId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1DefaultRoute34E15456": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1DefaultRoute249B0F88": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "NatGatewayId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet1NATGatewayB6AE456F"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1NATGateway4AB83773"
         },
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1RouteTableE43C1F94"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1RouteTable2E7FF861"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -316,7 +316,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-production-app-vpc_private"
+            "Value": "nevergreen-production-app-vpc_private"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -324,52 +324,52 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_privateSubnet2"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_privateSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2RouteTable0A626686": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2RouteTable115C6A95": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_privateSubnet2"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_privateSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2RouteTableAssociation02ED32A1": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2RouteTableAssociation0EA89C89": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2RouteTable0A626686"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2RouteTable115C6A95"
         },
         "SubnetId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2DefaultRouteE9487033": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2DefaultRoute20D5292E": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "NatGatewayId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcpublicSubnet2NATGatewayF1C708E6"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2NATGatewayF5FF3905"
         },
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2RouteTable0A626686"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2RouteTable115C6A95"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1Subnet1814DE8A": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet1Subnet297827F2": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -385,7 +385,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-production-app-vpc_isolated"
+            "Value": "nevergreen-production-app-vpc_isolated"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -393,40 +393,40 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_isolatedSubnet1"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_isolatedSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1RouteTable39F30FE1": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet1RouteTable31A9802E": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_isolatedSubnet1"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_isolatedSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1RouteTableAssociation6178531B": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet1RouteTableAssociation0911439B": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1RouteTable39F30FE1"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet1RouteTable31A9802E"
         },
         "SubnetId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet1Subnet1814DE8A"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet1Subnet297827F2"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2SubnetAC93CFED": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet2Subnet77BFFB48": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -442,7 +442,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-production-app-vpc_isolated"
+            "Value": "nevergreen-production-app-vpc_isolated"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -450,65 +450,65 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_isolatedSubnet2"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_isolatedSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2RouteTable702C13A2": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet2RouteTableE02D2544": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/starter-production-app-vpc_isolatedSubnet2"
+            "Value": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/nevergreen-production-app-vpc_isolatedSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2RouteTableAssociationB9C52A53": {
+    "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet2RouteTableAssociationF3A5FA20": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2RouteTable702C13A2"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet2RouteTableE02D2544"
         },
         "SubnetId": {
-          "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcisolatedSubnet2SubnetAC93CFED"
+          "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet2Subnet77BFFB48"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcIGW73974067": {
+    "NevergreenProductionAppVpcAppVpcIGWC10C71B5": {
       "Type": "AWS::EC2::InternetGateway",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ]
       }
     },
-    "StarterProductionAppVpcAppVpcVPCGW3FD73E67": {
+    "NevergreenProductionAppVpcAppVpcVPCGW13F6B2A9": {
       "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
         "InternetGatewayId": {
-          "Ref": "StarterProductionAppVpcAppVpcIGW73974067"
+          "Ref": "NevergreenProductionAppVpcAppVpcIGWC10C71B5"
         },
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcEC2SecurityGroup89822406": {
+    "NevergreenProductionAppVpcAppVpcEC2SecurityGroup819C4AA1": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/EC2/SecurityGroup",
+        "GroupDescription": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/EC2/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -520,7 +520,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterProductionAppVpcAppVpc9179387E",
+                "NevergreenProductionAppVpcAppVpc5A7B00F7",
                 "CidrBlock"
               ]
             },
@@ -531,7 +531,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterProductionAppVpcAppVpc9179387E",
+                      "NevergreenProductionAppVpcAppVpc5A7B00F7",
                       "CidrBlock"
                     ]
                   },
@@ -547,22 +547,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcEC2C6535C51": {
+    "NevergreenProductionAppVpcAppVpcEC2C303333A": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterProductionAppVpcAppVpcEC2SecurityGroup89822406",
+              "NevergreenProductionAppVpcAppVpcEC2SecurityGroup819C4AA1",
               "GroupId"
             ]
           }
@@ -581,28 +581,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
           },
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcEC2MESSAGESSecurityGroup06A77580": {
+    "NevergreenProductionAppVpcAppVpcEC2MESSAGESSecurityGroup31119B49": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
+        "GroupDescription": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -614,7 +614,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterProductionAppVpcAppVpc9179387E",
+                "NevergreenProductionAppVpcAppVpc5A7B00F7",
                 "CidrBlock"
               ]
             },
@@ -625,7 +625,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterProductionAppVpcAppVpc9179387E",
+                      "NevergreenProductionAppVpcAppVpc5A7B00F7",
                       "CidrBlock"
                     ]
                   },
@@ -641,22 +641,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcEC2MESSAGES1EE8CF0B": {
+    "NevergreenProductionAppVpcAppVpcEC2MESSAGESA63C0274": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterProductionAppVpcAppVpcEC2MESSAGESSecurityGroup06A77580",
+              "NevergreenProductionAppVpcAppVpcEC2MESSAGESSecurityGroup31119B49",
               "GroupId"
             ]
           }
@@ -675,28 +675,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
           },
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcSSMSecurityGroup246C8D99": {
+    "NevergreenProductionAppVpcAppVpcSSMSecurityGroup3746D719": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/SSM/SecurityGroup",
+        "GroupDescription": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/SSM/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -708,7 +708,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterProductionAppVpcAppVpc9179387E",
+                "NevergreenProductionAppVpcAppVpc5A7B00F7",
                 "CidrBlock"
               ]
             },
@@ -719,7 +719,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterProductionAppVpcAppVpc9179387E",
+                      "NevergreenProductionAppVpcAppVpc5A7B00F7",
                       "CidrBlock"
                     ]
                   },
@@ -735,22 +735,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcSSM212B264E": {
+    "NevergreenProductionAppVpcAppVpcSSM0192FA69": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterProductionAppVpcAppVpcSSMSecurityGroup246C8D99",
+              "NevergreenProductionAppVpcAppVpcSSMSecurityGroup3746D719",
               "GroupId"
             ]
           }
@@ -769,28 +769,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
           },
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcSSMMESSAGESSecurityGroup6F78E97D": {
+    "NevergreenProductionAppVpcAppVpcSSMMESSAGESSecurityGroup056E30B8": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
+        "GroupDescription": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -802,7 +802,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterProductionAppVpcAppVpc9179387E",
+                "NevergreenProductionAppVpcAppVpc5A7B00F7",
                 "CidrBlock"
               ]
             },
@@ -813,7 +813,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterProductionAppVpcAppVpc9179387E",
+                      "NevergreenProductionAppVpcAppVpc5A7B00F7",
                       "CidrBlock"
                     ]
                   },
@@ -829,22 +829,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcSSMMESSAGES515CA29E": {
+    "NevergreenProductionAppVpcAppVpcSSMMESSAGES96ED08F2": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterProductionAppVpcAppVpcSSMMESSAGESSecurityGroup6F78E97D",
+              "NevergreenProductionAppVpcAppVpcSSMMESSAGESSecurityGroup056E30B8",
               "GroupId"
             ]
           }
@@ -863,28 +863,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
           },
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcSECRETSMANAGERSecurityGroup9B72A63D": {
+    "NevergreenProductionAppVpcAppVpcSECRETSMANAGERSecurityGroupD6DF8811": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
+        "GroupDescription": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -896,7 +896,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterProductionAppVpcAppVpc9179387E",
+                "NevergreenProductionAppVpcAppVpc5A7B00F7",
                 "CidrBlock"
               ]
             },
@@ -907,7 +907,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterProductionAppVpcAppVpc9179387E",
+                      "NevergreenProductionAppVpcAppVpc5A7B00F7",
                       "CidrBlock"
                     ]
                   },
@@ -923,22 +923,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcSECRETSMANAGERD07356D0": {
+    "NevergreenProductionAppVpcAppVpcSECRETSMANAGER46F213F2": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterProductionAppVpcAppVpcSECRETSMANAGERSecurityGroup9B72A63D",
+              "NevergreenProductionAppVpcAppVpcSECRETSMANAGERSecurityGroupD6DF8811",
               "GroupId"
             ]
           }
@@ -957,28 +957,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
           },
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcECSAGENTSecurityGroup12E57814": {
+    "NevergreenProductionAppVpcAppVpcECSAGENTSecurityGroup2D57C0C9": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/ECS_AGENT/SecurityGroup",
+        "GroupDescription": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/ECS_AGENT/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -990,7 +990,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterProductionAppVpcAppVpc9179387E",
+                "NevergreenProductionAppVpcAppVpc5A7B00F7",
                 "CidrBlock"
               ]
             },
@@ -1001,7 +1001,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterProductionAppVpcAppVpc9179387E",
+                      "NevergreenProductionAppVpcAppVpc5A7B00F7",
                       "CidrBlock"
                     ]
                   },
@@ -1017,22 +1017,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcECSAGENT024D5510": {
+    "NevergreenProductionAppVpcAppVpcECSAGENT46BE0FD8": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterProductionAppVpcAppVpcECSAGENTSecurityGroup12E57814",
+              "NevergreenProductionAppVpcAppVpcECSAGENTSecurityGroup2D57C0C9",
               "GroupId"
             ]
           }
@@ -1051,28 +1051,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
           },
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcECSSecurityGroup75F73E7D": {
+    "NevergreenProductionAppVpcAppVpcECSSecurityGroupBFD12478": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/ECS/SecurityGroup",
+        "GroupDescription": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/ECS/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -1084,7 +1084,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterProductionAppVpcAppVpc9179387E",
+                "NevergreenProductionAppVpcAppVpc5A7B00F7",
                 "CidrBlock"
               ]
             },
@@ -1095,7 +1095,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterProductionAppVpcAppVpc9179387E",
+                      "NevergreenProductionAppVpcAppVpc5A7B00F7",
                       "CidrBlock"
                     ]
                   },
@@ -1111,22 +1111,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcECS1017D2CE": {
+    "NevergreenProductionAppVpcAppVpcECS12B62C88": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterProductionAppVpcAppVpcECSSecurityGroup75F73E7D",
+              "NevergreenProductionAppVpcAppVpcECSSecurityGroupBFD12478",
               "GroupId"
             ]
           }
@@ -1145,28 +1145,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
           },
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcECSTELEMETRYSecurityGroup85BE22CF": {
+    "NevergreenProductionAppVpcAppVpcECSTELEMETRYSecurityGroup77CEB32A": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterProductionAppVpcStack/StarterProductionAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
+        "GroupDescription": "NevergreenProductionAppVpcStack/NevergreenProductionAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -1178,7 +1178,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterProductionAppVpcAppVpc9179387E",
+                "NevergreenProductionAppVpcAppVpc5A7B00F7",
                 "CidrBlock"
               ]
             },
@@ -1189,7 +1189,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterProductionAppVpcAppVpc9179387E",
+                      "NevergreenProductionAppVpcAppVpc5A7B00F7",
                       "CidrBlock"
                     ]
                   },
@@ -1205,22 +1205,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcAppVpcECSTELEMETRYBBDF70F4": {
+    "NevergreenProductionAppVpcAppVpcECSTELEMETRY4247D71A": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterProductionAppVpcAppVpcECSTELEMETRYSecurityGroup85BE22CF",
+              "NevergreenProductionAppVpcAppVpcECSTELEMETRYSecurityGroup77CEB32A",
               "GroupId"
             ]
           }
@@ -1239,32 +1239,79 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet1Subnet52E97A40"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1SubnetDA631D88"
           },
           {
-            "Ref": "StarterProductionAppVpcAppVpcstarterproductionappvpcprivateSubnet2SubnetBC269CBF"
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2Subnet848550A9"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-production-app-vpc"
+            "Value": "nevergreen-production-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterProductionAppVpcAppVpc9179387E"
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
         }
       }
     },
-    "StarterProductionAppVpcPrivateR53ZoneACC0FCAC": {
+    "NevergreenProductionAppVpcAppVpcS3525D9671": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "RouteTableIds": [
+          {
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet1RouteTable2E7FF861"
+          },
+          {
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcprivateSubnet2RouteTable115C6A95"
+          },
+          {
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet1RouteTable31CA5BA6"
+          },
+          {
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcpublicSubnet2RouteTable4D2CCD11"
+          },
+          {
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet1RouteTable31A9802E"
+          },
+          {
+            "Ref": "NevergreenProductionAppVpcAppVpcnevergreenproductionappvpcisolatedSubnet2RouteTableE02D2544"
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".s3"
+            ]
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "nevergreen-production-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Gateway",
+        "VpcId": {
+          "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
+        }
+      }
+    },
+    "NevergreenProductionAppVpcPrivateR53Zone7516725B": {
       "Type": "AWS::Route53::HostedZone",
       "Properties": {
         "Name": "production.internal.production.daisy.com.",
         "VPCs": [
           {
             "VPCId": {
-              "Ref": "StarterProductionAppVpcAppVpc9179387E"
+              "Ref": "NevergreenProductionAppVpcAppVpc5A7B00F7"
             },
             "VPCRegion": {
               "Ref": "AWS::Region"

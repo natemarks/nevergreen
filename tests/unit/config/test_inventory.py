@@ -13,9 +13,21 @@ _STG = f"{APP_NAME}Staging"
 _PRD = f"{APP_NAME}Production"
 
 EXPECTED_STACK_NAMES = {
-    "dev": {f"{_DEV}AppVpcStack", f"{_DEV}SimpleAsgAaaStack"},
-    "staging": {f"{_STG}AppVpcStack", f"{_STG}SimpleAsgBbbStack"},
-    "production": {f"{_PRD}AppVpcStack", f"{_PRD}SimpleAsgCccStack"},
+    "dev": {
+        f"{_DEV}AppVpcStack",
+        f"{_DEV}SimpleAsgAaaStack",
+        f"{_DEV}SecureS3PhiStack",
+    },
+    "staging": {
+        f"{_STG}AppVpcStack",
+        f"{_STG}SimpleAsgBbbStack",
+        f"{_STG}SecureS3PhiStack",
+    },
+    "production": {
+        f"{_PRD}AppVpcStack",
+        f"{_PRD}SimpleAsgCccStack",
+        f"{_PRD}SecureS3PhiStack",
+    },
 }
 
 
