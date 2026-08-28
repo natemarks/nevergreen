@@ -111,6 +111,23 @@ comment. Add a brief explanation when the reason is not obvious from context.
 Golden files store expected CloudFormation templates. `test_*_actual` tests
 compare synthesized output against them; a mismatch fails the test.
 
+**Every new stack requires two test functions** in `tests/unit/stack/test_<name>.py`:
+
+- **`test_<name>_actual`** — one `pytest.param` per real environment that has a
+  config file (`config/<env>/`). Loads input via `get_actual_path(environment)`.
+  These are environment contracts: a failure here means an unintended template
+  change.
+- **`test_<name>_custom`** — one `pytest.param` per config combination the actual
+  environments do not exercise. Each case carries its own fixture config directory
+  under `test_data/unit/stack/test_<name>/test_<name>_custom/<case>/`.
+
+See `tests/unit/stack/test_secure_s3.py` for prior art on both functions.
+Generate golden files for a new test file before the first commit:
+```bash
+source .venv/bin/activate
+python3 -m pytest -v tests/unit/stack/test_<name>.py --update_golden
+```
+
 **Intentional template change** (you changed a stack module on purpose):
 ```bash
 make unit-update_golden   # regenerate
