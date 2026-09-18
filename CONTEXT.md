@@ -60,6 +60,25 @@ A stack type deployed at most once per environment. The eligibility list holds a
 
 ---
 
+## SqsQueue context
+
+### SqsQueueStack
+A multi-stack CDK stack type that provisions one standard SQS queue plus its
+dead-letter queue, and consumer (receive/delete)/producer (send) IAM managed
+policies. One instance per logical job queue. Follows the factory pattern:
+`sqs_queue("explore-a")`.
+
+### explore-a queue
+The `SqsQueueStack` instance (`stack_id="explore-a"`) that carries
+Character-A image-generation jobs for the `explore_worker.py` worker to
+consume. Physical queue name: `nevergreen-<app_env>-explore-a-queue`.
+
+### Job (explore-a worker)
+A queue message of the shape `{"seed_prompt": str, "batch_size": int,
+"job_id": str (optional)}`. `job_id` is generated if absent, and becomes the
+S3 prefix `explore/{job_id}/` that all of that job's generated images are
+written under.
+
 ## SecureS3 context
 
 ### SecureS3Stack
@@ -126,6 +145,15 @@ consumers that only read PHI (analytics, reporting).
 A CDK `ManagedPolicy` created within a `SecureS3Stack` instance granting all actions in
 the read policy plus `s3:PutObject`, `s3:DeleteObject`, and `kms:GenerateDataKey`.
 Intended for application services that write or modify PHI.
+
+### extra_files (SimpleAsg)
+
+A `{remote_path: local_path_or_content}` map passed to `SimpleAsgStack`.
+Each entry is written to the instance via a userdata heredoc before the
+main userdata script runs. A `Path` value embeds a local repo file's exact
+content (e.g. a tested worker script); a `str` value is embedded verbatim,
+letting a caller include a CDK token resolved only at deploy time (e.g. a
+queue URL). See `stack/simple_asg.py`'s `_build_user_data`.
 
 ### VPC S3 gateway endpoint
 An AWS VPC gateway endpoint for S3 added to `AppVpcStack`. Routes S3 traffic within the

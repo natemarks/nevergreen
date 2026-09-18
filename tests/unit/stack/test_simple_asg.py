@@ -17,7 +17,11 @@ from aws_cdk import App, Stack, assertions, Environment
 from aws_cdk import aws_iam as iam
 from config.settings import get_actual_path
 from stack.app_vpc import AppVpcInput, AppVpcStack
-from stack.simple_asg import SimpleAsgInput, SimpleAsgStack
+from stack.simple_asg import (
+    SimpleAsgInput,
+    SimpleAsgStack,
+    _build_user_data,
+)
 from tests.helper import case_data_path, write_case_json, read_case_json
 
 
@@ -136,3 +140,67 @@ def test_simple_asg_stack_attaches_extra_managed_policies():
             )
         },
     )
+
+
+@pytest.mark.unit
+def test_build_user_data_with_no_extra_files_returns_script_unchanged():
+    """No extra_files means the script passes through untouched."""
+    assert _build_user_data({}, "#!/usr/bin/env bash\necho hi\n") == (
+        "#!/usr/bin/env bash\necho hi\n"
+    )
+
+
+@pytest.mark.unit
+def test_build_user_data_embeds_file_content_before_script(tmp_path):
+    """Each extra_files entry is written via heredoc before the script."""
+    local_file = tmp_path / "worker.py"
+    local_file.write_text("print('hello')\n", encoding="utf-8")
+
+    result = _build_user_data(
+        {"/opt/comfyui/worker.py": local_file}, "echo done\n"
+    )
+
+    assert "mkdir -p /opt/comfyui" in result
+    assert "cat > /opt/comfyui/worker.py <<'EXTRA_FILE_EOF'" in result
+    assert "print('hello')" in result
+    assert "EXTRA_FILE_EOF" in result
+    # the main script still runs last, after every extra file is written
+    assert result.rstrip().endswith("echo done")
+    assert result.index("EXTRA_FILE_EOF") < result.index("echo done")
+
+
+@pytest.mark.unit
+def test_simple_asg_stack_embeds_extra_files_in_launch_template_userdata(
+    tmp_path,
+):
+    """extra_files content ends up in the LaunchTemplate's UserData."""
+    local_file = tmp_path / "worker.py"
+    local_file.write_text("WORKER_MARKER = True\n", encoding="utf-8")
+
+    app = App()
+    input_path = get_actual_path("dev")
+    av_input = AppVpcInput.from_config_directory(input_path)
+    av_stk = AppVpcStack(scope=app, cdk_env=Environment(), s_input=av_input)
+    s_input = SimpleAsgInput.from_config_directory(input_path, "comfyui")
+
+    stk = SimpleAsgStack(
+        scope=app,
+        cdk_env=Environment(),
+        s_input=s_input,
+        app_vpc_stack=av_stk,
+        extra_files={"/opt/comfyui/worker.py": local_file},
+    )
+    template = assertions.Template.from_stack(stk).to_json()
+    launch_templates = [
+        resource
+        for resource in template["Resources"].values()
+        if resource["Type"] == "AWS::EC2::LaunchTemplate"
+    ]
+    assert len(launch_templates) == 1
+    user_data = launch_templates[0]["Properties"]["LaunchTemplateData"][
+        "UserData"
+    ]
+    # CDK renders this as the CloudFormation intrinsic {"Fn::Base64": "..."}
+    # -- CloudFormation itself base64-encodes at deploy time, not CDK at
+    # synth time -- so the template already holds the plain-text script.
+    assert "WORKER_MARKER = True" in user_data["Fn::Base64"]

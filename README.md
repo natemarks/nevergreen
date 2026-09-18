@@ -26,6 +26,21 @@ upgrade needed for either):
 - Cartoon/anime: [`cagliostrolab/animagine-xl-4.0`](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (file `animagine-xl-4.0-opt.safetensors`)
 - Realistic: [`RunDiffusion/Juggernaut-XI-v11`](https://huggingface.co/RunDiffusion/Juggernaut-XI-v11) (file `Juggernaut-XI-byRunDiffusion.safetensors`)
 
+## Phase 1: automated single worker consumes queue jobs
+
+Phase 1 adds `explore-a-queue` (standard SQS, 900s visibility timeout, DLQ
+after 3 failed receives) and an `explore-worker.service` systemd unit on the
+same Phase 0 instance. Dropping a job on the queue drives the full pipeline
+with no manual ComfyUI interaction: SQS poll → Ollama prompt-expansion (one
+seed prompt becomes `batch_size` varied prompts) → one ComfyUI generation per
+expanded prompt → S3 upload → delete message. Character A only.
+
+**What it adds** (`dev` environment only):
+- `nevergreen-dev-explore-a-queue` (+ its `-dlq`) — the job queue.
+- `explore-worker.service` — polls the queue, writes generated images to
+  `s3://nevergreen-dev-images/explore/{job_id}/`.
+- Ollama, installed and running on the same instance, for prompt expansion.
+
 ## Prerequisites
 
 - AWS credentials for the target environment's account.
@@ -102,6 +117,40 @@ new image.
    VAE Decode → Save Image), test it with Queue Prompt, then export via
    **Workflow → Export (API)** (not the plain Export/Save, which produces
    an incompatible schema) to a new file under `workflows/`.
+
+## Test Phase 1 (UAT)
+
+This is the acceptance test for Phase 1 — dropping a job on
+`explore-a-queue` and confirming images land in S3 automatically:
+
+```bash
+QUEUE_URL=$(aws sqs get-queue-url \
+  --queue-name nevergreen-dev-explore-a-queue --query QueueUrl --output text)
+aws sqs send-message --queue-url "${QUEUE_URL}" \
+  --message-body '{"seed_prompt": "a fox exploring a neon city", "batch_size": 3}'
+```
+
+Wait a few minutes (Ollama's prompt expansion + 3 ComfyUI generations), then
+confirm the images appeared without touching ComfyUI directly:
+
+```bash
+aws s3 ls s3://nevergreen-dev-images/explore/ --recursive
+```
+
+If nothing appears, SSM into the instance and check both services — the
+worker depends on Ollama and ComfyUI already being up (`After`/`Wants` in
+its systemd unit only orders startup, it doesn't retry a dependency that's
+still failing):
+
+```bash
+sudo systemctl status explore-worker.service ollama.service comfyui.service
+sudo journalctl -u explore-worker.service -n 100 --no-pager
+```
+
+A message that keeps reappearing on the queue after ~15 minutes (its
+visibility timeout) instead of being deleted means the worker is failing on
+it — check the log above for the exception; after 3 failed receives it moves
+to `nevergreen-dev-explore-a-queue-dlq`.
 
 ## Cost control
 

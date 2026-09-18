@@ -21,8 +21,17 @@ Customize:
   isn't reachable from the internet without one)
 - optional extra IAM managed policies on the instance role: pass
   `managed_policies` to `SimpleAsgStack`
+- optional extra files written to the instance before the userdata script
+  runs: pass `extra_files` (a `{remote_path: local_path_or_content}` map)
+  to `SimpleAsgStack` -- a `Path` value embeds that local file's exact
+  on-disk content as a heredoc, so a tested repo file (e.g. a worker
+  script) is the single source of truth instead of being duplicated
+  inline in a shell script; a `str` value is embedded verbatim, letting a
+  caller pass content that includes a CDK token only known at deploy time
+  (e.g. a queue URL or bucket name for an env file)
 """
 
+import shlex
 from dataclasses import dataclass
 from pathlib import Path
 from aws_cdk import (
@@ -36,6 +45,32 @@ from constructs import Construct
 from config.helper import APP_NAME
 from config.settings import EnvironmentSetting, SimpleAsgSetting
 from stack.app_vpc import AppVpcStack
+
+
+def _build_user_data(extra_files: dict[str, Path | str], script: str) -> str:
+    """Prepend heredoc-written extra_files to a userdata script.
+
+    A `Path` value's exact on-disk content becomes the single source of
+    truth for that remote file; a `str` value is written verbatim, so a
+    caller can embed a CDK token (e.g. a queue URL) resolved at deploy
+    time. Either way, the instance gets the content at boot, before the
+    main script runs.
+    """
+    blocks = []
+    for remote_path, content_source in extra_files.items():
+        content = (
+            content_source.read_text(encoding="utf-8")
+            if isinstance(content_source, Path)
+            else content_source
+        )
+        remote_dir = shlex.quote(str(Path(remote_path).parent))
+        blocks.append(
+            f"mkdir -p {remote_dir}\n"
+            f"cat > {shlex.quote(remote_path)} <<'EXTRA_FILE_EOF'\n"
+            f"{content}\n"
+            "EXTRA_FILE_EOF\n"
+        )
+    return "\n".join(blocks + [script])
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -81,13 +116,14 @@ class SimpleAsgStack(Stack):
     instance would be unreachable from the internet regardless.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
+    def __init__(  # pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
         self,
         scope: Construct,
         cdk_env: cdk_environment,
         s_input: SimpleAsgInput,
         app_vpc_stack: AppVpcStack,
         managed_policies: list[iam.IManagedPolicy] | None = None,
+        extra_files: dict[str, Path | str] | None = None,
         **kwargs,
     ):
         self.s_input = s_input
@@ -134,6 +170,9 @@ class SimpleAsgStack(Stack):
         userdata_file = (Path(__file__).parent) / (
             f"simple_asg/{self.s_input.sa_setting.userdata_filename}"
         )
+        user_data_script = _build_user_data(
+            extra_files or {}, userdata_file.read_text(encoding="utf-8")
+        )
         l_tpl = ec2.LaunchTemplate(
             self,
             f"{prefix}LaunchTpl",
@@ -160,9 +199,7 @@ class SimpleAsgStack(Stack):
             http_put_response_hop_limit=1,  # default=1
             require_imdsv2=True,  # default=False
             security_group=instance_sg,
-            user_data=ec2.UserData.custom(
-                userdata_file.read_text(encoding="utf-8")
-            ),
+            user_data=ec2.UserData.custom(user_data_script),
             role=self.asg_role,
         )
         autoscaling.AutoScalingGroup(

@@ -10,6 +10,12 @@
 #
 # Models are NOT downloaded here (Phase 0 decision: manual download over an
 # SSM session) — see the Phase 0 ticket's UAT steps.
+#
+# Phase 1 addition: installs Ollama (for seed-prompt expansion) and the
+# explore-a-queue worker (worker/explore_worker.py, embedded onto the
+# instance via SimpleAsgStack's `extra_files` mechanism -- see
+# stack/simple_asg.py -- so the tested repo file is what runs here, not a
+# hand-duplicated copy) as a systemd service.
 set -euxo pipefail
 
 COMFYUI_HOME=/opt/comfyui
@@ -52,6 +58,10 @@ python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+# explore_worker.py's own runtime dependencies (kept in step with
+# requirements.txt at the repo root) -- installed into the same venv so one
+# interpreter runs both ComfyUI and the worker.
+pip install boto3==1.43.92 requests==2.34.2
 
 mkdir -p custom_nodes
 cd custom_nodes
@@ -74,6 +84,21 @@ done
 
 chown -R "${COMFYUI_USER}:${COMFYUI_USER}" "${COMFYUI_HOME}"
 
+# Ollama expands each job's seed_prompt into a batch of SD-style prompt
+# variants (research/local-llm-image-generation.md's Advanced Prompt
+# Enhancer pattern). The official installer sets up its own
+# ollama.service; pulling the model here blocks boot completion until the
+# download finishes, which is acceptable for this prototype instance.
+curl -fsSL https://ollama.com/install.sh | sh
+systemctl enable --now ollama
+OLLAMA_MODEL="llama3.1"
+for _attempt in $(seq 1 10); do
+  if ollama pull "${OLLAMA_MODEL}"; then
+    break
+  fi
+  sleep 5
+done
+
 cat >/etc/systemd/system/comfyui.service <<UNIT
 [Unit]
 Description=ComfyUI
@@ -90,6 +115,25 @@ Restart=on-failure
 WantedBy=multi-user.target
 UNIT
 
+cat >/etc/systemd/system/explore-worker.service <<UNIT
+[Unit]
+Description=Explore-A queue worker
+After=network.target comfyui.service ollama.service
+Wants=comfyui.service ollama.service
+
+[Service]
+Type=simple
+User=${COMFYUI_USER}
+WorkingDirectory=${COMFYUI_HOME}
+EnvironmentFile=/etc/default/explore-worker
+ExecStart=${COMFYUI_HOME}/venv/bin/python3 ${COMFYUI_HOME}/explore_worker.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
 systemctl daemon-reload
-systemctl enable comfyui.service
+systemctl enable comfyui.service explore-worker.service
 systemctl restart comfyui.service
+systemctl restart explore-worker.service
