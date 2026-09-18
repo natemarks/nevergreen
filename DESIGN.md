@@ -59,14 +59,14 @@ data class in config.settings
 
 environment.json -> settings.EnvironmentSetting
 app_vpc/app_vpc.json -> settings.AppVpcSetting
-simple_asg/aaa/simple_asg.json -> settings.SimpleAsgSetting
+simple_asg/comfyui/simple_asg.json -> settings.SimpleAsgSetting
 
 Dataclasses are used to make it easy to access/manage/update the data files.
 Note that stacks that ccan be deployed many times in an environment have an
 extra directory that matches the 'stack_id'. In this case,
-simple_asg/aaa/simple_asg.json contains the asg specific settings for the ASG
-with the stack_id 'aaa'. I can deploy many ASG stack so long as each has a
-unique stack_id
+simple_asg/comfyui/simple_asg.json contains the asg specific settings for the
+ASG with the stack_id 'comfyui'. I can deploy many ASG stack so long as each
+has a unique stack_id
 
 To deploy a stack, I use the stack input class (ex. stack.app_vpc.AppVpcInput).
 It requries the config directory path. Using that it gathers the required
