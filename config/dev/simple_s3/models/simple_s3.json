@@ -1,0 +1,5 @@
+{
+  "enable_lifecycle_expiration": false,
+  "deletion_days": 1095,
+  "removal_policy": "DESTROY"
+}

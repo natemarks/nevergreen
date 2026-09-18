@@ -10,9 +10,14 @@ Flow:
 
 Customize:
 - instance type, scaling bounds, and root volume settings
-- user data script in `stack/simple_asg/userdata.sh`
+- user data script: `stack/simple_asg/<userdata_filename>` (per-instance,
+  set via `SimpleAsgSetting.userdata_filename`, defaults to `userdata.sh`)
 - AMI source strategy (`ami_id` discovery vs managed image lookup)
 - instance role permissions and security group rules
+- optional inbound access: `ingress_cidr`/`ingress_ports` on
+  `SimpleAsgSetting` (default: no inbound rules at all)
+- optional extra IAM managed policies on the instance role: pass
+  `managed_policies` to `SimpleAsgStack`
 """
 
 from dataclasses import dataclass
@@ -66,14 +71,17 @@ class SimpleAsgStack(Stack):
 
     This stack depends on `AppVpcStack` and deploys instances into private
     subnets. It also enables IMDSv2 and supports SSM Session Manager access.
+    If `SimpleAsgSetting.ingress_cidr`/`ingress_ports` are set, the instance
+    security group also allows inbound access from that CIDR on those ports.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         scope: Construct,
         cdk_env: cdk_environment,
         s_input: SimpleAsgInput,
         app_vpc_stack: AppVpcStack,
+        managed_policies: list[iam.IManagedPolicy] | None = None,
         **kwargs,
     ):
         self.s_input = s_input
@@ -88,16 +96,28 @@ class SimpleAsgStack(Stack):
             vpc=self.vpc,
             allow_all_outbound=True,
         )
+        ingress_cidr = self.s_input.sa_setting.ingress_cidr
+        if ingress_cidr:
+            for port in self.s_input.sa_setting.ingress_ports:
+                instance_sg.add_ingress_rule(
+                    peer=ec2.Peer.ipv4(ingress_cidr),
+                    connection=ec2.Port.tcp(port),
+                    description=f"Allow {ingress_cidr} on tcp/{port}",
+                )
         # role for ASG instances
         # this must exist in order to use ssm_session_permissions parameter
-        asg_role = iam.Role(
+        self.asg_role = iam.Role(
             self,
             f"{prefix}ASGRole",
             assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
         )
+        for managed_policy in managed_policies or []:
+            self.asg_role.add_managed_policy(managed_policy)
         default_region = self.s_input.env_setting.default_region
         ami_id = self.s_input.sa_setting.ami_id
-        userdata_file = (Path(__file__).parent) / "simple_asg/userdata.sh"
+        userdata_file = (Path(__file__).parent) / (
+            f"simple_asg/{self.s_input.sa_setting.userdata_filename}"
+        )
         l_tpl = ec2.LaunchTemplate(
             self,
             f"{prefix}LaunchTpl",
@@ -127,7 +147,7 @@ class SimpleAsgStack(Stack):
             user_data=ec2.UserData.custom(
                 userdata_file.read_text(encoding="utf-8")
             ),
-            role=asg_role,
+            role=self.asg_role,
         )
         autoscaling.AutoScalingGroup(
             self,

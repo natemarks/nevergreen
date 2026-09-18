@@ -1,0 +1,9 @@
+{
+  "admin_team": "Operations",
+  "aws_account_name": "Daisy Dev",
+  "aws_account_number": "709310380790",
+  "default_fqdn": "dev.daisy.com",
+  "default_region": "us-east-1",
+  "app_env": "dev",
+  "is_release": false
+}

@@ -12,6 +12,7 @@ import pytest
 from config.settings import (
     EnvironmentSetting,
     SecureS3Setting,
+    SimpleS3Setting,
     get_actual_path,
 )
 from tests.unit.config.settings._shared import APP_ENVS, expected_config_path
@@ -55,6 +56,23 @@ def test_secure_s3_setting_loads_from_config(
 
     assert isinstance(result, SecureS3Setting)
     assert result.removal_policy == expected_removal_policy
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "stack_id",
+    [
+        pytest.param("models", id="models"),
+        pytest.param("images", id="images"),
+    ],
+)
+def test_simple_s3_setting_loads_from_config(stack_id):
+    """SimpleS3Setting.from_data_path loads config for the dev environment."""
+    data_path = get_actual_path("dev")
+    result = SimpleS3Setting.from_data_path(data_path, stack_id)
+
+    assert isinstance(result, SimpleS3Setting)
+    assert result.removal_policy == "DESTROY"
 
 
 @pytest.mark.unit

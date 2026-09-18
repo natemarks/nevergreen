@@ -14,7 +14,7 @@ Customize:
 - Keep `EnvironmentSetting` aligned with account/region/tag strategy.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import ClassVar, Literal, Type, TypeVar
 
@@ -92,7 +92,9 @@ class EnvironmentSetting(JsonSettingBase):
 
 
 @dataclass(frozen=False, kw_only=True)
-class SimpleAsgSetting(JsonSettingBase):
+class SimpleAsgSetting(  # pylint: disable=too-many-instance-attributes
+    JsonSettingBase
+):
     """Settings for each SimpleAsg stack instance.
 
     This dataclass is intentionally mutable because discovery workflows may
@@ -107,6 +109,13 @@ class SimpleAsgSetting(JsonSettingBase):
     min_instances: int = 1
     root_block_device_name: str = "/dev/xvda"
     root_block_device_size: int = 100  # in GB
+    userdata_filename: str = "userdata.sh"
+    # ingress_cidr/ingress_ports are opt-in: default to no inbound rules
+    # at all, matching today's SimpleAsgStack behavior. Set both to open a
+    # port directly (e.g. a prototype GPU instance's UI) instead of relying
+    # solely on SSM Session Manager port forwarding.
+    ingress_cidr: str | None = None
+    ingress_ports: list[int] = field(default_factory=list)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -171,6 +180,21 @@ class SecureS3Setting(
                 "enable_lifecycle_expiration=False, set "
                 "deletion_days > worm_retention_days, or set worm_enabled=False."
             )
+
+
+@dataclass(frozen=True, kw_only=True)
+class SimpleS3Setting(JsonSettingBase):
+    """Settings for each SimpleS3 stack instance.
+
+    Deliberately smaller than SecureS3Setting: no CMK, WORM, or access-log
+    fields, since simple_s3 buckets don't carry those controls.
+    """
+
+    RELATIVE_PATH_TEMPLATE: ClassVar[str] = "simple_s3/{0}/simple_s3.json"
+
+    enable_lifecycle_expiration: bool = False
+    deletion_days: int = 1095
+    removal_policy: Literal["DESTROY", "RETAIN"] = "DESTROY"
 
 
 @dataclass(frozen=True, kw_only=True)

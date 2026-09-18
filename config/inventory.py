@@ -28,6 +28,7 @@ from config.settings import EnvironmentSetting, get_actual_path
 from stack.app_vpc import AppVpcInput, AppVpcStack
 from stack.secure_s3 import SecureS3Input, SecureS3Stack
 from stack.simple_asg import SimpleAsgInput, SimpleAsgStack
+from stack.simple_s3 import SimpleS3Input, SimpleS3Stack
 
 
 class Inventory:
@@ -130,6 +131,63 @@ class Inventory:
             cdk_env=cdk_env,
             s_input=s_input,
             app_vpc_stack=app_vpc_stack,
+            termination_protection=self.TERMINATION_PROTECTION,
+        )
+
+    def _deploy_simple_s3(
+        self, app: App, cdk_env: Environment, stack_id: str
+    ) -> SimpleS3Stack:
+        """Create and return one SimpleS3 stack (no AppVpc dependency)."""
+        s_input = SimpleS3Input.from_config_directory(
+            self.data_path,
+            stack_id,
+            env_setting=self.environment_setting,
+        )
+        return SimpleS3Stack(
+            scope=app,
+            cdk_env=cdk_env,
+            s_input=s_input,
+            termination_protection=self.TERMINATION_PROTECTION,
+        )
+
+    def _deploy_gpu_worker(
+        self,
+        app: App,
+        cdk_env: Environment,
+        stack_id: str,
+        images_stack_id: str,
+    ) -> SimpleAsgStack:
+        """Create and return one GPU worker stack.
+
+        AppVpc and the images SimpleS3 stack must already be deployed: the
+        worker reuses AppVpc for VPC/subnet context (like simple_asg), and
+        gets the images bucket's read-write managed policy attached to its
+        instance role.
+        """
+        app_vpc_name = (
+            f"{APP_NAME}{self.environment_setting.prefix()}AppVpcStack"
+        )
+        app_vpc_stack = cast(AppVpcStack, self._get_deployed(app_vpc_name))
+        images_input = SimpleS3Input.from_config_directory(
+            self.data_path,
+            images_stack_id,
+            env_setting=self.environment_setting,
+        )
+        images_stack = cast(
+            SimpleS3Stack,
+            self._get_deployed(f"{images_input.prefix()}Stack"),
+        )
+        s_input = SimpleAsgInput.from_config_directory(
+            self.data_path,
+            stack_id,
+            env_setting=self.environment_setting,
+        )
+        return SimpleAsgStack(
+            scope=app,
+            cdk_env=cdk_env,
+            s_input=s_input,
+            app_vpc_stack=app_vpc_stack,
+            managed_policies=[images_stack.read_write_policy],
             termination_protection=self.TERMINATION_PROTECTION,
         )
 

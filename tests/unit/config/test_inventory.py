@@ -17,6 +17,9 @@ EXPECTED_STACK_NAMES = {
         f"{_DEV}AppVpcStack",
         f"{_DEV}SimpleAsgAaaStack",
         f"{_DEV}SecureS3PhiStack",
+        f"{_DEV}SimpleS3ModelsStack",
+        f"{_DEV}SimpleS3ImagesStack",
+        f"{_DEV}SimpleAsgComfyuiStack",
     },
     "staging": {
         f"{_STG}AppVpcStack",

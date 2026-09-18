@@ -5,6 +5,7 @@ Purpose:
 - Provide JSON parsing helpers for config settings modules.
 - Validate app environment and caller AWS account alignment.
 - Discover latest ECS AMI id values for discovery workflows.
+- Look up AMI ids from AWS-published SSM parameter aliases (e.g. DLAMI).
 
 Flow:
 - Import project identity and rollout constants from `config.project`.
@@ -168,3 +169,15 @@ def latest_ecs_ami_id(aws_region: str) -> str:
 
     # Return the most recent AMI ID, or None if no AMIs match
     return sorted_images[0]["ImageId"]
+
+
+def latest_ami_from_ssm_parameter(aws_region: str, parameter_name: str) -> str:
+    """Return the AMI id stored in a public AWS-managed SSM parameter.
+
+    Used for AMI aliases AWS publishes and keeps current, e.g. the Deep
+    Learning AMI `image-id` parameters under
+    `/aws/service/deeplearning/ami/...`.
+    """
+    ssm = boto3.client("ssm", region_name=aws_region)
+    response = ssm.get_parameter(Name=parameter_name)
+    return response["Parameter"]["Value"]
