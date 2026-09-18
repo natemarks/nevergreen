@@ -126,7 +126,7 @@
             }
           ],
           "UserData": {
-            "Fn::Base64": "#!/usr/bin/env bash\ncd /tmp\n# sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\n# sudo systemctl enable amazon-ssm-agent\n# sudo systemctl start amazon-ssm-agent\n"
+            "Fn::Base64": "#!/bin/bash\n\n#!/usr/bin/env bash\ncd /tmp\n# sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\n# sudo systemctl enable amazon-ssm-agent\n# sudo systemctl start amazon-ssm-agent\n"
           }
         },
         "TagSpecifications": [
