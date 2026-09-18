@@ -1,10 +1,13 @@
-"""Shared fixtures for config.asg_scale / config.comfyui_client unit tests.
+"""Shared fixtures for the config.* CLI-module unit tests.
 
 Purpose:
-- Both modules resolve a simple_asg-based instance's real AutoScalingGroup
-  via the same config-directory + CloudFormation lookup shape, so their
-  tests need the same fake environment.json / simple_asg.json / ASG
-  resource payloads.
+- config.asg_scale / config.comfyui_client resolve a simple_asg-based
+  instance's real AutoScalingGroup via the same config-directory +
+  CloudFormation lookup shape, so their tests need the same fake
+  environment.json / simple_asg.json / ASG resource payloads.
+- config.queue_job resolves an sqs_queue/simple_s3 instance's physical
+  name the same way, so it reuses the environment.json writer plus its
+  own sqs_queue.json / simple_s3.json writers below.
 """
 
 import json
@@ -44,6 +47,32 @@ def write_simple_asg_config(
             }
         )
     )
+
+
+def write_sqs_queue_config(
+    data_path: Path,
+    stack_id: str,
+    visibility_timeout_seconds: int = 900,
+    max_receive_count: int = 3,
+) -> None:
+    """Write a minimal sqs_queue.json for one stack_id under data_path."""
+    setting_dir = data_path / "sqs_queue" / stack_id
+    setting_dir.mkdir(parents=True)
+    (setting_dir / "sqs_queue.json").write_text(
+        json.dumps(
+            {
+                "visibility_timeout_seconds": visibility_timeout_seconds,
+                "max_receive_count": max_receive_count,
+            }
+        )
+    )
+
+
+def write_simple_s3_config(data_path: Path, stack_id: str) -> None:
+    """Write a minimal simple_s3.json for one stack_id under data_path."""
+    setting_dir = data_path / "simple_s3" / stack_id
+    setting_dir.mkdir(parents=True)
+    (setting_dir / "simple_s3.json").write_text(json.dumps({}))
 
 
 def asg_resources(physical_id: str) -> dict:

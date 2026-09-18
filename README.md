@@ -121,14 +121,17 @@ new image.
 ## Test Phase 1 (UAT)
 
 This is the acceptance test for Phase 1 — dropping a job on
-`explore-a-queue` and confirming images land in S3 automatically:
+`explore-a-queue` and confirming images land in S3 automatically. `make
+queue_job` resolves the queue's real URL and sends the job in one step:
 
 ```bash
-QUEUE_URL=$(aws sqs get-queue-url \
-  --queue-name nevergreen-dev-explore-a-queue --query QueueUrl --output text)
-aws sqs send-message --queue-url "${QUEUE_URL}" \
-  --message-body '{"seed_prompt": "a fox exploring a neon city", "batch_size": 3}'
+make queue_job app_env=dev seed_prompt="a fox exploring a neon city" batch_size=3
 ```
+
+It prints the `job_id` it generated and the S3 path to check. (Equivalent
+by hand: `aws sqs get-queue-url --queue-name nevergreen-dev-explore-a-queue`
+then `aws sqs send-message --queue-url <url> --message-body
+'{"seed_prompt": "...", "batch_size": 3}'`.)
 
 Wait a few minutes (Ollama's prompt expansion + 3 ComfyUI generations), then
 confirm the images appeared without touching ComfyUI directly:
