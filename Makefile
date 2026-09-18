@@ -39,7 +39,7 @@ clean-venv: ## re-create virtual env
 
 update_cdk_libs: .venv ## install the latest version of aws cdk node and python packages
 	bash scripts/update_cdk_libs.sh
-	$(MAKE) clean-venv
+	$(MAKE) .venv
 
 black: .venv ## use black to format python files
 	( \
@@ -141,9 +141,9 @@ undo_edits: ## reset changes to HEAD
 	git reset HEAD --hard
 	git clean -f
 
-node_modules: ## create node_modules/ if it doesn't exist
-	bash scripts/update_cdk_libs.sh $(CDK_VERSION)
-	$(MAKE) clean-venv
+node_modules: ## create node_modules/ if it doesn't exist, at the pinned CDK_VERSION
+	npm install --prefix ./ aws-cdk@$(CDK_VERSION)
+	touch node_modules
 
 cdk-ls: node_modules .venv ## run cdk ls
 	$(eval CDK := $(shell find . -type f -name cdk))
@@ -200,4 +200,4 @@ discover: .venv ## update environment config data with discovered information
 	   PYTHONPATH="." python3 -m config.discover $(app_env); \
 	)
 
-.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits node_modules cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover
+.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover
