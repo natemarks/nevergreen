@@ -1,6 +1,6 @@
 {
   "Resources": {
-    "StarterDevAppVpcAppVpcF9E8D586": {
+    "NevergreenDevAppVpcAppVpc38674E87": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
         "CidrBlock": "10.37.0.0/16",
@@ -10,12 +10,12 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ]
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1Subnet0DEB4C02": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1SubnetD9969013": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -31,7 +31,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-dev-app-vpc_public"
+            "Value": "nevergreen-dev-app-vpc_public"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -39,91 +39,91 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet1"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_publicSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTable980C7F85": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1RouteTable6CCADF0F": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet1"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_publicSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTableAssociationED83B74A": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1RouteTableAssociationE2A3E344": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTable980C7F85"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1RouteTable6CCADF0F"
         },
         "SubnetId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1Subnet0DEB4C02"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1SubnetD9969013"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1DefaultRoute5C5BA4C7": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1DefaultRoute8ABC9C6E": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": {
-          "Ref": "StarterDevAppVpcAppVpcIGWCD30F8FB"
+          "Ref": "NevergreenDevAppVpcAppVpcIGW6F7CA20D"
         },
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTable980C7F85"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1RouteTable6CCADF0F"
         }
       },
       "DependsOn": [
-        "StarterDevAppVpcAppVpcVPCGW176A9610"
+        "NevergreenDevAppVpcAppVpcVPCGWE9C4669D"
       ]
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1EIP7096E9D0": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1EIPA7954A00": {
       "Type": "AWS::EC2::EIP",
       "Properties": {
         "Domain": "vpc",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet1"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_publicSubnet1"
           }
         ]
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1NATGateway899723C9": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1NATGateway30CCE784": {
       "Type": "AWS::EC2::NatGateway",
       "Properties": {
         "AllocationId": {
           "Fn::GetAtt": [
-            "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1EIP7096E9D0",
+            "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1EIPA7954A00",
             "AllocationId"
           ]
         },
         "SubnetId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1Subnet0DEB4C02"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1SubnetD9969013"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet1"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_publicSubnet1"
           }
         ]
       },
       "DependsOn": [
-        "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1DefaultRoute5C5BA4C7",
-        "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1RouteTableAssociationED83B74A"
+        "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1DefaultRoute8ABC9C6E",
+        "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1RouteTableAssociationE2A3E344"
       ]
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2Subnet82BBAFD1": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2SubnetE550CBBD": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -139,7 +139,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-dev-app-vpc_public"
+            "Value": "nevergreen-dev-app-vpc_public"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -147,91 +147,91 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet2"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_publicSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTable49B2227D": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2RouteTable5ABB53A3": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet2"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_publicSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTableAssociation698D3F3C": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2RouteTableAssociation49BE0A80": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTable49B2227D"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2RouteTable5ABB53A3"
         },
         "SubnetId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2Subnet82BBAFD1"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2SubnetE550CBBD"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2DefaultRoute6390C68E": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2DefaultRoute5C72861F": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": {
-          "Ref": "StarterDevAppVpcAppVpcIGWCD30F8FB"
+          "Ref": "NevergreenDevAppVpcAppVpcIGW6F7CA20D"
         },
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTable49B2227D"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2RouteTable5ABB53A3"
         }
       },
       "DependsOn": [
-        "StarterDevAppVpcAppVpcVPCGW176A9610"
+        "NevergreenDevAppVpcAppVpcVPCGWE9C4669D"
       ]
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2EIPD5364DF1": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2EIPB63506A8": {
       "Type": "AWS::EC2::EIP",
       "Properties": {
         "Domain": "vpc",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet2"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_publicSubnet2"
           }
         ]
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2NATGateway1ACE0F3F": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2NATGateway5468A50D": {
       "Type": "AWS::EC2::NatGateway",
       "Properties": {
         "AllocationId": {
           "Fn::GetAtt": [
-            "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2EIPD5364DF1",
+            "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2EIPB63506A8",
             "AllocationId"
           ]
         },
         "SubnetId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2Subnet82BBAFD1"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2SubnetE550CBBD"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_publicSubnet2"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_publicSubnet2"
           }
         ]
       },
       "DependsOn": [
-        "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2DefaultRoute6390C68E",
-        "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2RouteTableAssociation698D3F3C"
+        "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2DefaultRoute5C72861F",
+        "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2RouteTableAssociation49BE0A80"
       ]
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -247,7 +247,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-dev-app-vpc_private"
+            "Value": "nevergreen-dev-app-vpc_private"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -255,52 +255,52 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_privateSubnet1"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_privateSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1RouteTable4781CDC3": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1RouteTable2E6FA6C3": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_privateSubnet1"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_privateSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1RouteTableAssociation34E46D35": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1RouteTableAssociationC990564A": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1RouteTable4781CDC3"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1RouteTable2E6FA6C3"
         },
         "SubnetId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1DefaultRouteCF5AC9B4": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1DefaultRoute12F56489": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "NatGatewayId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet1NATGateway899723C9"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1NATGateway30CCE784"
         },
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1RouteTable4781CDC3"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1RouteTable2E6FA6C3"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -316,7 +316,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-dev-app-vpc_private"
+            "Value": "nevergreen-dev-app-vpc_private"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -324,52 +324,52 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_privateSubnet2"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_privateSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2RouteTableD9E81429": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2RouteTableA4DE44A2": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_privateSubnet2"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_privateSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2RouteTableAssociationF77C6E4C": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2RouteTableAssociation951546C6": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2RouteTableD9E81429"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2RouteTableA4DE44A2"
         },
         "SubnetId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2DefaultRoute59C64DD1": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2DefaultRoute3A1CEC43": {
       "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "NatGatewayId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcpublicSubnet2NATGateway1ACE0F3F"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2NATGateway5468A50D"
         },
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2RouteTableD9E81429"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2RouteTableA4DE44A2"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1Subnet0A59EFCE": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet1SubnetA34A2FD8": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -385,7 +385,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-dev-app-vpc_isolated"
+            "Value": "nevergreen-dev-app-vpc_isolated"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -393,40 +393,40 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_isolatedSubnet1"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_isolatedSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1RouteTableF0B6E9B8": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet1RouteTable27A3152E": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_isolatedSubnet1"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_isolatedSubnet1"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1RouteTableAssociationCD794D66": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet1RouteTableAssociationBE4B92A1": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1RouteTableF0B6E9B8"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet1RouteTable27A3152E"
         },
         "SubnetId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet1Subnet0A59EFCE"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet1SubnetA34A2FD8"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2SubnetF452F775": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet2Subnet78162CC8": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
@@ -442,7 +442,7 @@
         "Tags": [
           {
             "Key": "aws-cdk:subnet-name",
-            "Value": "starter-dev-app-vpc_isolated"
+            "Value": "nevergreen-dev-app-vpc_isolated"
           },
           {
             "Key": "aws-cdk:subnet-type",
@@ -450,65 +450,65 @@
           },
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_isolatedSubnet2"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_isolatedSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2RouteTableC82ABE3E": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet2RouteTableDC56A4A9": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/starter-dev-app-vpc_isolatedSubnet2"
+            "Value": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/nevergreen-dev-app-vpc_isolatedSubnet2"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2RouteTableAssociationBD4A6095": {
+    "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet2RouteTableAssociation2175797A": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2RouteTableC82ABE3E"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet2RouteTableDC56A4A9"
         },
         "SubnetId": {
-          "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcisolatedSubnet2SubnetF452F775"
+          "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet2Subnet78162CC8"
         }
       }
     },
-    "StarterDevAppVpcAppVpcIGWCD30F8FB": {
+    "NevergreenDevAppVpcAppVpcIGW6F7CA20D": {
       "Type": "AWS::EC2::InternetGateway",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ]
       }
     },
-    "StarterDevAppVpcAppVpcVPCGW176A9610": {
+    "NevergreenDevAppVpcAppVpcVPCGWE9C4669D": {
       "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
         "InternetGatewayId": {
-          "Ref": "StarterDevAppVpcAppVpcIGWCD30F8FB"
+          "Ref": "NevergreenDevAppVpcAppVpcIGW6F7CA20D"
         },
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcEC2SecurityGroup9CF45D42": {
+    "NevergreenDevAppVpcAppVpcEC2SecurityGroup634CBEFB": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/EC2/SecurityGroup",
+        "GroupDescription": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/EC2/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -520,7 +520,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterDevAppVpcAppVpcF9E8D586",
+                "NevergreenDevAppVpcAppVpc38674E87",
                 "CidrBlock"
               ]
             },
@@ -531,7 +531,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "NevergreenDevAppVpcAppVpc38674E87",
                       "CidrBlock"
                     ]
                   },
@@ -547,22 +547,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcEC23D16EBF9": {
+    "NevergreenDevAppVpcAppVpcEC23C75A25F": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterDevAppVpcAppVpcEC2SecurityGroup9CF45D42",
+              "NevergreenDevAppVpcAppVpcEC2SecurityGroup634CBEFB",
               "GroupId"
             ]
           }
@@ -581,28 +581,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
           },
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcEC2MESSAGESSecurityGroupAD0EF847": {
+    "NevergreenDevAppVpcAppVpcEC2MESSAGESSecurityGroup38C6AE3F": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
+        "GroupDescription": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/EC2_MESSAGES/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -614,7 +614,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterDevAppVpcAppVpcF9E8D586",
+                "NevergreenDevAppVpcAppVpc38674E87",
                 "CidrBlock"
               ]
             },
@@ -625,7 +625,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "NevergreenDevAppVpcAppVpc38674E87",
                       "CidrBlock"
                     ]
                   },
@@ -641,22 +641,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcEC2MESSAGESA04E2863": {
+    "NevergreenDevAppVpcAppVpcEC2MESSAGES7B4CDEE7": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterDevAppVpcAppVpcEC2MESSAGESSecurityGroupAD0EF847",
+              "NevergreenDevAppVpcAppVpcEC2MESSAGESSecurityGroup38C6AE3F",
               "GroupId"
             ]
           }
@@ -675,28 +675,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
           },
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcSSMSecurityGroup108208C4": {
+    "NevergreenDevAppVpcAppVpcSSMSecurityGroupD8C4437C": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/SSM/SecurityGroup",
+        "GroupDescription": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/SSM/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -708,7 +708,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterDevAppVpcAppVpcF9E8D586",
+                "NevergreenDevAppVpcAppVpc38674E87",
                 "CidrBlock"
               ]
             },
@@ -719,7 +719,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "NevergreenDevAppVpcAppVpc38674E87",
                       "CidrBlock"
                     ]
                   },
@@ -735,22 +735,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcSSMFD294B86": {
+    "NevergreenDevAppVpcAppVpcSSM39C007CB": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterDevAppVpcAppVpcSSMSecurityGroup108208C4",
+              "NevergreenDevAppVpcAppVpcSSMSecurityGroupD8C4437C",
               "GroupId"
             ]
           }
@@ -769,28 +769,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
           },
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcSSMMESSAGESSecurityGroup883D6F3E": {
+    "NevergreenDevAppVpcAppVpcSSMMESSAGESSecurityGroup5D9C0FAF": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
+        "GroupDescription": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/SSM_MESSAGES/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -802,7 +802,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterDevAppVpcAppVpcF9E8D586",
+                "NevergreenDevAppVpcAppVpc38674E87",
                 "CidrBlock"
               ]
             },
@@ -813,7 +813,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "NevergreenDevAppVpcAppVpc38674E87",
                       "CidrBlock"
                     ]
                   },
@@ -829,22 +829,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcSSMMESSAGESD1BBD74F": {
+    "NevergreenDevAppVpcAppVpcSSMMESSAGES0AD93DE0": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterDevAppVpcAppVpcSSMMESSAGESSecurityGroup883D6F3E",
+              "NevergreenDevAppVpcAppVpcSSMMESSAGESSecurityGroup5D9C0FAF",
               "GroupId"
             ]
           }
@@ -863,28 +863,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
           },
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcSECRETSMANAGERSecurityGroupED663B5A": {
+    "NevergreenDevAppVpcAppVpcSECRETSMANAGERSecurityGroupF15D5C18": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
+        "GroupDescription": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/SECRETS_MANAGER/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -896,7 +896,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterDevAppVpcAppVpcF9E8D586",
+                "NevergreenDevAppVpcAppVpc38674E87",
                 "CidrBlock"
               ]
             },
@@ -907,7 +907,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "NevergreenDevAppVpcAppVpc38674E87",
                       "CidrBlock"
                     ]
                   },
@@ -923,22 +923,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcSECRETSMANAGER7F4C170B": {
+    "NevergreenDevAppVpcAppVpcSECRETSMANAGER8E302628": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterDevAppVpcAppVpcSECRETSMANAGERSecurityGroupED663B5A",
+              "NevergreenDevAppVpcAppVpcSECRETSMANAGERSecurityGroupF15D5C18",
               "GroupId"
             ]
           }
@@ -957,28 +957,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
           },
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcECSAGENTSecurityGroup08DE64C4": {
+    "NevergreenDevAppVpcAppVpcECSAGENTSecurityGroup29B30692": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/ECS_AGENT/SecurityGroup",
+        "GroupDescription": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/ECS_AGENT/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -990,7 +990,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterDevAppVpcAppVpcF9E8D586",
+                "NevergreenDevAppVpcAppVpc38674E87",
                 "CidrBlock"
               ]
             },
@@ -1001,7 +1001,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "NevergreenDevAppVpcAppVpc38674E87",
                       "CidrBlock"
                     ]
                   },
@@ -1017,22 +1017,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcECSAGENTA6C5852F": {
+    "NevergreenDevAppVpcAppVpcECSAGENTFADC5B02": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterDevAppVpcAppVpcECSAGENTSecurityGroup08DE64C4",
+              "NevergreenDevAppVpcAppVpcECSAGENTSecurityGroup29B30692",
               "GroupId"
             ]
           }
@@ -1051,28 +1051,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
           },
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcECSSecurityGroup3B7CC02B": {
+    "NevergreenDevAppVpcAppVpcECSSecurityGroupC24B4C4C": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/ECS/SecurityGroup",
+        "GroupDescription": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/ECS/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -1084,7 +1084,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterDevAppVpcAppVpcF9E8D586",
+                "NevergreenDevAppVpcAppVpc38674E87",
                 "CidrBlock"
               ]
             },
@@ -1095,7 +1095,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "NevergreenDevAppVpcAppVpc38674E87",
                       "CidrBlock"
                     ]
                   },
@@ -1111,22 +1111,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcECSA2292102": {
+    "NevergreenDevAppVpcAppVpcECS1D0F248D": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterDevAppVpcAppVpcECSSecurityGroup3B7CC02B",
+              "NevergreenDevAppVpcAppVpcECSSecurityGroupC24B4C4C",
               "GroupId"
             ]
           }
@@ -1145,28 +1145,28 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
           },
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcECSTELEMETRYSecurityGroup6A041C98": {
+    "NevergreenDevAppVpcAppVpcECSTELEMETRYSecurityGroup250E4F6D": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "StarterDevAppVpcStack/StarterDevAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
+        "GroupDescription": "NevergreenDevAppVpcStack/NevergreenDevAppVpcAppVpc/ECS_TELEMETRY/SecurityGroup",
         "SecurityGroupEgress": [
           {
             "CidrIp": "0.0.0.0/0",
@@ -1178,7 +1178,7 @@
           {
             "CidrIp": {
               "Fn::GetAtt": [
-                "StarterDevAppVpcAppVpcF9E8D586",
+                "NevergreenDevAppVpcAppVpc38674E87",
                 "CidrBlock"
               ]
             },
@@ -1189,7 +1189,7 @@
                   "from ",
                   {
                     "Fn::GetAtt": [
-                      "StarterDevAppVpcAppVpcF9E8D586",
+                      "NevergreenDevAppVpcAppVpc38674E87",
                       "CidrBlock"
                     ]
                   },
@@ -1205,22 +1205,22 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcAppVpcECSTELEMETRY1C0062A9": {
+    "NevergreenDevAppVpcAppVpcECSTELEMETRY85E256DC": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
-              "StarterDevAppVpcAppVpcECSTELEMETRYSecurityGroup6A041C98",
+              "NevergreenDevAppVpcAppVpcECSTELEMETRYSecurityGroup250E4F6D",
               "GroupId"
             ]
           }
@@ -1239,32 +1239,79 @@
         },
         "SubnetIds": [
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet1SubnetE4B6C551"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6"
           },
           {
-            "Ref": "StarterDevAppVpcAppVpcstarterdevappvpcprivateSubnet2Subnet7075399A"
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B"
           }
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "starter-dev-app-vpc"
+            "Value": "nevergreen-dev-app-vpc"
           }
         ],
         "VpcEndpointType": "Interface",
         "VpcId": {
-          "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
         }
       }
     },
-    "StarterDevAppVpcPrivateR53ZoneF886FFFE": {
+    "NevergreenDevAppVpcAppVpcS376B8115E": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "RouteTableIds": [
+          {
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1RouteTable2E6FA6C3"
+          },
+          {
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2RouteTableA4DE44A2"
+          },
+          {
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1RouteTable6CCADF0F"
+          },
+          {
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2RouteTable5ABB53A3"
+          },
+          {
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet1RouteTable27A3152E"
+          },
+          {
+            "Ref": "NevergreenDevAppVpcAppVpcnevergreendevappvpcisolatedSubnet2RouteTableDC56A4A9"
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".s3"
+            ]
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "nevergreen-dev-app-vpc"
+          }
+        ],
+        "VpcEndpointType": "Gateway",
+        "VpcId": {
+          "Ref": "NevergreenDevAppVpcAppVpc38674E87"
+        }
+      }
+    },
+    "NevergreenDevAppVpcPrivateR53ZoneF1947A6B": {
       "Type": "AWS::Route53::HostedZone",
       "Properties": {
         "Name": "dev.internal.dev.daisy.com.",
         "VPCs": [
           {
             "VPCId": {
-              "Ref": "StarterDevAppVpcAppVpcF9E8D586"
+              "Ref": "NevergreenDevAppVpcAppVpc38674E87"
             },
             "VPCRegion": {
               "Ref": "AWS::Region"

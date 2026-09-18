@@ -1,10 +1,9 @@
-# CLAUDE.md — cdk-starter
+# CLAUDE.md
 
-This is a **GitHub Template Repository**: its purpose is to be forked into new
-Python CDK projects. The example stacks (`AppVpc`, `SimpleAsg`) are
-illustrative — they demonstrate the patterns, not deliver production
-infrastructure. A change that improves a pattern has higher value than one that
-only touches an example stack.
+This project was bootstrapped from
+[cdk-starter](https://github.com/natemarks/cdk-starter), a Python CDK template.
+The registry/discovery/inventory pattern is already in place; this document
+describes how to extend it and what working standards apply.
 
 See `AGENTS.md` for build commands, code-style rules, and the working agreement.
 
@@ -14,55 +13,44 @@ See `AGENTS.md` for build commands, code-style rules, and the working agreement.
 
 ### Registry: the single customization point
 
-`config/registry.py` — specifically `STACKS_BY_ENV` — is the only file a
-developer edits to control what deploys in each environment, in what order, and
-whether discovery runs before it. Reading that file answers "what does `cdk ls`
-show for staging?"
+`config/registry.py` — specifically `STACKS_BY_ENV` — is the only file to edit
+when adding a stack, adding an instance of an existing stack type, or graduating
+a stack to a higher environment. Reading it answers "what does `cdk ls` show for
+staging?"
 
-Each entry is a `StackFactory`: a `deploy` callable that creates and returns the
-Stack, and an optional `discover` callable that fetches external AWS data before
-synthesis. `Inventory.deploy_stacks` calls each factory in list order and
-registers the returned Stack in `_deployed` by name; later factories retrieve
-dependencies via `_get_deployed`.
+Each entry is a `StackFactory`: a `deploy` callable and an optional `discover`
+callable. `Inventory.deploy_stacks` calls each factory in list order; later
+factories retrieve dependencies via `_get_deployed`.
 
-**Unique stacks** (one per environment) become module-level `StackFactory`
-constants. **Multi-stacks** (many instances per environment, each with its own
-config) become factory function calls with a `stack_id`
-(e.g. `simple_asg("aaa")`).
-
-**Graduation** — promoting a stack from dev to staging or production — is one
-line: add the `StackFactory` to the target environment's list and supply the
-config files for that environment.
+**Unique stacks** (one per environment) become module-level constants.
+**Multi-stacks** (many instances, each with its own config) become factory
+function calls with a `stack_id`. **Graduation** — promoting a stack from dev to
+staging or production — is one line: add the `StackFactory` to the target
+environment's list and supply the config files for that environment.
 
 ### Discovery
 
-`make discover app_env=<env>` runs `DiscoveryRunner.run()`, which calls each
-factory's `discover` callable and skips `None`. The result is updated JSON files
-under `config/<env>/`. Run discovery before diff/deploy so synthesized templates
-reflect current external state.
+`make discover app_env=<env>` calls each factory's `discover` callable and
+writes updated JSON files under `config/<env>/`. Run before diff/deploy.
 
-Standalone discovery functions live in `config/discovery_functions.py`, not in
-`discover.py`. This breaks a circular import: `registry.py` imports discovery
-functions, and `discover.py` imports `STACKS_BY_ENV` from `registry.py`.
+Add new standalone discovery functions in `config/discovery_functions.py` (not
+in `discover.py`), then wire them into a `StackFactory` in `registry.py`.
 
 ### Stack inputs and config settings
 
 Every stack is constructed from a typed `*Input` dataclass built by
 `from_config_directory(data_path)`. Settings classes in `config/settings.py`
-inherit `JsonSettingBase` and declare `RELATIVE_PATH_TEMPLATE` to locate their
-JSON files under `config/<env>/`.
+inherit `JsonSettingBase` and declare `RELATIVE_PATH_TEMPLATE`.
 
 **Multi-stack** settings include a `stack_id` directory level:
-`config/<env>/<type>/<stack_id>/<type>.json`. The same stack class with
-different `stack_id` values produces independently configurable instances.
+`config/<env>/<type>/<stack_id>/<type>.json`.
 
 ### Account validation gotcha
 
 `Inventory.__init__` and `DiscoveryRunner.__init__` call `check_aws_account`,
 which makes an STS API call. Unit tests that construct either class must patch
 `config.inventory.check_aws_account` (or `config.discover.check_aws_account`)
-to a no-op. Forgetting this causes every inventory/runner construction to fail
-outside an AWS session.
+to a no-op.
 
 ---
 
@@ -123,6 +111,23 @@ comment. Add a brief explanation when the reason is not obvious from context.
 Golden files store expected CloudFormation templates. `test_*_actual` tests
 compare synthesized output against them; a mismatch fails the test.
 
+**Every new stack requires two test functions** in `tests/unit/stack/test_<name>.py`:
+
+- **`test_<name>_actual`** — one `pytest.param` per real environment that has a
+  config file (`config/<env>/`). Loads input via `get_actual_path(environment)`.
+  These are environment contracts: a failure here means an unintended template
+  change.
+- **`test_<name>_custom`** — one `pytest.param` per config combination the actual
+  environments do not exercise. Each case carries its own fixture config directory
+  under `test_data/unit/stack/test_<name>/test_<name>_custom/<case>/`.
+
+See `tests/unit/stack/test_secure_s3.py` for prior art on both functions.
+Generate golden files for a new test file before the first commit:
+```bash
+source .venv/bin/activate
+python3 -m pytest -v tests/unit/stack/test_<name>.py --update_golden
+```
+
 **Intentional template change** (you changed a stack module on purpose):
 ```bash
 make unit-update_golden   # regenerate
@@ -136,11 +141,9 @@ change that caused it, and fix the code.
 
 ### Documentation
 
-Update documentation when the project changes in ways a template consumer would
-need to know:
+Update documentation when the project changes in ways a developer would need to
+know:
 
-- `CUSTOMIZE.md` — adoption workflow. Update when the list of files to edit
-  changes.
 - `README.md` — CDK usage examples and discovery explanation. Update when the
   command interface or discovery workflow changes.
 - `DESIGN.md` — rationale and patterns. Update when an architectural pattern
@@ -150,37 +153,3 @@ need to know:
 
 Update documentation to explain intent and constraints, not to describe what the
 code does.
-
----
-
-## Static Analysis & Testing Standards
-
-This project follows opinionated scaffolding standards:
-
-1. **Pinned Dependencies**: All versions pinned exactly — no `^`, `~`, or ranges
-2. **Static Analysis**: Run `make static` before committing (auto-formats); `make static-check` in CI
-3. **Pre-commit Hooks**: Configured with gitleaks and `make static` — install with `pre-commit install`
-4. **Dependabot**: Weekly updates for pip, npm, and github-actions
-5. **CI/CD**: GitHub Actions runs `make static-check` on PRs and main pushes
-
-### Key Make Targets
-
-- `make static` — shellcheck + black (auto-format) + mypy + pylint + unit tests
-- `make static-check` — same but `black-check` (CI-safe, no modification)
-- `make unit` — unit tests only (no AWS credentials needed)
-- `make unit-update-golden` — regenerate golden CloudFormation templates
-- `make integration` — tests requiring AWS credentials (`aws` marker)
-- `make test-dependabot-pr` — validate a Dependabot PR locally
-- `make mypy` — type-check all tracked Python files
-- `make pre-commit-install` — install git pre-commit hooks (uses `.venv`, no system install needed)
-
-### Notes for untracked files
-
-`git ls-files` skips untracked files, so new `.py` files are invisible to
-Makefile targets until staged. Before staging a new file, run directly:
-
-```bash
-source .venv/bin/activate
-pylint --max-line-length=90 <file>.py
-black --check --line-length=79 <file>.py
-```

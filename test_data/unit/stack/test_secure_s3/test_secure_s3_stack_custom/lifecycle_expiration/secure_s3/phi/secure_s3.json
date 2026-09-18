@@ -1,0 +1,10 @@
+{
+  "rotation_period_days": 180,
+  "enable_access_logging_bucket": false,
+  "worm_enabled": false,
+  "worm_mode": "GOVERNANCE",
+  "worm_retention_days": 2555,
+  "enable_lifecycle_expiration": true,
+  "deletion_days": 1095,
+  "removal_policy": "DESTROY"
+}

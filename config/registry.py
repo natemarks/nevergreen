@@ -46,6 +46,17 @@ def _app_vpc_deploy(inv, app, cdk_env):
 app_vpc = StackFactory(deploy=_app_vpc_deploy, discover=None)
 
 
+def secure_s3(stack_id: str) -> StackFactory:
+    """Return a StackFactory for one SecureS3 instance identified by stack_id."""
+
+    def _deploy(inv, app, cdk_env):
+        return inv._deploy_secure_s3(  # pylint: disable=protected-access
+            app, cdk_env, stack_id
+        )
+
+    return StackFactory(deploy=_deploy, discover=None)
+
+
 def simple_asg(stack_id: str) -> StackFactory:
     """Return a StackFactory for one SimpleAsg instance identified by stack_id."""
 
@@ -61,9 +72,9 @@ def simple_asg(stack_id: str) -> StackFactory:
 
 
 STACKS_BY_ENV: dict[str, list[StackFactory]] = {
-    "dev": [app_vpc, simple_asg("aaa")],
-    "staging": [app_vpc, simple_asg("bbb")],
-    "production": [app_vpc, simple_asg("ccc")],
+    "dev": [app_vpc, simple_asg("aaa"), secure_s3("phi")],
+    "staging": [app_vpc, simple_asg("bbb"), secure_s3("phi")],
+    "production": [app_vpc, simple_asg("ccc"), secure_s3("phi")],
 }
 
 for _env in SUPPORTED_APP_ENVS:

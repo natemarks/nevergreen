@@ -62,4 +62,5 @@ response.json
 # use edit/ to store data files for manual edits
 edit/
 
-#.scratch/
+.scratch/
+scratch.txt

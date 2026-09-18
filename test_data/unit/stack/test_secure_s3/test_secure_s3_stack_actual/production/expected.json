@@ -1,0 +1,483 @@
+{
+  "Resources": {
+    "NevergreenProductionSecureS3PhiCmk35DF750A": {
+      "Type": "AWS::KMS::Key",
+      "Properties": {
+        "Description": "CMK for nevergreen-production-phi SecureS3 bucket",
+        "EnableKeyRotation": true,
+        "KeyPolicy": {
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":root"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "RotationPeriodInDays": 90,
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "NevergreenProductionSecureS3PhiLoggingBucketA44730E5": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "BucketName": "nevergreen-production-phi-access-logs",
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "ObjectWriter"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ],
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "NevergreenProductionSecureS3PhiBucketAEA4D7A5": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "NevergreenProductionSecureS3PhiCmk35DF750A",
+                    "Arn"
+                  ]
+                },
+                "SSEAlgorithm": "aws:kms:dsse"
+              }
+            }
+          ]
+        },
+        "BucketName": "nevergreen-production-phi",
+        "LoggingConfiguration": {
+          "DestinationBucketName": {
+            "Ref": "NevergreenProductionSecureS3PhiLoggingBucketA44730E5"
+          }
+        },
+        "ObjectLockConfiguration": {
+          "ObjectLockEnabled": "Enabled",
+          "Rule": {
+            "DefaultRetention": {
+              "Days": 2555,
+              "Mode": "COMPLIANCE"
+            }
+          }
+        },
+        "ObjectLockEnabled": true,
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "NevergreenProductionSecureS3PhiBucketPolicyDCF07552": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "NevergreenProductionSecureS3PhiBucketAEA4D7A5"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "DenyNonHttps"
+            },
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "StringNotEqualsIfExists": {
+                  "s3:x-amz-server-side-encryption": "aws:kms:dsse"
+                }
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                        "Arn"
+                      ]
+                    },
+                    "/*"
+                  ]
+                ]
+              },
+              "Sid": "EnforceDsseKms"
+            },
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "StringNotEquals": {
+                  "aws:sourceVpce": {
+                    "Fn::ImportValue": "NevergreenProductionAppVpcStack:ExportsOutputRefNevergreenProductionAppVpcAppVpcS3525D9671F5A4D15B"
+                  }
+                }
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "DenyNonVpcEndpoint"
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenProductionSecureS3PhiReadPolicy6BF60766": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "",
+        "ManagedPolicyName": "NevergreenProductionSecureS3Phi-read",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "NevergreenProductionSecureS3PhiCmk35DF750A",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenProductionSecureS3PhiReadWritePolicyA0E6E4E5": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "",
+        "ManagedPolicyName": "NevergreenProductionSecureS3Phi-read-write",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject",
+                "s3:DeleteObject"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "NevergreenProductionSecureS3PhiCmk35DF750A",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenProductionSecureS3PhiCmkArnParamD43A7BFA": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "CMK ARN for nevergreen-production-phi SecureS3 bucket",
+        "Name": "/nevergreen/production/secure_s3/phi/cmk-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenProductionSecureS3PhiCmk35DF750A",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "NevergreenProductionSecureS3PhiBucketArnParam78A62A11": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Primary bucket ARN for nevergreen-production-phi SecureS3 bucket",
+        "Name": "/nevergreen/production/secure_s3/phi/bucket-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "NevergreenProductionSecureS3PhiLoggingBucketArnParam45A7DFC5": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Access-logging bucket ARN for nevergreen-production-phi SecureS3 bucket",
+        "Name": "/nevergreen/production/secure_s3/phi/logging-bucket-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenProductionSecureS3PhiLoggingBucketA44730E5",
+            "Arn"
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "BucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NevergreenProductionSecureS3PhiBucketAEA4D7A5",
+          "Arn"
+        ]
+      }
+    },
+    "CmkArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NevergreenProductionSecureS3PhiCmk35DF750A",
+          "Arn"
+        ]
+      }
+    },
+    "ReadPolicyArn": {
+      "Value": {
+        "Ref": "NevergreenProductionSecureS3PhiReadPolicy6BF60766"
+      }
+    },
+    "ReadWritePolicyArn": {
+      "Value": {
+        "Ref": "NevergreenProductionSecureS3PhiReadWritePolicyA0E6E4E5"
+      }
+    },
+    "CmkArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenProductionSecureS3PhiCmkArnParamD43A7BFA"
+      }
+    },
+    "BucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenProductionSecureS3PhiBucketArnParam78A62A11"
+      }
+    },
+    "LoggingBucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NevergreenProductionSecureS3PhiLoggingBucketA44730E5",
+          "Arn"
+        ]
+      }
+    },
+    "LoggingBucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenProductionSecureS3PhiLoggingBucketArnParam45A7DFC5"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}
