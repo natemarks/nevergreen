@@ -175,8 +175,11 @@ def latest_ami_from_ssm_parameter(aws_region: str, parameter_name: str) -> str:
     """Return the AMI id stored in a public AWS-managed SSM parameter.
 
     Used for AMI aliases AWS publishes and keeps current, e.g. the Deep
-    Learning AMI `image-id` parameters under
-    `/aws/service/deeplearning/ami/...`.
+    Learning AMI `ami-id` parameters under
+    `/aws/service/deeplearning/ami/...`. AWS retires old variant names
+    over time, so a stale `parameter_name` here raises
+    `botocore.errorfactory.ParameterNotFound` — check
+    https://docs.aws.amazon.com/dlami/latest/devguide/ for the current one.
     """
     ssm = boto3.client("ssm", region_name=aws_region)
     response = ssm.get_parameter(Name=parameter_name)

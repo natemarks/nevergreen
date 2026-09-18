@@ -27,10 +27,13 @@ from config.settings import EnvironmentSetting, SimpleAsgSetting
 mlog = get_logger(str(__name__))
 
 # AWS-published SSM parameter alias for the latest GPU Deep Learning AMI.
-# See research/aws-infrastructure.md for why this specific DLAMI variant.
+# The DLAMI variant naming (and the "latest DLAMI versions" list at
+# https://docs.aws.amazon.com/dlami/latest/devguide/) changes over time as
+# AWS retires old PyTorch/OS combinations, so this needs occasional review:
+# a retired variant name here fails with botocore.errorfactory.ParameterNotFound.
 GPU_WORKER_AMI_SSM_PARAMETER = (
     "/aws/service/deeplearning/ami/x86_64/"
-    "pytorch-2.4-gpu-py310-ubuntu22.04/latest/image-id"
+    "oss-nvidia-driver-gpu-pytorch-2.7-ubuntu-22.04/latest/ami-id"
 )
 
 

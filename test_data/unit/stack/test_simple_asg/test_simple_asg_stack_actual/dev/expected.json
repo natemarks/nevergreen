@@ -180,7 +180,7 @@
   "Mappings": {
     "NevergreenDevSimpleAsgAaaLaunchTplAmiMapB0ED70B7": {
       "us-east-1": {
-        "ami": "ami-04a95f47496c803a3"
+        "ami": "ami-0bd0c855385bb5d39"
       }
     }
   },

@@ -26,7 +26,7 @@ clean-venv: ## re-create virtual env
        pip install -r requirements.txt; \
     )
 
-.venv: ## create venv if it doesn't exist
+.venv: requirements.txt ## create/update venv if missing or requirements.txt changed
 	( \
        source scripts/enable_pyenv.sh; \
        pyenv local $(PYTHON_VERSION); \
@@ -35,6 +35,7 @@ clean-venv: ## re-create virtual env
        pip install --upgrade pip setuptools; \
        pip install -r requirements.txt; \
     )
+	touch .venv
 
 update_cdk_libs: .venv ## install the latest version of aws cdk node and python packages
 	bash scripts/update_cdk_libs.sh
