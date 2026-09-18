@@ -205,6 +205,8 @@ class SecureS3Stack(Stack):
 
         # --- Bucket policy layers ---
         endpoint_id = app_vpc_stack.s3_gateway_endpoint.vpc_endpoint_id
+        bucket_arn = self.bucket.bucket_arn
+        bucket_arn_wildcard = f"{bucket_arn}/*"
 
         self.bucket.add_to_resource_policy(
             iam.PolicyStatement(
@@ -212,10 +214,7 @@ class SecureS3Stack(Stack):
                 effect=iam.Effect.DENY,
                 principals=[iam.AnyPrincipal()],
                 actions=["s3:*"],
-                resources=[
-                    self.bucket.bucket_arn,
-                    f"{self.bucket.bucket_arn}/*",
-                ],
+                resources=[bucket_arn, bucket_arn_wildcard],
                 conditions={"Bool": {"aws:SecureTransport": "false"}},
             )
         )
@@ -225,7 +224,7 @@ class SecureS3Stack(Stack):
                 effect=iam.Effect.DENY,
                 principals=[iam.AnyPrincipal()],
                 actions=["s3:PutObject"],
-                resources=[f"{self.bucket.bucket_arn}/*"],
+                resources=[bucket_arn_wildcard],
                 conditions={
                     "StringNotEqualsIfExists": {
                         "s3:x-amz-server-side-encryption": "aws:kms:dsse"
@@ -239,10 +238,7 @@ class SecureS3Stack(Stack):
                 effect=iam.Effect.DENY,
                 principals=[iam.AnyPrincipal()],
                 actions=["s3:*"],
-                resources=[
-                    self.bucket.bucket_arn,
-                    f"{self.bucket.bucket_arn}/*",
-                ],
+                resources=[bucket_arn, bucket_arn_wildcard],
                 conditions={
                     "StringNotEquals": {"aws:sourceVpce": endpoint_id}
                 },
@@ -258,10 +254,7 @@ class SecureS3Stack(Stack):
                 iam.PolicyStatement(
                     effect=iam.Effect.ALLOW,
                     actions=["s3:GetObject", "s3:ListBucket"],
-                    resources=[
-                        self.bucket.bucket_arn,
-                        f"{self.bucket.bucket_arn}/*",
-                    ],
+                    resources=[bucket_arn, bucket_arn_wildcard],
                 ),
                 iam.PolicyStatement(
                     effect=iam.Effect.ALLOW,
@@ -283,10 +276,7 @@ class SecureS3Stack(Stack):
                         "s3:PutObject",
                         "s3:DeleteObject",
                     ],
-                    resources=[
-                        self.bucket.bucket_arn,
-                        f"{self.bucket.bucket_arn}/*",
-                    ],
+                    resources=[bucket_arn, bucket_arn_wildcard],
                 ),
                 iam.PolicyStatement(
                     effect=iam.Effect.ALLOW,
@@ -300,17 +290,18 @@ class SecureS3Stack(Stack):
         app = APP_NAME.lower()
         env = s_input.env_setting.app_env
         sid = s_input.stack_id
+        ssm_prefix = f"/{app}/{env}/secure_s3/{sid}"
         ssm_cmk = ssm.StringParameter(
             self,
             f"{self._prefix}CmkArnParam",
-            parameter_name=f"/{app}/{env}/secure_s3/{sid}/cmk-arn",
+            parameter_name=f"{ssm_prefix}/cmk-arn",
             string_value=self.cmk.key_arn,
             description=f"CMK ARN for {s_input.bucket_name()} SecureS3 bucket",
         )
         ssm_bucket = ssm.StringParameter(
             self,
             f"{self._prefix}BucketArnParam",
-            parameter_name=f"/{app}/{env}/secure_s3/{sid}/bucket-arn",
+            parameter_name=f"{ssm_prefix}/bucket-arn",
             string_value=self.bucket.bucket_arn,
             description=(
                 f"Primary bucket ARN for {s_input.bucket_name()} SecureS3 bucket"
@@ -336,9 +327,7 @@ class SecureS3Stack(Stack):
             ssm_logging = ssm.StringParameter(
                 self,
                 f"{self._prefix}LoggingBucketArnParam",
-                parameter_name=(
-                    f"/{app}/{env}/secure_s3/{sid}/logging-bucket-arn"
-                ),
+                parameter_name=f"{ssm_prefix}/logging-bucket-arn",
                 string_value=self.logging_bucket.bucket_arn,
                 description=(
                     f"Access-logging bucket ARN for "

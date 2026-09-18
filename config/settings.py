@@ -16,7 +16,7 @@ Customize:
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, Type, TypeVar
+from typing import ClassVar, Literal, Type, TypeVar
 
 from config.helper import get_logger, dict_from_json_file
 
@@ -124,11 +124,11 @@ class SecureS3Setting(
     rotation_period_days: int = 180
     enable_access_logging_bucket: bool = False
     worm_enabled: bool = False
-    worm_mode: str = "GOVERNANCE"
+    worm_mode: Literal["GOVERNANCE", "COMPLIANCE"] = "GOVERNANCE"
     worm_retention_days: int = 2555
     enable_lifecycle_expiration: bool = False
     deletion_days: int = 1095
-    removal_policy: str = "DESTROY"
+    removal_policy: Literal["DESTROY", "RETAIN"] = "DESTROY"
 
     def __post_init__(self) -> None:
         if self.worm_mode not in {"GOVERNANCE", "COMPLIANCE"}:
