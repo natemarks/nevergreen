@@ -212,4 +212,10 @@ asg_up: .venv ## scale every simple_asg Auto Scaling Group in app_env back to it
 	   PYTHONPATH="." python3 -m config.asg_scale up $(app_env); \
 	)
 
-.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover asg_down asg_up
+comfyui_prompt: .venv ## discover the comfyui worker's URL, wait for it, and POST workflow=<path.json>
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.comfyui_client $(app_env) $(workflow); \
+	)
+
+.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover asg_down asg_up comfyui_prompt

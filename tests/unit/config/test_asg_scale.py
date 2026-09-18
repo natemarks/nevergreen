@@ -1,59 +1,23 @@
 """Tests for config.asg_scale."""
 
 # pylint: disable=redefined-outer-name
-import json
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 from botocore.exceptions import ClientError
 
 from config.asg_scale import AsgScaler
-
-_ENVIRONMENT_JSON = {
-    "admin_team": "Operations",
-    "aws_account_name": "Test",
-    "aws_account_number": "709310380790",
-    "default_fqdn": "test.example.com",
-    "default_region": "us-east-1",
-    "app_env": "dev",
-    "is_release": False,
-}
-
-
-def _write_simple_asg_config(
-    data_path: Path, stack_id: str, min_instances: int, max_instances: int
-) -> None:
-    """Write a minimal simple_asg.json for one stack_id under data_path."""
-    setting_dir = data_path / "simple_asg" / stack_id
-    setting_dir.mkdir(parents=True)
-    (setting_dir / "simple_asg.json").write_text(
-        json.dumps(
-            {
-                "ami_id": "ami-00000000000000000",
-                "min_instances": min_instances,
-                "max_instances": max_instances,
-            }
-        )
-    )
-
-
-def _asg_resources(physical_id: str) -> dict:
-    """Return a describe_stack_resources payload with one ASG resource."""
-    return {
-        "StackResources": [
-            {
-                "ResourceType": "AWS::AutoScaling::AutoScalingGroup",
-                "PhysicalResourceId": physical_id,
-            }
-        ]
-    }
+from tests.unit.config._shared import (
+    asg_resources as _asg_resources,
+    write_environment_json as _write_environment_json,
+    write_simple_asg_config as _write_simple_asg_config,
+)
 
 
 @pytest.fixture
 def scaler(tmp_path):
     """Return an AsgScaler with mocked AWS clients and a tmp data path."""
-    (tmp_path / "environment.json").write_text(json.dumps(_ENVIRONMENT_JSON))
+    _write_environment_json(tmp_path)
     cfn = MagicMock()
     autoscaling = MagicMock()
     with patch("config.asg_scale.check_aws_account"), patch(

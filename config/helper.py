@@ -24,6 +24,7 @@ import json
 from typing import Any, Dict
 
 import boto3
+from botocore.exceptions import ClientError
 
 from config.project import APP_ENV_TO_AWS_ACCOUNT, APP_NAME as _APP_NAME
 
@@ -184,3 +185,22 @@ def latest_ami_from_ssm_parameter(aws_region: str, parameter_name: str) -> str:
     ssm = boto3.client("ssm", region_name=aws_region)
     response = ssm.get_parameter(Name=parameter_name)
     return response["Parameter"]["Value"]
+
+
+def asg_physical_name(cfn_client, stack_name: str) -> str | None:
+    """Return the physical AutoScalingGroup id for one CFN stack, or None.
+
+    None means the stack isn't deployed yet, or it has no
+    AWS::AutoScaling::AutoScalingGroup resource -- callers decide whether
+    that's a skip or an error for their use case.
+    """
+    try:
+        resources = cfn_client.describe_stack_resources(StackName=stack_name)[
+            "StackResources"
+        ]
+    except ClientError:
+        return None
+    for resource in resources:
+        if resource["ResourceType"] == "AWS::AutoScaling::AutoScalingGroup":
+            return resource["PhysicalResourceId"]
+    return None

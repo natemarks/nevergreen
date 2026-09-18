@@ -45,13 +45,17 @@ echo "$INSTANCE_ID"
 
 Get the URL to test directly against ComfyUI (the `comfyui` instance is in
 a public subnet with a public IP specifically so you can reach it this way,
-per the `ingress_cidr` setting in its config). `scripts/comfyui_url.sh` runs
-the same lookup plus the public-IP query and just prints the URL:
+per the `ingress_cidr` setting in its config):
 
 ```bash
-URL=$(scripts/comfyui_url.sh)
+PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$INSTANCE_ID" \
+  --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
+URL="http://$PUBLIC_IP:8188"
 echo "$URL"
 ```
+
+(`config/comfyui_client.py`, used in step 5 below via `make comfyui_prompt`,
+runs this exact same lookup internally — no separate script needed there.)
 
 ## 3. Confirm ComfyUI is running
 
@@ -82,34 +86,68 @@ correct CUDA wheel over this same SSM session.
 
 ## 4. Download a checkpoint (manual — Phase 0 has no automated model sync)
 
-Still inside the SSM session:
+Still inside the SSM session. Two example checkpoints — one for cartoon/anime
+style (Character A's primary style per `human-workflow-steps.md`'s own
+example prompt), one for realistic images (for later use). Both are
+standard SDXL 1.0 checkpoints, well within the `g4dn.xlarge`/Tesla T4's
+16GB VRAM (no instance upgrade needed for either). For this UAT, one is
+enough to prove the pipeline end-to-end — download whichever you want to
+test with, or both.
+
+**Cartoon/anime — `cagliostrolab/animagine-xl-4.0`** (verified current: actively
+maintained, explicitly documented as not an NSFW-focused model, unlike most
+other top-ranked anime SDXL checkpoints in 2026):
 
 ```bash
 sudo -u ubuntu /opt/comfyui/venv/bin/pip install huggingface_hub
-sudo -u ubuntu /opt/comfyui/venv/bin/huggingface-cli download \
-  <model-repo, e.g. RunDiffusion/Juggernaut-XL-v9> \
+sudo -u ubuntu /opt/comfyui/venv/bin/hf download \
+  cagliostrolab/animagine-xl-4.0 \
+  animagine-xl-4.0-opt.safetensors \
   --local-dir /opt/comfyui/models/checkpoints
 ```
 
-Confirm the `.safetensors` file landed under
+**Realistic — `RunDiffusion/Juggernaut-XI-v11`** (the newest Juggernaut XL
+release RunDiffusion hosts officially on HuggingFace; their newer "Ragnarok"
+release is Civitai-only and would need Civitai token handling we don't have
+yet):
+
+```bash
+sudo -u ubuntu /opt/comfyui/venv/bin/pip install huggingface_hub
+sudo -u ubuntu /opt/comfyui/venv/bin/hf download \
+  RunDiffusion/Juggernaut-XI-v11 \
+  Juggernaut-XI-byRunDiffusion.safetensors \
+  --local-dir /opt/comfyui/models/checkpoints
+```
+
+Confirm the `.safetensors` file(s) landed under
 `/opt/comfyui/models/checkpoints/`.
 
 ## 5. Generate an image
 
-From your laptop (if using the direct path) or from within the SSM session
-(`curl localhost:8188/...`):
+From your laptop, run `config/comfyui_client.py` via its Make target. It
+re-runs the same instance/URL discovery as step 2, **waits** for the port to
+actually accept connections (useful right after a fresh instance launch —
+`comfyui.service` takes a few minutes to come up), then POSTs your workflow,
+wrapping it under `"prompt"` automatically — no more manual
+`-d "{\"prompt\": $(cat workflow.json)}"` shell-escaping:
 
 ```bash
-curl -s -X POST "$URL/prompt" \
-  -H "Content-Type: application/json" \
-  -d @workflow.json
+make comfyui_prompt app_env=dev workflow=workflow.json
 ```
 
-`workflow.json` is a ComfyUI API-format workflow graph (checkpoint loader +
-positive/negative `CLIPTextEncode` + `KSampler` + `VAEDecode` + `SaveImage`) —
-export one from ComfyUI's own UI ("Save (API Format)") pointed at the
-checkpoint you just downloaded. Confirm a PNG appears under
-`/opt/comfyui/output/` on the instance.
+`workflow.json` is a ComfyUI **API-format** export — Workflow menu →
+**Export (API)** (not the plain Export/Save, which produces a different,
+incompatible schema) — of the graph you built and tested in ComfyUI's UI
+first (checkpoint loader + positive/negative `CLIPTextEncode` + `KSampler` +
+`VAEDecode` + `SaveImage`), pointed at whichever checkpoint you downloaded.
+Confirm a PNG appears under `/opt/comfyui/output/` on the instance.
+
+**Re-running it:** `KSampler`'s `seed` is a frozen number in the exported
+file. `SaveImage` always writes a new file regardless (ComfyUI never skips
+output/side-effect nodes even on a full cache hit), but the sampling pass
+itself will be skipped as a no-op if every input — including that seed — is
+identical to the last run. Edit the seed between runs if you want a genuinely
+new image rather than a re-save of the cached one.
 
 ## 6. Push the image to S3 and confirm it landed
 

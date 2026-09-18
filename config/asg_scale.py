@@ -33,9 +33,13 @@ Customize:
 import argparse
 
 import boto3
-from botocore.exceptions import ClientError
 
-from config.helper import check_app_env, check_aws_account, get_logger
+from config.helper import (
+    asg_physical_name,
+    check_app_env,
+    check_aws_account,
+    get_logger,
+)
 from config.project import SUPPORTED_APP_ENVS
 from config.settings import EnvironmentSetting, get_actual_path
 from stack.simple_asg import SimpleAsgInput
@@ -74,25 +78,13 @@ class AsgScaler:
 
     def _asg_name(self, stack_name: str) -> str | None:
         """Return the physical AutoScalingGroup id for one CFN stack."""
-        try:
-            resources = self.cfn.describe_stack_resources(
-                StackName=stack_name
-            )["StackResources"]
-        except ClientError:
-            mlog.warning("Stack %s not deployed yet; skipping", stack_name)
-            return None
-        for resource in resources:
-            if (
-                resource["ResourceType"]
-                == "AWS::AutoScaling::AutoScalingGroup"
-            ):
-                return resource["PhysicalResourceId"]
-        mlog.warning(
-            "No AWS::AutoScaling::AutoScalingGroup found in stack %s; "
-            "skipping",
-            stack_name,
-        )
-        return None
+        name = asg_physical_name(self.cfn, stack_name)
+        if name is None:
+            mlog.warning(
+                "No deployed AutoScalingGroup found for stack %s; skipping",
+                stack_name,
+            )
+        return name
 
     def run(self, direction: str) -> None:
         """Scale every discovered ASG "up" (to config min/max) or "down" (to 0)."""
