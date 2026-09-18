@@ -1,180 +1,136 @@
-# cdk-starter
+# Nevergreen — Cartoon Character Image Generation
 
-If you're interested in creating  Infrastructure as Code (IaC) projects in AWS,
-you've come to the right place. This project is my starting point and I'm happy
-to talk about it. 
+An AWS CDK (Python) app that deploys a ComfyUI-based pipeline for generating
+cartoon/anime and realistic character images. See
+[research/aws-infrastructure.md](research/aws-infrastructure.md) for the full
+phased design, and [CLAUDE.md](CLAUDE.md) for the registry/discovery/pipeline
+conventions this project follows.
 
-If you are using this as a GitHub template repository, start with
-[CUSTOMIZE.md](./CUSTOMIZE.md).
+## Phase 0: ComfyUI prototype instance
 
-## Quick Start (Template Consumers)
+Phase 0 stands up a single GPU instance running ComfyUI, driven manually
+through its own web UI or the API — no custom UI, no automation of the
+generation pipeline itself yet (that starts in later phases).
 
-```console
-make .venv
-make node_modules
-make unit-test
+**What it deploys** (`dev` environment only):
+- `comfyui` — a `g4dn.xlarge` (Tesla T4, 16GB VRAM) instance on a Deep
+  Learning AMI, running ComfyUI + custom nodes (Impact Pack, IPAdapter Plus,
+  ControlNet Aux, Plush, Masquerade Nodes) as a `comfyui.service` systemd
+  unit, reachable via a public IP (locked to one configured CIDR) or SSM
+  Session Manager.
+- `nevergreen-dev-models` / `nevergreen-dev-images` — S3 buckets for model
+  checkpoints and generated images.
+
+**Verified example checkpoints** (both standard SDXL 1.0 — no instance
+upgrade needed for either):
+- Cartoon/anime: [`cagliostrolab/animagine-xl-4.0`](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (file `animagine-xl-4.0-opt.safetensors`)
+- Realistic: [`RunDiffusion/Juggernaut-XI-v11`](https://huggingface.co/RunDiffusion/Juggernaut-XI-v11) (file `Juggernaut-XI-byRunDiffusion.safetensors`)
+
+## Prerequisites
+
+- AWS credentials for the target environment's account.
+- `aws` CLI v2 and `session-manager-plugin` (for `aws ssm start-session`).
+- `make .venv && make node_modules` (or the CI bypass in
+  [CLAUDE.md](CLAUDE.md#pipeline) if `pyenv` isn't available).
+
+## Deploy
+
+```bash
+make discover app_env=dev          # resolves the real Deep Learning AMI id
+make cdk-diff-all app_env=dev      # review before approving
+make cdk-deploy-all app_env=dev
 ```
 
-If naming changes cause golden-file diffs, run:
+## Test it (UAT)
 
-```console
-make unit-update_golden
-make unit-test
+This is the acceptance test for Phase 0 — an end-to-end proof that a prompt
+turns into an image landing in S3, using this repo's own tooling rather than
+raw AWS CLI calls.
+
+1. **Find the instance** (for the SSM step below):
+   ```bash
+   bash scripts/list_instances.sh
+   ```
+2. **Confirm ComfyUI is running** — SSM in and check the service:
+   ```bash
+   aws ssm start-session --target <instance-id>
+   sudo systemctl status comfyui.service
+   sudo journalctl -u comfyui.service -n 100 --no-pager
+   ```
+   If it isn't `active (running)`, the userdata install
+   (`stack/simple_asg/userdata_gpu_worker.sh`) is best-effort — a custom
+   node's `requirements.txt` pulling a CPU-only `torch` build is the most
+   likely failure, fixable with a manual `pip install` of the matching CUDA
+   wheel over this same session.
+3. **Download a checkpoint** (still over SSM — Phase 0 has no automated
+   model sync yet):
+   ```bash
+   sudo -u ubuntu /opt/comfyui/venv/bin/pip install huggingface_hub
+   sudo -u ubuntu /opt/comfyui/venv/bin/hf download \
+     cagliostrolab/animagine-xl-4.0 animagine-xl-4.0-opt.safetensors \
+     --local-dir /opt/comfyui/models/checkpoints
+   ```
+4. **Build and export a workflow.** In ComfyUI's web UI, build a graph
+   (Load Checkpoint → positive/negative CLIP Text Encode → KSampler → VAE
+   Decode → Save Image), point it at the checkpoint you downloaded, test it
+   with Queue Prompt, then export via **Workflow → Export (API)** (not the
+   plain Export/Save, which produces an incompatible schema). A working
+   example is checked in at `workflows/txt2img-example.json`.
+5. **Generate an image from your laptop**, with the final test automation —
+   `config/comfyui_client.py` discovers the instance's current URL, waits
+   for the port to actually accept connections (useful right after a fresh
+   launch — `comfyui.service` takes a few minutes to come up), and POSTs the
+   workflow, wrapped correctly under `"prompt"`:
+   ```bash
+   make comfyui_prompt app_env=dev workflow=workflows/txt2img-example.json
+   ```
+   Confirm a new PNG appears under `/opt/comfyui/output/` on the instance.
+   Note: `KSampler`'s `seed` is frozen in the exported file — `SaveImage`
+   always writes a new file, but the sampling pass itself is a no-op cache
+   hit if every input, including that seed, is unchanged from the previous
+   run. Edit the seed between runs for a genuinely new image.
+6. **Push the image to S3 and confirm it landed** (the instance role already
+   has the images bucket's read-write policy attached):
+   ```bash
+   aws s3 cp /opt/comfyui/output/<file>.png s3://nevergreen-dev-images/explore/manual-uat/
+   aws s3 ls s3://nevergreen-dev-images/explore/manual-uat/
+   ```
+
+## Cost control
+
+GPU instances aren't cheap idle. `cdk deploy` alone does **not** restore
+Auto Scaling capacity after a manual scale-down (CloudFormation only pushes
+property changes relative to the previously deployed template, not live AWS
+state) — use these instead:
+
+```bash
+make asg_down app_env=dev   # scale every simple_asg ASG to 0
+make asg_up app_env=dev     # restore min/max from config; ASG relaunches
 ```
 
-This project is part pitch and part demonstration. 
+## Known gotchas
 
-There are 4 main reasons to choose CDK in AWS:
-1) Free and full support from the cloud provider. AWS will help you with CDK
-problems.
-2) Delegate state management to AWS Cloudformation. Only deal with templates
-and leave the state management and synchronization to battle-tested
-cloudformation. By contrast, some other tools will force you to protect and
-upgrade your own state data across breaking changes.
-3) I can't stress this next one enough: Test hooks make it trivially easy to
-test for unintentional template changes. I'm familiar with pytest in python, so
-I use that. But CDK supports several languanges and their test hooks. Pick your
-favorite and go to town.
-4) Programming language support: Having chosen your favorite language for CDK,
-you can then extend yor CDK project with the same. In this project, CDK builds
-my resources, and I extend that with pyton modules that do things like discover
-AMI IDs, external peering targets, etc.
-5) Automatic resource tagging: CDK makes it easy to automatically tag all taggable resources. This is important if you have many teams sharing a sandbox account. They make it easy to clean up.
+- ComfyUI's server is plain HTTP — no TLS certificate is configured.
+- The GPU worker's root device name must match the AMI's actual
+  `RootDeviceName` (currently `/dev/sda1` for this Deep Learning AMI, not the
+  more common `/dev/xvda`) — otherwise the configured EBS volume attaches as
+  an idle second disk instead of becoming the root filesystem, and the OS
+  keeps whatever tiny size the AMI's own snapshot shipped with.
+- A fresh instance gets a new public IP on every launch — re-run
+  `bash scripts/list_instances.sh` or `make comfyui_prompt` (which
+  re-discovers it every time) rather than reusing a stale IP.
 
-I like tags like:
+## Testing this project's own code
 
- - 'owner' ('Nate Marks')
- - 'owner_email' ('npmarks@gmail.com')
- - 'iac_project' ('github.com/natemarks/cdk-starter')
+Golden-file tests compare synthesized CloudFormation templates against
+checked-in expected output — a mismatch means an unintended template
+change. See [CLAUDE.md](CLAUDE.md#golden-files) for the full convention.
 
-
-
-NOTE: GNU Make is useful for automating common project tasks, like testing and
-static checks. I also use it to simplify pipeline execution of CDK commands. It
-keeps the pipelines clean, and I can test the automation locally.
-
-I enjoy this stuff, so if you have questions, I'll try to help.  Drop me an
-email, but be prepared to wait. :)
-
-## Demonstration
-
-CDK deploys and destroys Cloudformation stacks. That's it. I find it useful to
-organize my stacks based on whether or not I can deploy them multiple times in
-each environment. To demonstrate these two types, I provide a unique stack
-module (app_vpc.py) and a multiple stack module (simple_asg.py).
-
-app_vpc.py deploys a VPC with a few of my favorite features. This is a unique
-stack, meaning that there will be exactly one app vpc stack in each
-environment.
-
-simple_asg.py deploys an autoscaling group, but it can be used many times in
-each environment. Multiple stacks like this one support an extra 'stack_id'
-attribute to distinguish between the different simple_asg stacks in an
-environment. This is obviously not needed for app_vpc which can only exist once
-in an environment.
-
-Also, the simple_asg stacks are build on the app_vpc, so they depend upon it.
-This dependency is automatic in CDK, but it's nice to demonstrate it.
-
-### CDK Usage
-
-Using 'make cdk-ls' and providing the target environment, cdk prints the stacks
-that exist for the dev environment. 
-```console
-foo@bar:~$ make cdk-ls app_env=dev
-   ...
-StarterDevAppVpcStack
-StarterDevSimpleAsgAaaStack
+```bash
+make static        # shellcheck, black, mypy, pylint, unit tests
+make unit-update_golden   # regenerate golden files after an intentional change
 ```
-
-I can use the make target 'cdk-diff' and 'cdk-diff-all' to see if the project
-template would change the AWS deployed stack. Note that when I diff the
-SimpleAsg stack, CDK automatically figures out that it depends upon th AppVpc
-stack. It diffs both. 
-
-If I run the 'cdk-diff-all' target, it diffs every stack in the environment
-
-```console
-foo@bar:~$ make cdk-diff app_env=dev stack=StarterDevSimpleAsgAaaStack
- ...
-Including dependency stacks: StarterDevAppVpcStack
-start: Building 69f29bc9ba86d9acc02d6e91ebe003b265184e8bd7238569531453e75854fbaa:709310380790-us-east-1
-success: Built 69f29bc9ba86d9acc02d6e91ebe003b265184e8bd7238569531453e75854fbaa:709310380790-us-east-1
-start: Publishing 69f29bc9ba86d9acc02d6e91ebe003b265184e8bd7238569531453e75854fbaa:709310380790-us-east-1
-success: Published 69f29bc9ba86d9acc02d6e91ebe003b265184e8bd7238569531453e75854fbaa:709310380790-us-east-1
-Hold on while we create a read-only change set to get a diff with accurate replacement information (use --no-change-set to use a less accurate but faster template-only diff)
-Stack StarterDevAppVpcStack
-There were no differences
-start: Building caaf085f9c46d956ec4fc0002e927e7e7febfff7413592436995dbeaa0b3d3de:709310380790-us-east-1
-success: Built caaf085f9c46d956ec4fc0002e927e7e7febfff7413592436995dbeaa0b3d3de:709310380790-us-east-1
-start: Publishing caaf085f9c46d956ec4fc0002e927e7e7febfff7413592436995dbeaa0b3d3de:709310380790-us-east-1
-success: Published caaf085f9c46d956ec4fc0002e927e7e7febfff7413592436995dbeaa0b3d3de:709310380790-us-east-1
-Hold on while we create a read-only change set to get a diff with accurate replacement information (use --no-change-set to use a less accurate but faster template-only diff)
-Stack StarterDevSimpleAsgAaaStack
-There were no differences
-
-✨  Number of stacks with differences: 0
-```
-
-
-'cdk-deploy' and 'cdk-deploy-all' work the same way as 'cdk-diff' and
-'cdk-diff-all' above. The deploy commands create or update the specified stacks
-deployed in AWS.
-
-
-I have a 'cdk-destroy' target that works like 'cdk-diff' and 'cdk-deploy'. You
-must specify the target stack.  I don't have a 'cdk-destroy-all' because I'm a
-coward.
-
-### Pytest Golden Files
-
-CDK test hooks allow me to easily compare a stack template to the expected
-template in my pytests. It's a great way to know when a change to the project
-unintentially changes a template. To accomplish this, every stack test case has
-a golden file. Theses stack test are marked as unit tests. Running 'make
-unit-test' will run all such tests. If the project has changed and the actual
-template no longer matches the expected template, the test will fail. If the
-change is intended, run 'make unit-update-golden'. All the unit test golden
-files will be updated. Use git to view and keep/reset the changes.
-
-
-### Discovery
-
-The environment-specific config files are maintained in the project repo:
-
- - config/dev/
- - config/staging/
- - config/production/
-
-The data is often generated manually and is fairly static.  However, sometimes I
-need to store data from external sources and it's safer and easier to automate
-the process of updating parts of the configuration data.  I use the AMI_ID for
-the simple_asg stack as an example, just becuase the latest ECS optimized ami
-ID changes fairly often, so it's likely to force an update.
-
-To see it in action, set your AWS credentials and run:
-```console
-foo@bar:~$ make discover app_env=dev
- ...
-2025-01-21 08:36:31,544 - {__main__} - {config.discover:update_simple_asg:87} - INFO - updating simple_asg: dev - aaa
-```
-
-If you look in the git repository, you should see the file:
-config/dev/simple_asg/aaa/simple_asg.json change.  It starts as a simple map in
-JSON with a single key. The new version is fleshed out with all the default
-values for that dataclass AND a new value for the key: ami_id
-
-The discovery process can be run manually, if you want to carefully manage the
-config data changes. Just run the discovery manually and commit the changes to
-the repo. The pipeline that runs your CDK commands will just read the
-configuration data.  Alternatively, if you don't care about the changes, but
-you want the convenience of always using the latest discovered data -  and
-perhaps just checking the impact using CDK diff - run the discovery in the
-pipeline that runs your CDK commands.
-
-
 
 ## Contributing
 
-If you'd like to contribute to this project read
-[CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md).
