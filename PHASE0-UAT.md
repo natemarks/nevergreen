@@ -132,15 +132,18 @@ wrapping it under `"prompt"` automatically — no more manual
 `-d "{\"prompt\": $(cat workflow.json)}"` shell-escaping:
 
 ```bash
-make comfyui_prompt app_env=dev workflow=workflow.json
+make comfyui_prompt app_env=dev workflow=workflows/txt2img-example.json
 ```
 
-`workflow.json` is a ComfyUI **API-format** export — Workflow menu →
-**Export (API)** (not the plain Export/Save, which produces a different,
-incompatible schema) — of the graph you built and tested in ComfyUI's UI
-first (checkpoint loader + positive/negative `CLIPTextEncode` + `KSampler` +
-`VAEDecode` + `SaveImage`), pointed at whichever checkpoint you downloaded.
-Confirm a PNG appears under `/opt/comfyui/output/` on the instance.
+`workflows/txt2img-example.json` (checked into the repo) is a ComfyUI
+**API-format** export — Workflow menu → **Export (API)** (not the plain
+Export/Save, which produces a different, incompatible schema) — of the
+graph built and tested in ComfyUI's UI first (checkpoint loader +
+positive/negative `CLIPTextEncode` + `KSampler` + `VAEDecode` +
+`SaveImage`), pointed at `Juggernaut-XI-byRunDiffusion.safetensors`. Edit
+`ckpt_name` in it to point at a different downloaded checkpoint, or export
+your own workflow to a new file under `workflows/`. Confirm a PNG appears
+under `/opt/comfyui/output/` on the instance.
 
 **Re-running it:** `KSampler`'s `seed` is a frozen number in the exported
 file. `SaveImage` always writes a new file regardless (ComfyUI never skips
