@@ -56,9 +56,9 @@ of truth for all three environments.
 from config.registry_factories import app_vpc, simple_asg, debug
 
 STACKS_BY_ENV: dict[str, list[StackFactory]] = {
-    "dev":        [app_vpc, simple_asg("aaa"), debug],
-    "staging":    [app_vpc, simple_asg("bbb")],
-    "production": [app_vpc, simple_asg("ccc")],
+    "dev":        [app_vpc, simple_asg("worker-a"), debug],
+    "staging":    [app_vpc, simple_asg("worker-b")],
+    "production": [app_vpc, simple_asg("worker-c")],
 }
 ```
 
@@ -92,7 +92,7 @@ def simple_asg(stack_id: str) -> StackFactory:
     )
 ```
 
-`simple_asg("aaa")` and `simple_asg("bbb")` produce two independent `StackFactory`
+`simple_asg("worker-a")` and `simple_asg("worker-b")` produce two independent `StackFactory`
 instances. Each has its own `stack_id` bound into the closures. Config for each lives at
 `config/<env>/simple_asg/<stack_id>/simple_asg.json`.
 
@@ -218,9 +218,9 @@ See `azure-pipelines.yml` in the repo root for a complete example.
 1. Add the factory entry to the target environment's list in `config/registry.py`:
    ```python
    STACKS_BY_ENV = {
-       "dev":        [app_vpc, simple_asg("aaa"), debug],
-       "staging":    [app_vpc, simple_asg("bbb"), debug],  # ← add here
-       "production": [app_vpc, simple_asg("ccc")],
+       "dev":        [app_vpc, simple_asg("worker-a"), debug],
+       "staging":    [app_vpc, simple_asg("worker-b"), debug],  # ← add here
+       "production": [app_vpc, simple_asg("worker-c")],
    }
    ```
 2. Add config files under `config/<target_env>/<stack_type>/...`

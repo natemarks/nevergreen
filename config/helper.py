@@ -5,6 +5,7 @@ Purpose:
 - Provide JSON parsing helpers for config settings modules.
 - Validate app environment and caller AWS account alignment.
 - Discover latest ECS AMI id values for discovery workflows.
+- Look up AMI ids from AWS-published SSM parameter aliases (e.g. DLAMI).
 
 Flow:
 - Import project identity and rollout constants from `config.project`.
@@ -23,6 +24,7 @@ import json
 from typing import Any, Dict
 
 import boto3
+from botocore.exceptions import ClientError
 
 from config.project import APP_ENV_TO_AWS_ACCOUNT, APP_NAME as _APP_NAME
 
@@ -168,3 +170,37 @@ def latest_ecs_ami_id(aws_region: str) -> str:
 
     # Return the most recent AMI ID, or None if no AMIs match
     return sorted_images[0]["ImageId"]
+
+
+def latest_ami_from_ssm_parameter(aws_region: str, parameter_name: str) -> str:
+    """Return the AMI id stored in a public AWS-managed SSM parameter.
+
+    Used for AMI aliases AWS publishes and keeps current, e.g. the Deep
+    Learning AMI `ami-id` parameters under
+    `/aws/service/deeplearning/ami/...`. AWS retires old variant names
+    over time, so a stale `parameter_name` here raises
+    `botocore.errorfactory.ParameterNotFound` — check
+    https://docs.aws.amazon.com/dlami/latest/devguide/ for the current one.
+    """
+    ssm = boto3.client("ssm", region_name=aws_region)
+    response = ssm.get_parameter(Name=parameter_name)
+    return response["Parameter"]["Value"]
+
+
+def asg_physical_name(cfn_client, stack_name: str) -> str | None:
+    """Return the physical AutoScalingGroup id for one CFN stack, or None.
+
+    None means the stack isn't deployed yet, or it has no
+    AWS::AutoScaling::AutoScalingGroup resource -- callers decide whether
+    that's a skip or an error for their use case.
+    """
+    try:
+        resources = cfn_client.describe_stack_resources(StackName=stack_name)[
+            "StackResources"
+        ]
+    except ClientError:
+        return None
+    for resource in resources:
+        if resource["ResourceType"] == "AWS::AutoScaling::AutoScalingGroup":
+            return resource["PhysicalResourceId"]
+    return None

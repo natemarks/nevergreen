@@ -1,0 +1,230 @@
+{
+  "Resources": {
+    "NevergreenDevSimpleAsgComfyuiSecurityGroupAE3FC899": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "NevergreenDevSimpleAsgComfyuiStack/NevergreenDevSimpleAsgComfyuiSecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "73.126.140.136/32",
+            "Description": "Allow 73.126.140.136/32 on tcp/8188",
+            "FromPort": 8188,
+            "IpProtocol": "tcp",
+            "ToPort": 8188
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "NevergreenDevAppVpcStack:ExportsOutputRefNevergreenDevAppVpcAppVpc38674E8714D644CD"
+        }
+      }
+    },
+    "NevergreenDevSimpleAsgComfyuiASGRole07FC6FD3": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "NevergreenDevSimpleAsgComfyuiLaunchTplProfileE78A386B": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "NevergreenDevSimpleAsgComfyuiASGRole07FC6FD3"
+          }
+        ]
+      }
+    },
+    "NevergreenDevSimpleAsgComfyuiLaunchTplCA5328CA": {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Properties": {
+        "LaunchTemplateData": {
+          "BlockDeviceMappings": [
+            {
+              "DeviceName": "/dev/sda1",
+              "Ebs": {
+                "VolumeSize": 500
+              }
+            }
+          ],
+          "IamInstanceProfile": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "NevergreenDevSimpleAsgComfyuiLaunchTplProfileE78A386B",
+                "Arn"
+              ]
+            }
+          },
+          "ImageId": {
+            "Fn::FindInMap": [
+              "NevergreenDevSimpleAsgComfyuiLaunchTplAmiMap6C46E0FB",
+              {
+                "Ref": "AWS::Region"
+              },
+              "ami"
+            ]
+          },
+          "InstanceType": "g4dn.xlarge",
+          "MetadataOptions": {
+            "HttpPutResponseHopLimit": 1,
+            "HttpTokens": "required"
+          },
+          "NetworkInterfaces": [
+            {
+              "AssociatePublicIpAddress": true,
+              "DeviceIndex": 0,
+              "Groups": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenDevSimpleAsgComfyuiSecurityGroupAE3FC899",
+                    "GroupId"
+                  ]
+                }
+              ]
+            }
+          ],
+          "TagSpecifications": [
+            {
+              "ResourceType": "instance",
+              "Tags": [
+                {
+                  "Key": "Name",
+                  "Value": "NevergreenDevSimpleAsgComfyuiStack/NevergreenDevSimpleAsgComfyuiLaunchTpl"
+                }
+              ]
+            },
+            {
+              "ResourceType": "volume",
+              "Tags": [
+                {
+                  "Key": "Name",
+                  "Value": "NevergreenDevSimpleAsgComfyuiStack/NevergreenDevSimpleAsgComfyuiLaunchTpl"
+                }
+              ]
+            }
+          ],
+          "UserData": {
+            "Fn::Base64": "#!/usr/bin/env bash\n# Phase 0 bootstrap for the ComfyUI GPU worker (research/aws-infrastructure.md).\n#\n# Best-effort prototype install: clones ComfyUI + the custom nodes the\n# research calls out, then runs ComfyUI as a systemd service listening on\n# 0.0.0.0:8188. Relies on the Deep Learning AMI's pre-installed NVIDIA\n# drivers/CUDA/PyTorch; if a custom node's own requirements.txt pulls in a\n# CPU-only torch build, reinstall the matching CUDA torch wheel by hand over\n# SSM before relying on GPU generation.\n#\n# Models are NOT downloaded here (Phase 0 decision: manual download over an\n# SSM session) \u2014 see the Phase 0 ticket's UAT steps.\nset -euxo pipefail\n\nCOMFYUI_HOME=/opt/comfyui\nCOMFYUI_USER=ubuntu\n\n# --- Grow the root filesystem to fill the configured EBS volume size ---\n# Enlarging the EBS volume at launch only grows the block device; the\n# partition and filesystem inside it must be extended separately -- this is\n# universal EC2/EBS behavior, not something CloudFormation/CDK can do for\n# you. Confirmed via `lsblk` on this AMI: root (nvme0n1p1) is a plain\n# partition, not LVM (the AMI's LVM volume group is only the separate\n# ephemeral instance-store disk at /opt/dlami/nvme). Root device name must\n# match the AMI's actual RootDeviceName (`aws ec2 describe-images --query\n# Images[0].RootDeviceName`) or the configured EBS volume attaches as an\n# extra, unused disk instead of becoming the root volume -- this is why\n# root_block_device_name is \"/dev/sda1\", not the more common \"/dev/xvda\".\n# See https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html\nROOT_SOURCE=\"$(findmnt -n -o SOURCE /)\"\nROOT_DISK=\"/dev/$(lsblk -no PKNAME \"${ROOT_SOURCE}\")\"\nROOT_PART_NUM=\"${ROOT_SOURCE##*[!0-9]}\"\ngrowpart \"${ROOT_DISK}\" \"${ROOT_PART_NUM}\" || true # exit 1 = already full size\nFS_TYPE=\"$(findmnt -n -o FSTYPE /)\"\nif [[ \"${FS_TYPE}\" == \"xfs\" ]]; then\n  xfs_growfs -d /\nelse\n  resize2fs \"${ROOT_SOURCE}\"\nfi\ndf -h /\n\napt-get update -y\napt-get install -y git python3-venv\n\nif [[ ! -d \"${COMFYUI_HOME}\" ]]; then\n  git clone https://github.com/comfyanonymous/ComfyUI \"${COMFYUI_HOME}\"\nfi\n\ncd \"${COMFYUI_HOME}\"\npython3 -m venv venv\n# shellcheck source=/dev/null\nsource venv/bin/activate\npip install --upgrade pip\npip install -r requirements.txt\n\nmkdir -p custom_nodes\ncd custom_nodes\ndeclare -a CUSTOM_NODES=(\n  \"https://github.com/ltdrdata/ComfyUI-Impact-Pack\"\n  \"https://github.com/cubiq/ComfyUI_IPAdapter_plus\"\n  \"https://github.com/Fannovel16/comfyui_controlnet_aux\"\n  \"https://github.com/glibsonoran/Plush-for-ComfyUI\"\n  \"https://github.com/BadCafeCode/masquerade-nodes-comfyui\"\n)\nfor repo in \"${CUSTOM_NODES[@]}\"; do\n  dir=\"$(basename \"${repo}\")\"\n  if [[ ! -d \"${dir}\" ]]; then\n    git clone \"${repo}\"\n  fi\n  if [[ -f \"${dir}/requirements.txt\" ]]; then\n    \"${COMFYUI_HOME}/venv/bin/pip\" install -r \"${dir}/requirements.txt\" || true\n  fi\ndone\n\nchown -R \"${COMFYUI_USER}:${COMFYUI_USER}\" \"${COMFYUI_HOME}\"\n\ncat >/etc/systemd/system/comfyui.service <<UNIT\n[Unit]\nDescription=ComfyUI\nAfter=network.target\n\n[Service]\nType=simple\nUser=${COMFYUI_USER}\nWorkingDirectory=${COMFYUI_HOME}\nExecStart=${COMFYUI_HOME}/venv/bin/python main.py --listen 0.0.0.0 --port 8188 --enable-cors-header\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target\nUNIT\n\nsystemctl daemon-reload\nsystemctl enable comfyui.service\nsystemctl restart comfyui.service\n"
+          }
+        },
+        "TagSpecifications": [
+          {
+            "ResourceType": "launch-template",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "NevergreenDevSimpleAsgComfyuiStack/NevergreenDevSimpleAsgComfyuiLaunchTpl"
+              }
+            ]
+          }
+        ]
+      },
+      "DependsOn": [
+        "NevergreenDevSimpleAsgComfyuiASGRole07FC6FD3"
+      ]
+    },
+    "NevergreenDevSimpleAsgComfyuiASG4DB141A5": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "LaunchTemplate": {
+          "LaunchTemplateId": {
+            "Ref": "NevergreenDevSimpleAsgComfyuiLaunchTplCA5328CA"
+          },
+          "Version": {
+            "Fn::GetAtt": [
+              "NevergreenDevSimpleAsgComfyuiLaunchTplCA5328CA",
+              "LatestVersionNumber"
+            ]
+          }
+        },
+        "MaxSize": "1",
+        "MinSize": "1",
+        "VPCZoneIdentifier": [
+          {
+            "Fn::ImportValue": "NevergreenDevAppVpcStack:ExportsOutputRefNevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1SubnetD9969013EAF55209"
+          },
+          {
+            "Fn::ImportValue": "NevergreenDevAppVpcStack:ExportsOutputRefNevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2SubnetE550CBBDAE631412"
+          }
+        ]
+      },
+      "UpdatePolicy": {
+        "AutoScalingScheduledAction": {
+          "IgnoreUnmodifiedGroupSizeProperties": true
+        }
+      }
+    }
+  },
+  "Mappings": {
+    "NevergreenDevSimpleAsgComfyuiLaunchTplAmiMap6C46E0FB": {
+      "us-east-1": {
+        "ami": "ami-012ba162b9cd2729c"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

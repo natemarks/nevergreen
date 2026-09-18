@@ -9,7 +9,6 @@ CDK := node_modules/.bin/cdk
 CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 app_env := dev
 PYTHON_VERSION := 3.12.13
-CDK_VERSION := 2.70.0
 SHELL_PREAMBLE = source scripts/enable_pyenv.sh; pyenv local $(PYTHON_VERSION); python --version; source .venv/bin/activate;
 
 help: ## Show this help.
@@ -26,7 +25,7 @@ clean-venv: ## re-create virtual env
        pip install -r requirements.txt; \
     )
 
-.venv: ## create venv if it doesn't exist
+.venv: requirements.txt ## create/update venv if missing or requirements.txt changed
 	( \
        source scripts/enable_pyenv.sh; \
        pyenv local $(PYTHON_VERSION); \
@@ -35,10 +34,11 @@ clean-venv: ## re-create virtual env
        pip install --upgrade pip setuptools; \
        pip install -r requirements.txt; \
     )
+	touch .venv
 
 update_cdk_libs: .venv ## install the latest version of aws cdk node and python packages
 	bash scripts/update_cdk_libs.sh
-	$(MAKE) clean-venv
+	$(MAKE) .venv
 
 black: .venv ## use black to format python files
 	( \
@@ -140,9 +140,9 @@ undo_edits: ## reset changes to HEAD
 	git reset HEAD --hard
 	git clean -f
 
-node_modules: ## create node_modules/ if it doesn't exist
-	bash scripts/update_cdk_libs.sh $(CDK_VERSION)
-	$(MAKE) clean-venv
+node_modules: package.json ## create/update node_modules/ if missing or package.json changed
+	npm install --prefix ./
+	touch node_modules
 
 cdk-ls: node_modules .venv ## run cdk ls
 	$(eval CDK := $(shell find . -type f -name cdk))
@@ -199,4 +199,22 @@ discover: .venv ## update environment config data with discovered information
 	   PYTHONPATH="." python3 -m config.discover $(app_env); \
 	)
 
-.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits node_modules cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover
+asg_down: .venv ## scale every simple_asg Auto Scaling Group in app_env to 0
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.asg_scale down $(app_env); \
+	)
+
+asg_up: .venv ## scale every simple_asg Auto Scaling Group in app_env back to its configured min/max
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.asg_scale up $(app_env); \
+	)
+
+comfyui_prompt: .venv ## discover the comfyui worker's URL, wait for it, and POST workflow=<path.json>
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.comfyui_client $(app_env) $(workflow); \
+	)
+
+.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover asg_down asg_up comfyui_prompt

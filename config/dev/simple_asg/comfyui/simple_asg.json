@@ -1,0 +1,13 @@
+{
+  "ami_id": "ami-012ba162b9cd2729c",
+  "instance_type": "g4dn.xlarge",
+  "max_instances": 1,
+  "min_instances": 1,
+  "root_block_device_name": "/dev/sda1",
+  "root_block_device_size": 500,
+  "userdata_filename": "userdata_gpu_worker.sh",
+  "ingress_cidr": "73.126.140.136/32",
+  "ingress_ports": [
+    8188
+  ]
+}

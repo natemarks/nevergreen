@@ -39,7 +39,7 @@ Example registry entry:
 
 ```python
 STACKS_BY_ENV = {
-    "dev": [app_vpc, simple_asg("aaa"), secure_s3("patient-records")],
+    "dev": [app_vpc, secure_s3("patient-records")],
 }
 ```
 

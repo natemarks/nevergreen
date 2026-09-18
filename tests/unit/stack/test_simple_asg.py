@@ -13,7 +13,8 @@ Customize:
 
 # pylint: disable=duplicate-code
 import pytest
-from aws_cdk import App, assertions, Environment
+from aws_cdk import App, Stack, assertions, Environment
+from aws_cdk import aws_iam as iam
 from config.settings import get_actual_path
 from stack.app_vpc import AppVpcInput, AppVpcStack
 from stack.simple_asg import SimpleAsgInput, SimpleAsgStack
@@ -24,9 +25,7 @@ from tests.helper import case_data_path, write_case_json, read_case_json
 @pytest.mark.parametrize(
     "environment,stack_id",
     [
-        pytest.param("dev", "aaa", id="dev"),
-        pytest.param("staging", "bbb", id="staging"),
-        pytest.param("production", "ccc", id="production"),
+        pytest.param("dev", "comfyui", id="dev_gpu_worker"),
     ],
 )
 def test_simple_asg_stack_actual(
@@ -64,6 +63,7 @@ def test_simple_asg_stack_actual(
     "stack_id",
     [
         pytest.param("aaa", id="custom_aaa"),
+        pytest.param("comfyui", id="custom_gpu_worker"),
     ],
 )
 def test_simple_asg_stack_custom(request, stack_id, update_golden):
@@ -91,3 +91,48 @@ def test_simple_asg_stack_custom(request, stack_id, update_golden):
         write_case_json(data_path, "expected.json", template.to_json())
 
     template.template_matches(read_case_json(data_path, "expected.json"))
+
+
+@pytest.mark.unit
+def test_simple_asg_stack_attaches_extra_managed_policies():
+    """Passing managed_policies attaches them to the ASG instance role."""
+    app = App()
+    input_path = get_actual_path("dev")
+    av_input = AppVpcInput.from_config_directory(input_path)
+    av_stk = AppVpcStack(scope=app, cdk_env=Environment(), s_input=av_input)
+    s_input = SimpleAsgInput.from_config_directory(input_path, "comfyui")
+
+    policy_stack = Stack(app, "PolicyStack")
+    extra_policy = iam.ManagedPolicy(
+        policy_stack,
+        "ExtraPolicy",
+        managed_policy_name="extra-policy",
+        statements=[
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                actions=["s3:GetObject"],
+                resources=["*"],
+            )
+        ],
+    )
+
+    stk = SimpleAsgStack(
+        scope=app,
+        cdk_env=Environment(),
+        s_input=s_input,
+        app_vpc_stack=av_stk,
+        managed_policies=[extra_policy],
+    )
+    template = assertions.Template.from_stack(stk)
+    template.has_resource_properties(
+        "AWS::IAM::Role",
+        {
+            "ManagedPolicyArns": assertions.Match.array_with(
+                [
+                    assertions.Match.object_like(
+                        {"Fn::ImportValue": assertions.Match.any_value()}
+                    )
+                ]
+            )
+        },
+    )

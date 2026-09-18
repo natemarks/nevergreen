@@ -1,0 +1,360 @@
+{
+  "Resources": {
+    "NevergreenDevSimpleS3ModelsBucket7FED5FE8": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "BucketName": "nevergreen-dev-models",
+        "Tags": [
+          {
+            "Key": "aws-cdk:auto-delete-objects",
+            "Value": "true"
+          },
+          {
+            "Key": "simple_s3_id",
+            "Value": "models"
+          }
+        ],
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "NevergreenDevSimpleS3ModelsBucketPolicyBD284788": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "NevergreenDevSimpleS3ModelsBucket7FED5FE8"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutBucketPolicy",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                    "Arn"
+                  ]
+                }
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "DenyNonHttps"
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenDevSimpleS3ModelsBucketAutoDeleteObjectsCustomResourceED70B914": {
+      "Type": "Custom::S3AutoDeleteObjects",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+            "Arn"
+          ]
+        },
+        "BucketName": {
+          "Ref": "NevergreenDevSimpleS3ModelsBucket7FED5FE8"
+        }
+      },
+      "DependsOn": [
+        "NevergreenDevSimpleS3ModelsBucketPolicyBD284788"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          }
+        ]
+      }
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+        },
+        "Timeout": 900,
+        "MemorySize": 128,
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs24.x",
+        "Description": {
+          "Fn::Join": [
+            "",
+            [
+              "Lambda function for auto-deleting objects in ",
+              {
+                "Ref": "NevergreenDevSimpleS3ModelsBucket7FED5FE8"
+              },
+              " S3 bucket."
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+      ]
+    },
+    "NevergreenDevSimpleS3ModelsReadPolicy0482B2C5": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "",
+        "ManagedPolicyName": "NevergreenDevSimpleS3Models-read",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenDevSimpleS3ModelsReadWritePolicy2696D5E2": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "",
+        "ManagedPolicyName": "NevergreenDevSimpleS3Models-read-write",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject",
+                "s3:DeleteObject"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenDevSimpleS3ModelsBucketArnParamF218010D": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Primary bucket ARN for nevergreen-dev-models SimpleS3 bucket",
+        "Name": "/nevergreen/dev/simple_s3/models/bucket-arn",
+        "Tags": {
+          "simple_s3_id": "models"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+            "Arn"
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "BucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+          "Arn"
+        ]
+      }
+    },
+    "ReadPolicyArn": {
+      "Value": {
+        "Ref": "NevergreenDevSimpleS3ModelsReadPolicy0482B2C5"
+      }
+    },
+    "ReadWritePolicyArn": {
+      "Value": {
+        "Ref": "NevergreenDevSimpleS3ModelsReadWritePolicy2696D5E2"
+      }
+    },
+    "BucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenDevSimpleS3ModelsBucketArnParamF218010D"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

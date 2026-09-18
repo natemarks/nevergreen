@@ -1,0 +1,240 @@
+{
+  "Resources": {
+    "NevergreenDevSimpleS3ModelsBucket7FED5FE8": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "BucketName": "nevergreen-dev-models",
+        "Tags": [
+          {
+            "Key": "simple_s3_id",
+            "Value": "models"
+          }
+        ],
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "NevergreenDevSimpleS3ModelsBucketPolicyBD284788": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "NevergreenDevSimpleS3ModelsBucket7FED5FE8"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "DenyNonHttps"
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenDevSimpleS3ModelsReadPolicy0482B2C5": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "",
+        "ManagedPolicyName": "NevergreenDevSimpleS3Models-read",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenDevSimpleS3ModelsReadWritePolicy2696D5E2": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "",
+        "ManagedPolicyName": "NevergreenDevSimpleS3Models-read-write",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject",
+                "s3:DeleteObject"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "NevergreenDevSimpleS3ModelsBucketArnParamF218010D": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Primary bucket ARN for nevergreen-dev-models SimpleS3 bucket",
+        "Name": "/nevergreen/dev/simple_s3/models/bucket-arn",
+        "Tags": {
+          "simple_s3_id": "models"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+            "Arn"
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "BucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NevergreenDevSimpleS3ModelsBucket7FED5FE8",
+          "Arn"
+        ]
+      }
+    },
+    "ReadPolicyArn": {
+      "Value": {
+        "Ref": "NevergreenDevSimpleS3ModelsReadPolicy0482B2C5"
+      }
+    },
+    "ReadWritePolicyArn": {
+      "Value": {
+        "Ref": "NevergreenDevSimpleS3ModelsReadWritePolicy2696D5E2"
+      }
+    },
+    "BucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenDevSimpleS3ModelsBucketArnParamF218010D"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

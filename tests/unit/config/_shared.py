@@ -1,0 +1,58 @@
+"""Shared fixtures for config.asg_scale / config.comfyui_client unit tests.
+
+Purpose:
+- Both modules resolve a simple_asg-based instance's real AutoScalingGroup
+  via the same config-directory + CloudFormation lookup shape, so their
+  tests need the same fake environment.json / simple_asg.json / ASG
+  resource payloads.
+"""
+
+import json
+from pathlib import Path
+
+ENVIRONMENT_JSON = {
+    "admin_team": "Operations",
+    "aws_account_name": "Test",
+    "aws_account_number": "709310380790",
+    "default_fqdn": "test.example.com",
+    "default_region": "us-east-1",
+    "app_env": "dev",
+    "is_release": False,
+}
+
+
+def write_environment_json(data_path: Path) -> None:
+    """Write a minimal environment.json under data_path."""
+    (data_path / "environment.json").write_text(json.dumps(ENVIRONMENT_JSON))
+
+
+def write_simple_asg_config(
+    data_path: Path,
+    stack_id: str,
+    min_instances: int = 1,
+    max_instances: int = 1,
+) -> None:
+    """Write a minimal simple_asg.json for one stack_id under data_path."""
+    setting_dir = data_path / "simple_asg" / stack_id
+    setting_dir.mkdir(parents=True)
+    (setting_dir / "simple_asg.json").write_text(
+        json.dumps(
+            {
+                "ami_id": "ami-00000000000000000",
+                "min_instances": min_instances,
+                "max_instances": max_instances,
+            }
+        )
+    )
+
+
+def asg_resources(physical_id: str) -> dict:
+    """Return a describe_stack_resources payload with one ASG resource."""
+    return {
+        "StackResources": [
+            {
+                "ResourceType": "AWS::AutoScaling::AutoScalingGroup",
+                "PhysicalResourceId": physical_id,
+            }
+        ]
+    }

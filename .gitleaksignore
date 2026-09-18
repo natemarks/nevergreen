@@ -7,3 +7,6 @@
 test_data/unit/stack/test_secure_s3/test_secure_s3_stack_actual/dev/expected.json:generic-api-key:272
 test_data/unit/stack/test_secure_s3/test_secure_s3_stack_custom/lifecycle_expiration/expected.json:generic-api-key:284
 test_data/unit/stack/test_secure_s3/test_secure_s3_stack_custom/with_logging/expected.json:generic-api-key:175
+test_data/unit/stack/test_simple_s3/test_simple_s3_stack_actual/dev_images/expected.json:generic-api-key:168
+test_data/unit/stack/test_simple_s3/test_simple_s3_stack_actual/dev_models/expected.json:generic-api-key:168
+test_data/unit/stack/test_simple_s3/test_simple_s3_stack_custom/lifecycle_expiration/expected.json:generic-api-key:180
