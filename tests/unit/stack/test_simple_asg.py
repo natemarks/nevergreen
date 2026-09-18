@@ -25,9 +25,6 @@ from tests.helper import case_data_path, write_case_json, read_case_json
 @pytest.mark.parametrize(
     "environment,stack_id",
     [
-        pytest.param("dev", "aaa", id="dev"),
-        pytest.param("staging", "bbb", id="staging"),
-        pytest.param("production", "ccc", id="production"),
         pytest.param("dev", "comfyui", id="dev_gpu_worker"),
     ],
 )
@@ -103,7 +100,7 @@ def test_simple_asg_stack_attaches_extra_managed_policies():
     input_path = get_actual_path("dev")
     av_input = AppVpcInput.from_config_directory(input_path)
     av_stk = AppVpcStack(scope=app, cdk_env=Environment(), s_input=av_input)
-    s_input = SimpleAsgInput.from_config_directory(input_path, "aaa")
+    s_input = SimpleAsgInput.from_config_directory(input_path, "comfyui")
 
     policy_stack = Stack(app, "PolicyStack")
     extra_policy = iam.ManagedPolicy(

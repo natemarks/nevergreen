@@ -107,14 +107,13 @@ def simple_s3(stack_id: str) -> StackFactory:
 STACKS_BY_ENV: dict[str, list[StackFactory]] = {
     "dev": [
         app_vpc,
-        simple_asg("aaa"),
         secure_s3("phi"),
         simple_s3("models"),
         simple_s3("images"),
         gpu_worker("comfyui"),
     ],
-    "staging": [app_vpc, simple_asg("bbb"), secure_s3("phi")],
-    "production": [app_vpc, simple_asg("ccc"), secure_s3("phi")],
+    "staging": [app_vpc, secure_s3("phi")],
+    "production": [app_vpc, secure_s3("phi")],
 }
 
 for _env in SUPPORTED_APP_ENVS:
