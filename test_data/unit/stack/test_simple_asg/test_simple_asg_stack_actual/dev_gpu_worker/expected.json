@@ -102,7 +102,7 @@
           },
           "NetworkInterfaces": [
             {
-              "AssociatePublicIpAddress": false,
+              "AssociatePublicIpAddress": true,
               "DeviceIndex": 0,
               "Groups": [
                 {
@@ -172,10 +172,10 @@
         "MinSize": "1",
         "VPCZoneIdentifier": [
           {
-            "Fn::ImportValue": "NevergreenDevAppVpcStack:ExportsOutputRefNevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet1Subnet1E63E6B6A9F30B90"
+            "Fn::ImportValue": "NevergreenDevAppVpcStack:ExportsOutputRefNevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet1SubnetD9969013EAF55209"
           },
           {
-            "Fn::ImportValue": "NevergreenDevAppVpcStack:ExportsOutputRefNevergreenDevAppVpcAppVpcnevergreendevappvpcprivateSubnet2Subnet4C3E229B2878E0D9"
+            "Fn::ImportValue": "NevergreenDevAppVpcStack:ExportsOutputRefNevergreenDevAppVpcAppVpcnevergreendevappvpcpublicSubnet2SubnetE550CBBDAE631412"
           }
         ]
       },
