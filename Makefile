@@ -200,4 +200,16 @@ discover: .venv ## update environment config data with discovered information
 	   PYTHONPATH="." python3 -m config.discover $(app_env); \
 	)
 
-.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover
+asg_down: .venv ## scale every simple_asg Auto Scaling Group in app_env to 0
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.asg_scale down $(app_env); \
+	)
+
+asg_up: .venv ## scale every simple_asg Auto Scaling Group in app_env back to its configured min/max
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.asg_scale up $(app_env); \
+	)
+
+.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover asg_down asg_up
