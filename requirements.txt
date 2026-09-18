@@ -1,7 +1,7 @@
 aws-cdk-lib==2.267.0
 constructs==10.8.1
 botocore==1.43.92
-boto3==1.43.80
+boto3==1.43.92
 pytest==9.1.1
 black==26.5.1
 pylint==4.0.8
