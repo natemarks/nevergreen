@@ -9,7 +9,7 @@ CDK := node_modules/.bin/cdk
 CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 app_env := dev
 PYTHON_VERSION := 3.12.13
-CDK_VERSION := 2.70.0
+CDK_VERSION := 2.1142.0
 SHELL_PREAMBLE = source scripts/enable_pyenv.sh; pyenv local $(PYTHON_VERSION); python --version; source .venv/bin/activate;
 
 help: ## Show this help.
