@@ -33,7 +33,13 @@
           ],
           "Version": "2012-10-17"
         },
-        "RotationPeriodInDays": 180
+        "RotationPeriodInDays": 180,
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ]
       },
       "UpdateReplacePolicy": "Retain",
       "DeletionPolicy": "Retain"
@@ -57,6 +63,12 @@
           ]
         },
         "BucketName": "nevergreen-dev-phi",
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ],
         "VersioningConfiguration": {
           "Status": "Enabled"
         }
@@ -290,10 +302,30 @@
       "Properties": {
         "Description": "CMK ARN for nevergreen-dev-phi SecureS3 bucket",
         "Name": "/nevergreen/dev/secure_s3/phi/cmk-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
         "Type": "String",
         "Value": {
           "Fn::GetAtt": [
             "NevergreenDevSecureS3PhiCmk42981EC6",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "NevergreenDevSecureS3PhiBucketArnParam4AC73FE6": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Primary bucket ARN for nevergreen-dev-phi SecureS3 bucket",
+        "Name": "/nevergreen/dev/secure_s3/phi/bucket-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenDevSecureS3PhiBucketA71E5EE7",
             "Arn"
           ]
         }
@@ -330,6 +362,11 @@
     "CmkArnSsmPath": {
       "Value": {
         "Ref": "NevergreenDevSecureS3PhiCmkArnParam1D7FB28C"
+      }
+    },
+    "BucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenDevSecureS3PhiBucketArnParam4AC73FE6"
       }
     }
   },

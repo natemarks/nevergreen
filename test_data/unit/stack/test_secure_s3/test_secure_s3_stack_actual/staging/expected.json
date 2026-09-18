@@ -33,7 +33,13 @@
           ],
           "Version": "2012-10-17"
         },
-        "RotationPeriodInDays": 180
+        "RotationPeriodInDays": 180,
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ]
       },
       "UpdateReplacePolicy": "Retain",
       "DeletionPolicy": "Retain"
@@ -59,6 +65,12 @@
             }
           ]
         },
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ],
         "VersioningConfiguration": {
           "Status": "Enabled"
         }
@@ -90,6 +102,12 @@
             "Ref": "NevergreenStagingSecureS3PhiLoggingBucket8AD33FD1"
           }
         },
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ],
         "VersioningConfiguration": {
           "Status": "Enabled"
         }
@@ -323,10 +341,47 @@
       "Properties": {
         "Description": "CMK ARN for nevergreen-staging-phi SecureS3 bucket",
         "Name": "/nevergreen/staging/secure_s3/phi/cmk-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
         "Type": "String",
         "Value": {
           "Fn::GetAtt": [
             "NevergreenStagingSecureS3PhiCmk1EB25459",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "NevergreenStagingSecureS3PhiBucketArnParam2CFF7308": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Primary bucket ARN for nevergreen-staging-phi SecureS3 bucket",
+        "Name": "/nevergreen/staging/secure_s3/phi/bucket-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenStagingSecureS3PhiBucket8A19100A",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "NevergreenStagingSecureS3PhiLoggingBucketArnParam0FEEE90E": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Access-logging bucket ARN for nevergreen-staging-phi SecureS3 bucket",
+        "Name": "/nevergreen/staging/secure_s3/phi/logging-bucket-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenStagingSecureS3PhiLoggingBucket8AD33FD1",
             "Arn"
           ]
         }
@@ -365,12 +420,22 @@
         "Ref": "NevergreenStagingSecureS3PhiCmkArnParam276D9E42"
       }
     },
+    "BucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenStagingSecureS3PhiBucketArnParam2CFF7308"
+      }
+    },
     "LoggingBucketArn": {
       "Value": {
         "Fn::GetAtt": [
           "NevergreenStagingSecureS3PhiLoggingBucket8AD33FD1",
           "Arn"
         ]
+      }
+    },
+    "LoggingBucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenStagingSecureS3PhiLoggingBucketArnParam0FEEE90E"
       }
     }
   },

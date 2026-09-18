@@ -13,8 +13,12 @@ Add one line to `STACKS_BY_ENV` and a JSON config file to deploy a fully secured
 - **Bucket policies** — HTTPS-only, DSSE encryption enforcement, VPC endpoint restriction
 - **Read policy** — IAM managed policy for read-only application access
 - **Read-write policy** — IAM managed policy for read/write application access
-- **SSM parameter** — CMK ARN stored at `/{app_name}/{env}/secure_s3/{stack_id}/cmk-arn`
-- **CloudFormation outputs** — ARNs for all key resources
+- **SSM parameters** — resource ARNs stored under `/{app_name}/{env}/secure_s3/{stack_id}/`:
+  - `cmk-arn` — customer-managed KMS key ARN (always)
+  - `bucket-arn` — primary bucket ARN (always)
+  - `logging-bucket-arn` — companion logging bucket ARN (only when `enable_access_logging_bucket=true`)
+- **Stack tag** — `secure_s3_id={stack_id}` applied to all resources in this stack instance
+- **CloudFormation outputs** — ARNs for all key resources and their SSM paths
 
 Optional (controlled by config):
 - **Companion logging bucket** — receives S3 server access logs
@@ -124,14 +128,86 @@ confirming the bucket policy restrictions are enforced.
 
 ## Stack outputs reference
 
-| Output key | Value |
-|---|---|
-| `BucketArn` | Primary bucket ARN |
-| `CmkArn` | Customer-managed KMS key ARN |
-| `ReadPolicyArn` | Read-only managed policy ARN |
-| `ReadWritePolicyArn` | Read-write managed policy ARN |
-| `CmkArnSsmPath` | SSM parameter path for CMK ARN |
-| `LoggingBucketArn` | Companion logging bucket ARN (only when `enable_access_logging_bucket=true`) |
+| Output key | Value | Always present |
+|---|---|---|
+| `BucketArn` | Primary bucket ARN | Yes |
+| `CmkArn` | Customer-managed KMS key ARN | Yes |
+| `ReadPolicyArn` | Read-only managed policy ARN | Yes |
+| `ReadWritePolicyArn` | Read-write managed policy ARN | Yes |
+| `CmkArnSsmPath` | SSM parameter path for CMK ARN | Yes |
+| `BucketArnSsmPath` | SSM parameter path for primary bucket ARN | Yes |
+| `LoggingBucketArn` | Companion logging bucket ARN | Only when `enable_access_logging_bucket=true` |
+| `LoggingBucketArnSsmPath` | SSM parameter path for logging bucket ARN | Only when `enable_access_logging_bucket=true` |
+
+---
+
+## Fleet management
+
+Each SecureS3Stack instance publishes its resource ARNs to SSM Parameter Store under a
+consistent path prefix, enabling fleet-wide discovery without CloudFormation stack enumeration.
+
+### SSM path structure
+
+```
+/{app_name}/{env}/secure_s3/{stack_id}/cmk-arn
+/{app_name}/{env}/secure_s3/{stack_id}/bucket-arn
+/{app_name}/{env}/secure_s3/{stack_id}/logging-bucket-arn   ← only if logging enabled
+```
+
+**List all parameters for a single instance:**
+
+```bash
+aws ssm get-parameters-by-path \
+  --path "/nevergreen/dev/secure_s3/phi" \
+  --query "Parameters[*].{Name:Name,Value:Value}"
+```
+
+**List all SecureS3 parameters in an environment:**
+
+```bash
+aws ssm get-parameters-by-path \
+  --path "/nevergreen/dev/secure_s3" \
+  --recursive \
+  --query "Parameters[*].{Name:Name,Value:Value}"
+```
+
+### Resource Groups tag-based discovery
+
+Every stack instance tags all its resources with `secure_s3_id={stack_id}`. This enables
+tag-based Resource Groups queries to list all AWS resources belonging to one SecureS3 instance.
+
+**One-time Resource Group creation per environment** (operational step, not CDK):
+
+```bash
+aws resource-groups create-group \
+  --name "nevergreen-dev-secure-s3-phi" \
+  --resource-query '{
+    "Type": "TAG_FILTERS_1_0",
+    "Query": "{\"ResourceTypeFilters\":[\"AWS::AllSupported\"],\"TagFilters\":[{\"Key\":\"secure_s3_id\",\"Values\":[\"phi\"]}]}"
+  }'
+```
+
+**Query a Resource Group:**
+
+```bash
+aws resource-groups list-group-resources \
+  --group "nevergreen-dev-secure-s3-phi" \
+  --query "Resources[*].Identifier.ResourceArn"
+```
+
+### AWS Config fleet inventory
+
+AWS Config records S3 bucket and KMS key configuration history. To query across all
+SecureS3 instances in an environment, run an advanced Config query (requires Config
+aggregator for multi-account or multi-region):
+
+```bash
+aws configservice select-resource-config \
+  --expression "SELECT resourceId, configuration WHERE resourceType = 'AWS::S3::Bucket' AND tags.secure_s3_id IS NOT NULL"
+```
+
+See `specs/s3-bucket-fleet-management.md` for the full four-layer fleet management pattern,
+including AWS Config conformance packs and CloudTrail data event recommendations.
 
 ---
 

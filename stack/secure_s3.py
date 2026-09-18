@@ -19,13 +19,13 @@ Customize:
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from aws_cdk import (
     CfnOutput,
     Duration,
     RemovalPolicy,
     Stack,
+    Tags,
     aws_iam as iam,
     aws_kms as kms,
     aws_s3 as s3,
@@ -147,7 +147,7 @@ class SecureS3Stack(Stack):
         )
 
         # --- Optional companion logging bucket (created before primary) ---
-        self.logging_bucket: Optional[s3.Bucket] = None
+        self.logging_bucket: s3.Bucket | None = None
         if cfg.enable_access_logging_bucket:
             self.logging_bucket = s3.Bucket(
                 self,
@@ -296,17 +296,25 @@ class SecureS3Stack(Stack):
             ],
         )
 
-        # --- SSM parameter for CMK ARN ---
+        # --- SSM parameters ---
         app = APP_NAME.lower()
         env = s_input.env_setting.app_env
         sid = s_input.stack_id
-        ssm_path = f"/{app}/{env}/secure_s3/{sid}/cmk-arn"
-        ssm_param = ssm.StringParameter(
+        ssm_cmk = ssm.StringParameter(
             self,
             f"{self._prefix}CmkArnParam",
-            parameter_name=ssm_path,
+            parameter_name=f"/{app}/{env}/secure_s3/{sid}/cmk-arn",
             string_value=self.cmk.key_arn,
             description=f"CMK ARN for {s_input.bucket_name()} SecureS3 bucket",
+        )
+        ssm_bucket = ssm.StringParameter(
+            self,
+            f"{self._prefix}BucketArnParam",
+            parameter_name=f"/{app}/{env}/secure_s3/{sid}/bucket-arn",
+            string_value=self.bucket.bucket_arn,
+            description=(
+                f"Primary bucket ARN for {s_input.bucket_name()} SecureS3 bucket"
+            ),
         )
 
         # --- CloudFormation outputs ---
@@ -322,10 +330,31 @@ class SecureS3Stack(Stack):
             "ReadWritePolicyArn",
             value=self.read_write_policy.managed_policy_arn,
         )
-        CfnOutput(self, "CmkArnSsmPath", value=ssm_param.parameter_name)
+        CfnOutput(self, "CmkArnSsmPath", value=ssm_cmk.parameter_name)
+        CfnOutput(self, "BucketArnSsmPath", value=ssm_bucket.parameter_name)
         if self.logging_bucket is not None:
+            ssm_logging = ssm.StringParameter(
+                self,
+                f"{self._prefix}LoggingBucketArnParam",
+                parameter_name=(
+                    f"/{app}/{env}/secure_s3/{sid}/logging-bucket-arn"
+                ),
+                string_value=self.logging_bucket.bucket_arn,
+                description=(
+                    f"Access-logging bucket ARN for "
+                    f"{s_input.bucket_name()} SecureS3 bucket"
+                ),
+            )
             CfnOutput(
                 self,
                 "LoggingBucketArn",
                 value=self.logging_bucket.bucket_arn,
             )
+            CfnOutput(
+                self,
+                "LoggingBucketArnSsmPath",
+                value=ssm_logging.parameter_name,
+            )
+
+        # --- Stack-instance tag for Resource Groups discovery ---
+        Tags.of(self).add("secure_s3_id", s_input.stack_id)

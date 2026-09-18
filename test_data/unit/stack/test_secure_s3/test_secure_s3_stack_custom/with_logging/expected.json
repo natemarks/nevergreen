@@ -33,7 +33,13 @@
           ],
           "Version": "2012-10-17"
         },
-        "RotationPeriodInDays": 180
+        "RotationPeriodInDays": 180,
+        "Tags": [
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
+          }
+        ]
       },
       "UpdateReplacePolicy": "Delete",
       "DeletionPolicy": "Delete"
@@ -63,6 +69,10 @@
           {
             "Key": "aws-cdk:auto-delete-objects",
             "Value": "true"
+          },
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
           }
         ],
         "VersioningConfiguration": {
@@ -229,6 +239,10 @@
           {
             "Key": "aws-cdk:auto-delete-objects",
             "Value": "true"
+          },
+          {
+            "Key": "secure_s3_id",
+            "Value": "phi"
           }
         ],
         "VersioningConfiguration": {
@@ -522,10 +536,47 @@
       "Properties": {
         "Description": "CMK ARN for nevergreen-dev-phi SecureS3 bucket",
         "Name": "/nevergreen/dev/secure_s3/phi/cmk-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
         "Type": "String",
         "Value": {
           "Fn::GetAtt": [
             "NevergreenDevSecureS3PhiCmk42981EC6",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "NevergreenDevSecureS3PhiBucketArnParam4AC73FE6": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Primary bucket ARN for nevergreen-dev-phi SecureS3 bucket",
+        "Name": "/nevergreen/dev/secure_s3/phi/bucket-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenDevSecureS3PhiBucketA71E5EE7",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "NevergreenDevSecureS3PhiLoggingBucketArnParam9F4FC378": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Access-logging bucket ARN for nevergreen-dev-phi SecureS3 bucket",
+        "Name": "/nevergreen/dev/secure_s3/phi/logging-bucket-arn",
+        "Tags": {
+          "secure_s3_id": "phi"
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "NevergreenDevSecureS3PhiLoggingBucket280678CA",
             "Arn"
           ]
         }
@@ -564,12 +615,22 @@
         "Ref": "NevergreenDevSecureS3PhiCmkArnParam1D7FB28C"
       }
     },
+    "BucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenDevSecureS3PhiBucketArnParam4AC73FE6"
+      }
+    },
     "LoggingBucketArn": {
       "Value": {
         "Fn::GetAtt": [
           "NevergreenDevSecureS3PhiLoggingBucket280678CA",
           "Arn"
         ]
+      }
+    },
+    "LoggingBucketArnSsmPath": {
+      "Value": {
+        "Ref": "NevergreenDevSecureS3PhiLoggingBucketArnParam9F4FC378"
       }
     }
   },
