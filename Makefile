@@ -9,7 +9,6 @@ CDK := node_modules/.bin/cdk
 CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 app_env := dev
 PYTHON_VERSION := 3.12.13
-CDK_VERSION := 2.1142.0
 SHELL_PREAMBLE = source scripts/enable_pyenv.sh; pyenv local $(PYTHON_VERSION); python --version; source .venv/bin/activate;
 
 help: ## Show this help.
@@ -141,8 +140,8 @@ undo_edits: ## reset changes to HEAD
 	git reset HEAD --hard
 	git clean -f
 
-node_modules: ## create node_modules/ if it doesn't exist, at the pinned CDK_VERSION
-	npm install --prefix ./ aws-cdk@$(CDK_VERSION)
+node_modules: package.json ## create/update node_modules/ if missing or package.json changed
+	npm install --prefix ./
 	touch node_modules
 
 cdk-ls: node_modules .venv ## run cdk ls

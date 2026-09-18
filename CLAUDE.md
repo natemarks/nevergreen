@@ -72,7 +72,7 @@ call `pyenv` internally. Instead:
 
 ```bash
 python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-npm install aws-cdk@$(CDK_VERSION)
+npm install   # reads the pinned aws-cdk version from package.json
 ```
 
 ---
