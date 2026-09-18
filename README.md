@@ -44,15 +44,39 @@ make cdk-deploy-all app_env=dev
 ## Test it (UAT)
 
 This is the acceptance test for Phase 0 — an end-to-end proof that a prompt
-turns into an image landing in S3, using this repo's own tooling rather than
-raw AWS CLI calls.
+turns into an image landing in S3. `make comfyui_prompt` is the final test
+automation for this: it discovers the current instance's URL on its own
+(no separate lookup step needed), waits for the port to actually accept
+connections (useful right after a fresh launch — `comfyui.service` takes a
+few minutes to come up), and POSTs a workflow, wrapped correctly under
+`"prompt"`:
 
-1. **Find the instance** (for the SSM step below):
+```bash
+make comfyui_prompt app_env=dev workflow=workflows/txt2img-example.json
+```
+
+Confirm a new PNG appears under `/opt/comfyui/output/` on the instance, then
+push it to S3 and confirm it landed (the instance role already has the
+images bucket's read-write policy attached):
+
+```bash
+aws s3 cp /opt/comfyui/output/<file>.png s3://nevergreen-dev-images/explore/manual-uat/
+aws s3 ls s3://nevergreen-dev-images/explore/manual-uat/
+```
+
+**No new PNG on a repeat run isn't necessarily a failure:** `KSampler`'s
+`seed` is frozen in the exported workflow file. `SaveImage` always writes a
+new file regardless, but the sampling pass itself is a no-op cache hit if
+every input, including that seed, is unchanged from the previous run — edit
+the seed in `workflows/txt2img-example.json` between runs for a genuinely
+new image.
+
+### Troubleshooting if `make comfyui_prompt` fails
+
+1. **Find the instance and confirm ComfyUI is actually running** — SSM in
+   and check the service:
    ```bash
-   bash scripts/list_instances.sh
-   ```
-2. **Confirm ComfyUI is running** — SSM in and check the service:
-   ```bash
+   bash scripts/list_instances.sh   # get the instance id
    aws ssm start-session --target <instance-id>
    sudo systemctl status comfyui.service
    sudo journalctl -u comfyui.service -n 100 --no-pager
@@ -62,39 +86,22 @@ raw AWS CLI calls.
    node's `requirements.txt` pulling a CPU-only `torch` build is the most
    likely failure, fixable with a manual `pip install` of the matching CUDA
    wheel over this same session.
-3. **Download a checkpoint** (still over SSM — Phase 0 has no automated
-   model sync yet):
+2. **A `node_errors` response, or a missing-checkpoint error, usually means
+   the checkpoint isn't downloaded yet** — a fresh instance (new deploy, or
+   a fresh launch after termination) has no models on it; Phase 0 has no
+   automated model sync. Download one manually, still over SSM:
    ```bash
    sudo -u ubuntu /opt/comfyui/venv/bin/pip install huggingface_hub
    sudo -u ubuntu /opt/comfyui/venv/bin/hf download \
      cagliostrolab/animagine-xl-4.0 animagine-xl-4.0-opt.safetensors \
      --local-dir /opt/comfyui/models/checkpoints
    ```
-4. **Build and export a workflow.** In ComfyUI's web UI, build a graph
-   (Load Checkpoint → positive/negative CLIP Text Encode → KSampler → VAE
-   Decode → Save Image), point it at the checkpoint you downloaded, test it
-   with Queue Prompt, then export via **Workflow → Export (API)** (not the
-   plain Export/Save, which produces an incompatible schema). A working
-   example is checked in at `workflows/txt2img-example.json`.
-5. **Generate an image from your laptop**, with the final test automation —
-   `config/comfyui_client.py` discovers the instance's current URL, waits
-   for the port to actually accept connections (useful right after a fresh
-   launch — `comfyui.service` takes a few minutes to come up), and POSTs the
-   workflow, wrapped correctly under `"prompt"`:
-   ```bash
-   make comfyui_prompt app_env=dev workflow=workflows/txt2img-example.json
-   ```
-   Confirm a new PNG appears under `/opt/comfyui/output/` on the instance.
-   Note: `KSampler`'s `seed` is frozen in the exported file — `SaveImage`
-   always writes a new file, but the sampling pass itself is a no-op cache
-   hit if every input, including that seed, is unchanged from the previous
-   run. Edit the seed between runs for a genuinely new image.
-6. **Push the image to S3 and confirm it landed** (the instance role already
-   has the images bucket's read-write policy attached):
-   ```bash
-   aws s3 cp /opt/comfyui/output/<file>.png s3://nevergreen-dev-images/explore/manual-uat/
-   aws s3 ls s3://nevergreen-dev-images/explore/manual-uat/
-   ```
+3. **If you want a different workflow than the checked-in example** (a
+   different checkpoint, prompt, or resolution), build one in ComfyUI's web
+   UI (Load Checkpoint → positive/negative CLIP Text Encode → KSampler →
+   VAE Decode → Save Image), test it with Queue Prompt, then export via
+   **Workflow → Export (API)** (not the plain Export/Save, which produces
+   an incompatible schema) to a new file under `workflows/`.
 
 ## Cost control
 
