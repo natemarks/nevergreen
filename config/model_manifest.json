@@ -1,0 +1,10 @@
+[
+  {
+    "repo_id": "cagliostrolab/animagine-xl-4.0",
+    "filename": "animagine-xl-4.0-opt.safetensors"
+  },
+  {
+    "repo_id": "RunDiffusion/Juggernaut-XI-v11",
+    "filename": "Juggernaut-XI-byRunDiffusion.safetensors"
+  }
+]

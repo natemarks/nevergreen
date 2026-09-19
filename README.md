@@ -103,13 +103,23 @@ new image.
    wheel over this same session.
 2. **A `node_errors` response, or a missing-checkpoint error, usually means
    the checkpoint isn't downloaded yet** — a fresh instance (new deploy, or
-   a fresh launch after termination) has no models on it; Phase 0 has no
-   automated model sync. Download one manually, still over SSM:
+   a fresh launch after termination) has no models on it. `make sync_models`
+   downloads every checkpoint listed in `config/model_manifest.json` from
+   Hugging Face and uploads it to `s3://nevergreen-dev-models/checkpoints/`
+   (runs locally — no GPU instance needed just to sync a model; add a
+   `HF_TOKEN=...` line to a gitignored `.env` if a listed repo is gated):
    ```bash
-   sudo -u ubuntu /opt/comfyui/venv/bin/pip install huggingface_hub
-   sudo -u ubuntu /opt/comfyui/venv/bin/hf download \
-     cagliostrolab/animagine-xl-4.0 animagine-xl-4.0-opt.safetensors \
-     --local-dir /opt/comfyui/models/checkpoints
+   make sync_models app_env=dev
+   ```
+   Getting a checkpoint from that bucket onto the instance is still manual,
+   over SSM (Phase 1's instance-side sync is not yet automated):
+   ```bash
+   aws s3 cp s3://nevergreen-dev-models/checkpoints/animagine-xl-4.0-opt.safetensors \
+     /opt/comfyui/models/checkpoints/ --profile <ssm-target-profile>
+   # or, over the SSM session itself:
+   sudo -u ubuntu aws s3 cp \
+     s3://nevergreen-dev-models/checkpoints/animagine-xl-4.0-opt.safetensors \
+     /opt/comfyui/models/checkpoints/
    ```
 3. **If you want a different workflow than the checked-in example** (a
    different checkpoint, prompt, or resolution), build one in ComfyUI's web
