@@ -79,15 +79,29 @@ A queue message of the shape `{"seed_prompt": str, "batch_size": int,
 S3 prefix `explore/{job_id}/` that all of that job's generated images are
 written under.
 
-### Model checkpoint delivery
-Two independent steps, decided in wayfinder ticket #32: `make sync_models`
-downloads checkpoints listed in `config/model_manifest.json` from Hugging
-Face and uploads them to the models bucket's `checkpoints/` prefix (runs
-locally -- no gpu_worker uptime needed just to sync a model). Every
-gpu_worker instance boot then runs `aws s3 sync` from that prefix into
-`/opt/comfyui/models/checkpoints/` -- the bucket's own listing is the
-source of truth, deliberately with no separate manifest of "currently
-synced content" to drift out of sync with it.
+### Model content delivery
+Two independent steps, decided in wayfinder ticket #32, applied to both
+SD checkpoints and the Ollama LLM: `make sync_models` populates the
+models bucket from each content's own origin (Hugging Face for
+checkpoints, a local `ollama pull` for the Ollama model) -- runs entirely
+locally, no gpu_worker uptime needed just to sync content. Every
+gpu_worker instance boot then runs `aws s3 sync` from the bucket's
+`checkpoints/` and `ollama/` prefixes into
+`/opt/comfyui/models/checkpoints/` and
+`/usr/share/ollama/.ollama/models/` respectively -- the bucket's own
+listing is the source of truth for both, deliberately with no separate
+manifest of "currently synced content" to drift out of sync with it. This
+also means neither Hugging Face nor Ollama's own registry is a live
+dependency at instance boot -- pulling the Ollama model live from its
+registry at every boot was the original design, but live UAT hit a
+boot-time failure pulling it that a manual pull moments later didn't
+reproduce, so the bucket became the single source for both.
+
+### config/model_manifest.json
+The list of model content `make sync_models` syncs: `{"checkpoints":
+[{"repo_id", "filename"}, ...], "ollama_models": [<model name>, ...]}`.
+Adding a new checkpoint or Ollama model is a one-line JSON edit, not a
+code change.
 
 ## SecureS3 context
 

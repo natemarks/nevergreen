@@ -124,18 +124,20 @@ chown -R "${COMFYUI_USER}:${COMFYUI_USER}" "${COMFYUI_HOME}/models"
 
 # Ollama expands each job's seed_prompt into a batch of SD-style prompt
 # variants (research/local-llm-image-generation.md's Advanced Prompt
-# Enhancer pattern). The official installer sets up its own
-# ollama.service; pulling the model here blocks boot completion until the
-# download finishes, which is acceptable for this prototype instance.
+# Enhancer pattern). The model itself comes from the models bucket, not
+# a live `ollama pull` from Ollama's own registry at boot -- live UAT hit
+# exactly the failure mode that dependency invites (10 automated pull
+# attempts failed within ~1s combined right after boot, while a manual
+# pull moments later on the same instance succeeded normally). `make
+# sync_models` is what actually populates s3://<bucket>/ollama/, by
+# pulling locally and syncing (wayfinder ticket #32); this only pulls
+# what's already there, same as the checkpoints sync above.
 curl -fsSL https://ollama.com/install.sh | sh
-systemctl enable --now ollama
-OLLAMA_MODEL="llama3.1"
-for _attempt in $(seq 1 10); do
-  if ollama pull "${OLLAMA_MODEL}"; then
-    break
-  fi
-  sleep 5
-done
+mkdir -p /usr/share/ollama/.ollama/models
+aws s3 sync "s3://${MODELS_BUCKET}/ollama/" /usr/share/ollama/.ollama/models/
+chown -R ollama:ollama /usr/share/ollama/.ollama/models
+systemctl enable ollama
+systemctl restart ollama
 
 cat >/etc/systemd/system/comfyui.service <<UNIT
 [Unit]

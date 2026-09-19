@@ -39,7 +39,9 @@ expanded prompt → S3 upload → delete message. Character A only.
 - `nevergreen-dev-explore-a-queue` (+ its `-dlq`) — the job queue.
 - `explore-worker.service` — polls the queue, writes generated images to
   `s3://nevergreen-dev-images/explore/{job_id}/`.
-- Ollama, installed and running on the same instance, for prompt expansion.
+- Ollama, installed on the same instance for prompt expansion, with its
+  `llama3.1` model synced from the models bucket at boot (not pulled live
+  from Ollama's own registry — see `make sync_models` below).
 
 ## Prerequisites
 
@@ -47,6 +49,9 @@ expanded prompt → S3 upload → delete message. Character A only.
 - `aws` CLI v2 and `session-manager-plugin` (for `aws ssm start-session`).
 - `make .venv && make node_modules` (or the CI bypass in
   [CLAUDE.md](CLAUDE.md#pipeline) if `pyenv` isn't available).
+- [Ollama installed locally](https://ollama.com/download) — only needed to
+  run `make sync_models` (it pulls the LLM on your machine, not any AWS
+  instance, before syncing it to S3).
 
 ## Deploy
 
@@ -101,21 +106,28 @@ new image.
    node's `requirements.txt` pulling a CPU-only `torch` build is the most
    likely failure, fixable with a manual `pip install` of the matching CUDA
    wheel over this same session.
-2. **A `node_errors` response, or a missing-checkpoint error, usually means
-   the checkpoint isn't in the models bucket yet.** `make sync_models`
-   downloads every checkpoint listed in `config/model_manifest.json` from
-   Hugging Face and uploads it to `s3://nevergreen-dev-models/checkpoints/`
-   (runs locally — no GPU instance needed just to sync a model; add a
-   `HF_TOKEN=...` line to a gitignored `.env` if a listed repo is gated):
+2. **A `node_errors` response, a missing-checkpoint error, or an Ollama
+   `404` on `/api/chat` usually means the models bucket is missing
+   content.** `make sync_models` (`config/model_manifest.json` lists both
+   sections) runs entirely locally — no GPU instance needed just to sync
+   model content:
+   - `checkpoints`: downloads each from Hugging Face, uploads to
+     `s3://nevergreen-dev-models/checkpoints/` (add a `HF_TOKEN=...` line
+     to a gitignored `.env` if a listed repo is gated).
+   - `ollama_models`: runs `ollama pull <model>` **on your own machine**
+     (requires Ollama installed locally), then `aws s3 sync`s your local
+     `~/.ollama/models` to `s3://nevergreen-dev-models/ollama/`.
    ```bash
    make sync_models app_env=dev
    ```
    Every instance boot (`userdata_gpu_worker.sh`) runs `aws s3 sync` from
-   that bucket's `checkpoints/` prefix into
-   `/opt/comfyui/models/checkpoints/` — the bucket's own listing is the
-   source of truth, so a fresh or relaunched instance is always
+   both of those bucket prefixes — into `/opt/comfyui/models/checkpoints/`
+   and `/usr/share/ollama/.ollama/models/` respectively — instead of
+   downloading checkpoints from Hugging Face or pulling the LLM from
+   Ollama's own registry live at boot. The bucket's own listing is the
+   source of truth for both, so a fresh or relaunched instance is always
    self-sufficient once the bucket has what it needs; there's no separate
-   manifest to keep in sync. If the checkpoint is already in the bucket but
+   manifest to keep in sync. If content is already in the bucket but
    still missing on a *running* instance, terminate it (the ASG relaunches
    with the current userdata) rather than syncing by hand.
 3. **If you want a different workflow than the checked-in example** (a
