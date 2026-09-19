@@ -180,7 +180,16 @@ def local_ollama_models_dir() -> Path:
     override = os.environ.get("OLLAMA_MODELS")
     if override:
         return Path(override)
-    if SYSTEMD_OLLAMA_MODELS_DIR.is_dir():
+    try:
+        systemd_dir_exists = SYSTEMD_OLLAMA_MODELS_DIR.is_dir()
+    except PermissionError as exc:
+        raise PermissionError(
+            f"{SYSTEMD_OLLAMA_MODELS_DIR} exists but isn't readable by "
+            "this user -- Ollama's Linux installer owns it as the "
+            "`ollama` system user. Run `sudo usermod -aG ollama "
+            "$(whoami)` and start a new shell session, then try again."
+        ) from exc
+    if systemd_dir_exists:
         return SYSTEMD_OLLAMA_MODELS_DIR
     return Path.home() / ".ollama" / "models"
 

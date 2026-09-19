@@ -267,6 +267,23 @@ def test_local_ollama_models_dir_defaults_to_home_when_systemd_path_absent(
 
 
 @pytest.mark.unit
+def test_local_ollama_models_dir_raises_clearly_on_permission_error(
+    monkeypatch,
+):
+    """A systemd-managed dir this user can't even stat() fails clearly,
+    not via a raw PermissionError from deep inside pathlib."""
+    monkeypatch.delenv("OLLAMA_MODELS", raising=False)
+    unreadable = MagicMock()
+    unreadable.is_dir.side_effect = PermissionError("denied")
+    monkeypatch.setattr(
+        "config.model_sync.SYSTEMD_OLLAMA_MODELS_DIR", unreadable
+    )
+
+    with pytest.raises(PermissionError, match="isn't readable"):
+        local_ollama_models_dir()
+
+
+@pytest.mark.unit
 def test_sync_ollama_models_pulls_each_model_then_syncs_to_s3(
     data_path, tmp_path
 ):
