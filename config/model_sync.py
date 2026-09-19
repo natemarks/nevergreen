@@ -161,15 +161,27 @@ def sync_checkpoints(
     ]
 
 
+SYSTEMD_OLLAMA_MODELS_DIR = Path("/usr/share/ollama/.ollama/models")
+
+
 def local_ollama_models_dir() -> Path:
     """Return this machine's local Ollama models directory.
 
-    Respects the OLLAMA_MODELS env var (same variable Ollama itself
-    reads); otherwise Ollama's own default of ~/.ollama/models.
+    Priority: the OLLAMA_MODELS env var (same variable Ollama itself
+    reads); Ollama's own Linux installer
+    (`curl -fsSL https://ollama.com/install.sh | sh`) sets it up as a
+    systemd service running under a dedicated `ollama` system user, whose
+    models live under /usr/share/ollama, not the invoking user's home
+    directory -- confirmed on both a gpu_worker instance and locally, not
+    a guess; finally ~/.ollama/models, Ollama's plain per-user default
+    for a non-systemd install (e.g. macOS, or `ollama serve` run directly
+    as yourself).
     """
     override = os.environ.get("OLLAMA_MODELS")
     if override:
         return Path(override)
+    if SYSTEMD_OLLAMA_MODELS_DIR.is_dir():
+        return SYSTEMD_OLLAMA_MODELS_DIR
     return Path.home() / ".ollama" / "models"
 
 
@@ -195,6 +207,12 @@ def sync_ollama_models(
         runner(["ollama", "pull", model_name], check=True)
 
     local_dir = models_dir or local_ollama_models_dir()
+    if not Path(local_dir).is_dir():
+        raise FileNotFoundError(
+            f"Ollama models directory not found at {local_dir} -- set the "
+            "OLLAMA_MODELS env var if this machine stores them somewhere "
+            "else."
+        )
     destination = f"s3://{bucket}/{OLLAMA_S3_PREFIX}/"
     mlog.info("Syncing %s to %s", local_dir, destination)
     runner(["aws", "s3", "sync", str(local_dir), destination], check=True)

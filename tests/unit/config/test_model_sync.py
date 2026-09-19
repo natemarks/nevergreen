@@ -238,20 +238,46 @@ def test_local_ollama_models_dir_respects_env_override(monkeypatch):
 
 
 @pytest.mark.unit
-def test_local_ollama_models_dir_defaults_to_home(monkeypatch):
-    """With no override, the default is ~/.ollama/models."""
+def test_local_ollama_models_dir_prefers_systemd_path_when_present(
+    monkeypatch, tmp_path
+):
+    """The systemd-managed dir wins over ~/.ollama/models when it exists."""
     monkeypatch.delenv("OLLAMA_MODELS", raising=False)
+    systemd_dir = tmp_path / "usr-share-ollama-models"
+    systemd_dir.mkdir()
+    monkeypatch.setattr(
+        "config.model_sync.SYSTEMD_OLLAMA_MODELS_DIR", systemd_dir
+    )
+
+    assert local_ollama_models_dir() == systemd_dir
+
+
+@pytest.mark.unit
+def test_local_ollama_models_dir_defaults_to_home_when_systemd_path_absent(
+    monkeypatch, tmp_path
+):
+    """Falls back to ~/.ollama/models when the systemd-managed dir isn't there."""
+    monkeypatch.delenv("OLLAMA_MODELS", raising=False)
+    monkeypatch.setattr(
+        "config.model_sync.SYSTEMD_OLLAMA_MODELS_DIR",
+        tmp_path / "does-not-exist",
+    )
+
     assert local_ollama_models_dir() == Path.home() / ".ollama" / "models"
 
 
 @pytest.mark.unit
-def test_sync_ollama_models_pulls_each_model_then_syncs_to_s3(data_path):
+def test_sync_ollama_models_pulls_each_model_then_syncs_to_s3(
+    data_path, tmp_path
+):
     """Each manifest model is pulled locally, then the whole dir is synced."""
     manifest_path = data_path / "model_manifest.json"
     manifest_path.write_text(
         json.dumps({"ollama_models": ["llama3.1", "mistral"]}),
         encoding="utf-8",
     )
+    ollama_dir = tmp_path / "ollama-models"
+    ollama_dir.mkdir()
     runner = MagicMock()
 
     with patch("config.model_sync.check_aws_account"), patch(
@@ -260,7 +286,7 @@ def test_sync_ollama_models_pulls_each_model_then_syncs_to_s3(data_path):
         model_names = sync_ollama_models(
             "dev",
             manifest_path=manifest_path,
-            models_dir="/home/op/.ollama/models",
+            models_dir=ollama_dir,
             runner=runner,
         )
 
@@ -272,7 +298,7 @@ def test_sync_ollama_models_pulls_each_model_then_syncs_to_s3(data_path):
             "aws",
             "s3",
             "sync",
-            "/home/op/.ollama/models",
+            str(ollama_dir),
             "s3://nevergreen-dev-models/ollama/",
         ],
         check=True,
@@ -280,10 +306,36 @@ def test_sync_ollama_models_pulls_each_model_then_syncs_to_s3(data_path):
 
 
 @pytest.mark.unit
-def test_sync_ollama_models_defaults_to_empty_when_section_absent(data_path):
+def test_sync_ollama_models_raises_when_local_dir_missing(data_path):
+    """A missing local Ollama models dir fails clearly, not via a raw
+    aws-cli error -- this is exactly the bug it replaces: a guessed path
+    that doesn't exist on this machine got passed straight to `aws s3
+    sync` before."""
+    manifest_path = data_path / "model_manifest.json"
+    manifest_path.write_text(
+        json.dumps({"ollama_models": ["llama3.1"]}), encoding="utf-8"
+    )
+
+    with patch("config.model_sync.check_aws_account"), patch(
+        "config.model_sync.get_actual_path", return_value=data_path
+    ), pytest.raises(FileNotFoundError, match="Ollama models directory"):
+        sync_ollama_models(
+            "dev",
+            manifest_path=manifest_path,
+            models_dir=Path("/does/not/exist"),
+            runner=MagicMock(),
+        )
+
+
+@pytest.mark.unit
+def test_sync_ollama_models_defaults_to_empty_when_section_absent(
+    data_path, tmp_path
+):
     """A manifest with no "ollama_models" key pulls/syncs nothing."""
     manifest_path = data_path / "model_manifest.json"
     manifest_path.write_text(json.dumps({"checkpoints": []}), encoding="utf-8")
+    ollama_dir = tmp_path / "ollama-models"
+    ollama_dir.mkdir()
     runner = MagicMock()
 
     with patch("config.model_sync.check_aws_account"), patch(
@@ -292,7 +344,7 @@ def test_sync_ollama_models_defaults_to_empty_when_section_absent(data_path):
         model_names = sync_ollama_models(
             "dev",
             manifest_path=manifest_path,
-            models_dir="/home/op/.ollama/models",
+            models_dir=ollama_dir,
             runner=runner,
         )
 
@@ -302,7 +354,7 @@ def test_sync_ollama_models_defaults_to_empty_when_section_absent(data_path):
             "aws",
             "s3",
             "sync",
-            "/home/op/.ollama/models",
+            str(ollama_dir),
             "s3://nevergreen-dev-models/ollama/",
         ],
         check=True,
