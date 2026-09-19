@@ -59,8 +59,8 @@ def test_deploy_stacks_creates_expected_stacks(app_env, expected):
 
 
 @pytest.mark.unit
-def test_gpu_worker_gets_images_and_queue_managed_policies():
-    """The comfyui instance role gets both the images and queue policies."""
+def test_gpu_worker_gets_images_queue_and_models_managed_policies():
+    """The comfyui instance role gets the images, queue, and models policies."""
     with patch("config.inventory.check_aws_account"):
         inv = Inventory("dev")
 
@@ -79,6 +79,9 @@ def test_gpu_worker_gets_images_and_queue_managed_policies():
         {
             "ManagedPolicyArns": assertions.Match.array_with(
                 [
+                    assertions.Match.object_like(
+                        {"Fn::ImportValue": assertions.Match.any_value()}
+                    ),
                     assertions.Match.object_like(
                         {"Fn::ImportValue": assertions.Match.any_value()}
                     ),
@@ -126,4 +129,6 @@ def test_gpu_worker_userdata_embeds_worker_script_and_env_file():
     assert "/etc/default/explore-worker" in rendered
     assert "QUEUE_URL=" in rendered
     assert "OUTPUT_BUCKET=" in rendered
+    assert "MODELS_BUCKET=" in rendered
     assert "AWS_REGION=" in rendered
+    assert "aws s3 sync" in rendered

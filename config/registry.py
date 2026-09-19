@@ -25,6 +25,7 @@ from config.project import SUPPORTED_APP_ENVS
 
 DEFAULT_QUEUE_STACK_ID = "explore-a"
 DEFAULT_IMAGES_STACK_ID = "images"
+DEFAULT_MODELS_STACK_ID = "models"
 
 
 @dataclass
@@ -78,21 +79,28 @@ def gpu_worker(
     stack_id: str,
     images_stack_id: str = DEFAULT_IMAGES_STACK_ID,
     queue_stack_id: str = DEFAULT_QUEUE_STACK_ID,
+    models_stack_id: str = DEFAULT_MODELS_STACK_ID,
 ) -> StackFactory:
     """Return a StackFactory for one GPU worker instance.
 
     Reuses SimpleAsgStack/SimpleAsgInput/SimpleAsgSetting unchanged (see
     research/aws-infrastructure.md Phase 0/1 decision); only the AMI
     discovery source differs from a plain simple_asg instance. The worker's
-    instance role also gets the images simple_s3 bucket's read-write
-    managed policy (so it can push generated images to S3) and the explore
-    queue's consumer managed policy (receive/delete/get-attributes)
-    attached.
+    instance role also gets: the images simple_s3 bucket's read-write
+    managed policy (so it can push generated images to S3), the explore
+    queue's consumer managed policy (receive/delete/get-attributes), and
+    the models simple_s3 bucket's read managed policy (so userdata can
+    `aws s3 sync` checkpoints down at boot -- wayfinder ticket #32).
     """
 
     def _deploy(inv, app, cdk_env):
         return inv._deploy_gpu_worker(  # pylint: disable=protected-access
-            app, cdk_env, stack_id, images_stack_id, queue_stack_id
+            app,
+            cdk_env,
+            stack_id,
+            images_stack_id,
+            queue_stack_id,
+            models_stack_id,
         )
 
     def _discover(data_path: Path) -> None:

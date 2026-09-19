@@ -102,8 +102,7 @@ new image.
    likely failure, fixable with a manual `pip install` of the matching CUDA
    wheel over this same session.
 2. **A `node_errors` response, or a missing-checkpoint error, usually means
-   the checkpoint isn't downloaded yet** — a fresh instance (new deploy, or
-   a fresh launch after termination) has no models on it. `make sync_models`
+   the checkpoint isn't in the models bucket yet.** `make sync_models`
    downloads every checkpoint listed in `config/model_manifest.json` from
    Hugging Face and uploads it to `s3://nevergreen-dev-models/checkpoints/`
    (runs locally — no GPU instance needed just to sync a model; add a
@@ -111,16 +110,14 @@ new image.
    ```bash
    make sync_models app_env=dev
    ```
-   Getting a checkpoint from that bucket onto the instance is still manual,
-   over SSM (Phase 1's instance-side sync is not yet automated):
-   ```bash
-   aws s3 cp s3://nevergreen-dev-models/checkpoints/animagine-xl-4.0-opt.safetensors \
-     /opt/comfyui/models/checkpoints/ --profile <ssm-target-profile>
-   # or, over the SSM session itself:
-   sudo -u ubuntu aws s3 cp \
-     s3://nevergreen-dev-models/checkpoints/animagine-xl-4.0-opt.safetensors \
-     /opt/comfyui/models/checkpoints/
-   ```
+   Every instance boot (`userdata_gpu_worker.sh`) runs `aws s3 sync` from
+   that bucket's `checkpoints/` prefix into
+   `/opt/comfyui/models/checkpoints/` — the bucket's own listing is the
+   source of truth, so a fresh or relaunched instance is always
+   self-sufficient once the bucket has what it needs; there's no separate
+   manifest to keep in sync. If the checkpoint is already in the bucket but
+   still missing on a *running* instance, terminate it (the ASG relaunches
+   with the current userdata) rather than syncing by hand.
 3. **If you want a different workflow than the checked-in example** (a
    different checkpoint, prompt, or resolution), build one in ComfyUI's web
    UI (Load Checkpoint → positive/negative CLIP Text Encode → KSampler →

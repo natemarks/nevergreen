@@ -103,6 +103,18 @@ done
 
 chown -R "${COMFYUI_USER}:${COMFYUI_USER}" "${COMFYUI_HOME}"
 
+# Sync checkpoints from the models bucket -- the bucket's own listing is
+# the source of truth (no separate manifest to drift out of sync with
+# it); MODELS_BUCKET comes from /etc/default/explore-worker, written
+# before this script runs (see stack/simple_asg.py's extra_files).
+# `make sync_models` is what actually populates the bucket from Hugging
+# Face (wayfinder ticket #32) -- this only pulls what's already there.
+# shellcheck source=/dev/null
+source /etc/default/explore-worker
+mkdir -p "${COMFYUI_HOME}/models/checkpoints"
+aws s3 sync "s3://${MODELS_BUCKET}/checkpoints/" "${COMFYUI_HOME}/models/checkpoints/"
+chown -R "${COMFYUI_USER}:${COMFYUI_USER}" "${COMFYUI_HOME}/models"
+
 # Ollama expands each job's seed_prompt into a batch of SD-style prompt
 # variants (research/local-llm-image-generation.md's Advanced Prompt
 # Enhancer pattern). The official installer sets up its own
