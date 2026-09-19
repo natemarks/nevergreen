@@ -21,8 +21,10 @@ Flow:
 - resolve_instance_ids(): finds every instance currently in the
   gpu_worker's ASG (same CloudFormation/AutoScaling lookup as
   comfyui_client.py/troubleshoot.py).
-- force_refresh(): sends one AWS-RunShellScript SSM command per instance
-  running the on-instance refresh script, and waits for each to finish.
+- force_refresh(): sends one AWS-RunShellScript SSM command, targeted by
+  the ASG's own `aws:autoscaling:groupName` tag (every instance an ASG
+  launches gets this tag automatically) so it fans out to the whole fleet
+  in one call, then waits for each instance's own invocation to finish.
 
 Customize:
 - REFRESH_COMMAND below if the on-instance script's path/name changes.
@@ -48,6 +50,7 @@ from config.helper import (
     get_logger,
 )
 from config.project import SUPPORTED_APP_ENVS
+from config.registry import DEFAULT_GPU_WORKER_STACK_ID
 from config.settings import EnvironmentSetting, get_actual_path
 from stack.simple_asg import SimpleAsgInput
 
@@ -56,24 +59,19 @@ mlog = get_logger(str(__name__))
 REFRESH_COMMAND = ["sudo /opt/comfyui/bin/refresh_worker.sh --force-models"]
 
 
-def resolve_instance_ids(
+def _resolve_asg_name(
     app_env: str,
-    stack_id: str = "comfyui",
+    stack_id: str = DEFAULT_GPU_WORKER_STACK_ID,
     cfn_client=None,
-    autoscaling_client=None,
-) -> list[str]:
-    """Return every instance id currently in the gpu_worker's ASG."""
+) -> str:
+    """Return the physical AutoScalingGroup name for the gpu_worker stack."""
     check_app_env(app_env)
     check_aws_account(app_env)
     data_path = get_actual_path(app_env)
     env_setting = EnvironmentSetting.from_data_path(data_path)
-    region = env_setting.default_region
-
-    cfn = cfn_client or boto3.client("cloudformation", region_name=region)
-    autoscaling = autoscaling_client or boto3.client(
-        "autoscaling", region_name=region
+    cfn = cfn_client or boto3.client(
+        "cloudformation", region_name=env_setting.default_region
     )
-
     s_input = SimpleAsgInput.from_config_directory(
         data_path, stack_id, env_setting=env_setting
     )
@@ -83,7 +81,21 @@ def resolve_instance_ids(
         raise RuntimeError(
             f"No deployed AutoScalingGroup found for stack {stack_name}"
         )
+    return asg_name
 
+
+def resolve_instance_ids(
+    app_env: str,
+    stack_id: str = DEFAULT_GPU_WORKER_STACK_ID,
+    cfn_client=None,
+    autoscaling_client=None,
+) -> list[str]:
+    """Return every instance id currently in the gpu_worker's ASG."""
+    env_setting = EnvironmentSetting.from_data_path(get_actual_path(app_env))
+    autoscaling = autoscaling_client or boto3.client(
+        "autoscaling", region_name=env_setting.default_region
+    )
+    asg_name = _resolve_asg_name(app_env, stack_id, cfn_client)
     instances = autoscaling.describe_auto_scaling_groups(
         AutoScalingGroupNames=[asg_name]
     )["AutoScalingGroups"][0]["Instances"]
@@ -124,13 +136,16 @@ def _wait_for_command(  # pylint: disable=too-many-arguments,too-many-positional
 
 def force_refresh(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     app_env: str,
-    stack_id: str = "comfyui",
+    stack_id: str = DEFAULT_GPU_WORKER_STACK_ID,
     ssm_client=None,
     poll_interval_seconds: int = 3,
     timeout_seconds: int = 120,
     instance_ids: list[str] | None = None,
+    asg_name: str | None = None,
 ) -> dict[str, str]:
-    """Run the refresh script on every gpu_worker instance.
+    """Run the refresh script on every gpu_worker instance, in one
+    SSM command targeted by the ASG's own tag rather than one command
+    per instance.
 
     Returns each instance id's final SSM command status.
     """
@@ -144,22 +159,34 @@ def force_refresh(  # pylint: disable=too-many-arguments,too-many-positional-arg
         mlog.info("No running instances in the %s ASG to refresh", stack_id)
         return {}
 
-    results = {}
-    for instance_id in targets:
-        mlog.info("Sending refresh command to %s", instance_id)
-        command_id = ssm.send_command(
-            InstanceIds=[instance_id],
-            DocumentName="AWS-RunShellScript",
-            Parameters={"commands": REFRESH_COMMAND},
-        )["Command"]["CommandId"]
-        results[instance_id] = _wait_for_command(
+    group_name = (
+        asg_name
+        if asg_name is not None
+        else _resolve_asg_name(app_env, stack_id)
+    )
+    mlog.info(
+        "Sending refresh command to ASG %s (%d instances)",
+        group_name,
+        len(targets),
+    )
+    command_id = ssm.send_command(
+        Targets=[
+            {"Key": "tag:aws:autoscaling:groupName", "Values": [group_name]}
+        ],
+        DocumentName="AWS-RunShellScript",
+        Parameters={"commands": REFRESH_COMMAND},
+    )["Command"]["CommandId"]
+
+    return {
+        instance_id: _wait_for_command(
             ssm,
             command_id,
             instance_id,
             poll_interval_seconds,
             timeout_seconds,
         )
-    return results
+        for instance_id in targets
+    }
 
 
 def get_args() -> argparse.Namespace:
@@ -171,7 +198,7 @@ def get_args() -> argparse.Namespace:
         )
     )
     parser.add_argument("environment", choices=list(SUPPORTED_APP_ENVS))
-    parser.add_argument("--stack-id", default="comfyui")
+    parser.add_argument("--stack-id", default=DEFAULT_GPU_WORKER_STACK_ID)
     return parser.parse_args()
 
 

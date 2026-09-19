@@ -49,7 +49,7 @@ from config.helper import (
     get_logger,
 )
 from config.project import SUPPORTED_APP_ENVS
-from config.registry import DEFAULT_QUEUE_STACK_ID
+from config.registry import DEFAULT_GPU_WORKER_STACK_ID, DEFAULT_QUEUE_STACK_ID
 from config.settings import EnvironmentSetting, get_actual_path
 from stack.simple_asg import SimpleAsgInput
 from stack.sqs_queue import SqsQueueInput
@@ -99,7 +99,7 @@ DIAGNOSTIC_COMMANDS = [
 
 def resolve_instance_id(
     app_env: str,
-    stack_id: str = "comfyui",
+    stack_id: str = DEFAULT_GPU_WORKER_STACK_ID,
     cfn_client=None,
     autoscaling_client=None,
 ) -> str:
@@ -218,7 +218,7 @@ def get_args() -> argparse.Namespace:
         description="Gather Phase 1 diagnostics into troubleshoot.log."
     )
     parser.add_argument("environment", choices=list(SUPPORTED_APP_ENVS))
-    parser.add_argument("--stack-id", default="comfyui")
+    parser.add_argument("--stack-id", default=DEFAULT_GPU_WORKER_STACK_ID)
     parser.add_argument("--queue-stack-id", default=DEFAULT_QUEUE_STACK_ID)
     return parser.parse_args()
 

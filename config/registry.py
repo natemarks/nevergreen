@@ -27,6 +27,7 @@ DEFAULT_QUEUE_STACK_ID = "explore-a"
 DEFAULT_IMAGES_STACK_ID = "images"
 DEFAULT_MODELS_STACK_ID = "models"
 DEFAULT_ECR_REPO_STACK_ID = "worker"
+DEFAULT_GPU_WORKER_STACK_ID = "comfyui"
 
 
 @dataclass

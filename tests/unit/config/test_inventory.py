@@ -145,6 +145,95 @@ def test_gpu_worker_userdata_embeds_refresh_script_and_env_file():
 
 
 @pytest.mark.unit
+def test_gpu_worker_gets_sqs_backlog_target_tracking_scaling_policy():
+    """The comfyui ASG gets a target-tracking policy on SQS
+    backlog-per-instance (target 2), via the L1 CfnScalingPolicy since
+    CDK's L2 scale_to_track_metric only accepts a single direct metric,
+    not this metric-math expression."""
+    with patch("config.inventory.check_aws_account"):
+        inv = Inventory("dev")
+
+    app = App()
+    inv.deploy_stacks(app, Environment())
+
+    gpu_worker_stack = next(
+        s
+        for s in app.node.children
+        if isinstance(s, Stack)
+        and s.stack_name == f"{_DEV}SimpleAsgComfyuiStack"
+    )
+    template = assertions.Template.from_stack(gpu_worker_stack)
+
+    backlog_query = assertions.Match.object_like(
+        {
+            "Id": "backlog",
+            "MetricStat": assertions.Match.object_like(
+                {
+                    "Metric": assertions.Match.object_like(
+                        {
+                            "MetricName": "ApproximateNumberOfMessagesVisible",
+                            "Namespace": "AWS/SQS",
+                        }
+                    )
+                }
+            ),
+        }
+    )
+    instances_query = assertions.Match.object_like(
+        {
+            "Id": "instances",
+            "MetricStat": assertions.Match.object_like(
+                {
+                    "Metric": assertions.Match.object_like(
+                        {
+                            "MetricName": "GroupInServiceInstances",
+                            "Namespace": "AWS/AutoScaling",
+                        }
+                    )
+                }
+            ),
+        }
+    )
+    backlog_per_instance_query = assertions.Match.object_like(
+        {
+            "Id": "backlog_per_instance",
+            "Expression": "IF(instances > 0, backlog / instances, backlog)",
+            "ReturnData": True,
+        }
+    )
+    metric_spec = assertions.Match.object_like(
+        {
+            "Metrics": assertions.Match.array_with(
+                [backlog_query, instances_query, backlog_per_instance_query]
+            )
+        }
+    )
+    target_tracking = assertions.Match.object_like(
+        {
+            "TargetValue": 2,
+            "CustomizedMetricSpecification": metric_spec,
+        }
+    )
+    template.has_resource_properties(
+        "AWS::AutoScaling::ScalingPolicy",
+        {
+            "PolicyType": "TargetTrackingScaling",
+            "TargetTrackingConfiguration": target_tracking,
+        },
+    )
+    # GroupInServiceInstances (used above) only gets published when group
+    # metrics collection is enabled on the ASG.
+    template.has_resource_properties(
+        "AWS::AutoScaling::AutoScalingGroup",
+        {
+            "MetricsCollection": assertions.Match.array_with(
+                [assertions.Match.object_like({"Granularity": "1Minute"})]
+            )
+        },
+    )
+
+
+@pytest.mark.unit
 def test_gpu_worker_without_ecr_repo_stays_bare_ec2():
     """ecr_repo_stack_id=None (Phase 0/1's design) still delivers
     explore_worker.py directly and skips the ECR pull policy -- this path

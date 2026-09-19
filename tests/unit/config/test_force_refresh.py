@@ -11,6 +11,7 @@ import pytest
 from botocore.exceptions import ClientError
 
 from config.force_refresh import (
+    _resolve_asg_name,
     _wait_for_command,
     force_refresh,
     resolve_instance_ids,
@@ -72,6 +73,32 @@ def test_resolve_instance_ids_raises_when_no_asg(data_path):
 
 
 @pytest.mark.unit
+def test_resolve_asg_name_returns_the_physical_name(data_path):
+    """_resolve_asg_name returns the ASG's real physical name."""
+    cfn = MagicMock()
+    cfn.describe_stack_resources.return_value = _asg_resources("real-asg")
+
+    with patch("config.force_refresh.check_aws_account"), patch(
+        "config.force_refresh.get_actual_path", return_value=data_path
+    ):
+        asg_name = _resolve_asg_name("dev", cfn_client=cfn)
+
+    assert asg_name == "real-asg"
+
+
+@pytest.mark.unit
+def test_resolve_asg_name_raises_when_no_asg(data_path):
+    """_resolve_asg_name raises when the stack has no ASG resource."""
+    cfn = MagicMock()
+    cfn.describe_stack_resources.return_value = {"StackResources": []}
+
+    with patch("config.force_refresh.check_aws_account"), patch(
+        "config.force_refresh.get_actual_path", return_value=data_path
+    ), pytest.raises(RuntimeError, match="No deployed AutoScalingGroup"):
+        _resolve_asg_name("dev", cfn_client=cfn)
+
+
+@pytest.mark.unit
 def test_wait_for_command_returns_the_final_status():
     """_wait_for_command polls until the command finishes, then returns it."""
     ssm = MagicMock()
@@ -115,13 +142,12 @@ def test_wait_for_command_times_out_when_never_finishing():
 
 
 @pytest.mark.unit
-def test_force_refresh_sends_the_command_to_every_instance():
-    """force_refresh sends one SSM command per instance and collects results."""
+def test_force_refresh_sends_one_tag_targeted_command_for_the_whole_fleet():
+    """force_refresh sends a single SSM command targeted by the ASG's own
+    tag (not one command per instance), then polls each instance's own
+    invocation of that same command."""
     ssm = MagicMock()
-    ssm.send_command.side_effect = [
-        {"Command": {"CommandId": "cmd-1"}},
-        {"Command": {"CommandId": "cmd-2"}},
-    ]
+    ssm.send_command.return_value = {"Command": {"CommandId": "cmd-1"}}
     ssm.get_command_invocation.return_value = {"Status": "Success"}
 
     results = force_refresh(
@@ -129,18 +155,30 @@ def test_force_refresh_sends_the_command_to_every_instance():
         ssm_client=ssm,
         poll_interval_seconds=0,
         instance_ids=["i-one", "i-two"],
+        asg_name="nevergreen-dev-comfyui-asg",
     )
 
     assert results == {"i-one": "Success", "i-two": "Success"}
-    assert ssm.send_command.call_count == 2
-    ssm.send_command.assert_any_call(
-        InstanceIds=["i-one"],
+    ssm.send_command.assert_called_once_with(
+        Targets=[
+            {
+                "Key": "tag:aws:autoscaling:groupName",
+                "Values": ["nevergreen-dev-comfyui-asg"],
+            }
+        ],
         DocumentName="AWS-RunShellScript",
         Parameters={
             "commands": [
                 "sudo /opt/comfyui/bin/refresh_worker.sh --force-models"
             ]
         },
+    )
+    assert ssm.get_command_invocation.call_count == 2
+    ssm.get_command_invocation.assert_any_call(
+        CommandId="cmd-1", InstanceId="i-one"
+    )
+    ssm.get_command_invocation.assert_any_call(
+        CommandId="cmd-1", InstanceId="i-two"
     )
 
 
