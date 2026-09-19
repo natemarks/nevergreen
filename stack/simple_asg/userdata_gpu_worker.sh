@@ -45,8 +45,27 @@ else
 fi
 df -h /
 
-apt-get update -y
-apt-get install -y git python3-venv
+# Ubuntu's own background apt processes (unattended-upgrades, apt-daily)
+# can hold the dpkg lock for the first minute or so after boot, racing
+# this script's own apt-get calls. Under `set -e` a single lock-contention
+# failure here silently aborts everything after it -- the ComfyUI clone,
+# Ollama install, and both systemd units -- leaving no visible symptom
+# beyond "nothing is running" (confirmed live: E: Could not get lock
+# /var/lib/dpkg/lock-frontend killed the whole script before ComfyUI was
+# even cloned). Retry instead of racing it.
+apt_get_retry() {
+  for _attempt in $(seq 1 12); do
+    if "$@"; then
+      return 0
+    fi
+    echo "apt-get busy (dpkg lock?), retrying in 10s..."
+    sleep 10
+  done
+  return 1
+}
+
+apt_get_retry apt-get update -y
+apt_get_retry apt-get install -y git python3-venv
 
 if [[ ! -d "${COMFYUI_HOME}" ]]; then
   git clone https://github.com/comfyanonymous/ComfyUI "${COMFYUI_HOME}"
