@@ -101,3 +101,17 @@ existing stack type, or graduating a stack to a higher environment.
 To see how the stack classes are used, look at config/registry.py and
 inventory.py. Even better, look at the stack unit tests in tests/unit/stack/
 
+### On-instance code delivery (extra_files)
+
+Some stacks (`SimpleAsgStack`) need more than a shell script on the instance
+-- e.g. a Python worker with its own test suite. Rather than hand-duplicating
+that code inline in the userdata shell script, `SimpleAsgStack` accepts an
+`extra_files` map of `{remote_path: local_path_or_content}`. A `Path` value
+is read from disk and embedded verbatim via a heredoc, so the tested repo
+file is the single source of truth for what runs on the instance. A `str`
+value is embedded as-is, which lets a caller pass content built from a CDK
+token only known at deploy time -- e.g. `Inventory._deploy_gpu_worker` builds
+an `/etc/default/explore-worker` env file containing the real queue URL and
+bucket name this way, resolved by CloudFormation at deploy time rather than
+hardcoded at synth time. See `stack/simple_asg.py`'s `_build_user_data`.
+

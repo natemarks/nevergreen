@@ -217,4 +217,22 @@ comfyui_prompt: .venv ## discover the comfyui worker's URL, wait for it, and POS
 	   PYTHONPATH="." python3 -m config.comfyui_client $(app_env) $(workflow); \
 	)
 
-.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover asg_down asg_up comfyui_prompt
+queue_job: .venv ## send an explore-a-queue job: seed_prompt="..." batch_size=3
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.queue_job $(app_env) "$(seed_prompt)" $(batch_size); \
+	)
+
+sync_models: .venv ## sync config/model_manifest.json's HF checkpoints into the models S3 bucket
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.model_sync $(app_env); \
+	)
+
+troubleshoot: .venv ## gather Phase 1 diagnostics (SQS + instance state) into troubleshoot.log
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.troubleshoot $(app_env); \
+	)
+
+.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover asg_down asg_up comfyui_prompt queue_job sync_models troubleshoot

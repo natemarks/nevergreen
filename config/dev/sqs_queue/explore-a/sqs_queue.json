@@ -1,0 +1,4 @@
+{
+  "visibility_timeout_seconds": 900,
+  "max_receive_count": 3
+}

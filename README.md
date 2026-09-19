@@ -26,12 +26,32 @@ upgrade needed for either):
 - Cartoon/anime: [`cagliostrolab/animagine-xl-4.0`](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (file `animagine-xl-4.0-opt.safetensors`)
 - Realistic: [`RunDiffusion/Juggernaut-XI-v11`](https://huggingface.co/RunDiffusion/Juggernaut-XI-v11) (file `Juggernaut-XI-byRunDiffusion.safetensors`)
 
+## Phase 1: automated single worker consumes queue jobs
+
+Phase 1 adds `explore-a-queue` (standard SQS, 900s visibility timeout, DLQ
+after 3 failed receives) and an `explore-worker.service` systemd unit on the
+same Phase 0 instance. Dropping a job on the queue drives the full pipeline
+with no manual ComfyUI interaction: SQS poll → Ollama prompt-expansion (one
+seed prompt becomes `batch_size` varied prompts) → one ComfyUI generation per
+expanded prompt → S3 upload → delete message. Character A only.
+
+**What it adds** (`dev` environment only):
+- `nevergreen-dev-explore-a-queue` (+ its `-dlq`) — the job queue.
+- `explore-worker.service` — polls the queue, writes generated images to
+  `s3://nevergreen-dev-images/explore/{job_id}/`.
+- Ollama, installed on the same instance for prompt expansion, with its
+  `llama3.1` model synced from the models bucket at boot (not pulled live
+  from Ollama's own registry — see `make sync_models` below).
+
 ## Prerequisites
 
 - AWS credentials for the target environment's account.
 - `aws` CLI v2 and `session-manager-plugin` (for `aws ssm start-session`).
 - `make .venv && make node_modules` (or the CI bypass in
   [CLAUDE.md](CLAUDE.md#pipeline) if `pyenv` isn't available).
+- [Ollama installed locally](https://ollama.com/download) — only needed to
+  run `make sync_models` (it pulls the LLM on your machine, not any AWS
+  instance, before syncing it to S3).
 
 ## Deploy
 
@@ -86,22 +106,79 @@ new image.
    node's `requirements.txt` pulling a CPU-only `torch` build is the most
    likely failure, fixable with a manual `pip install` of the matching CUDA
    wheel over this same session.
-2. **A `node_errors` response, or a missing-checkpoint error, usually means
-   the checkpoint isn't downloaded yet** — a fresh instance (new deploy, or
-   a fresh launch after termination) has no models on it; Phase 0 has no
-   automated model sync. Download one manually, still over SSM:
+2. **A `node_errors` response, a missing-checkpoint error, or an Ollama
+   `404` on `/api/chat` usually means the models bucket is missing
+   content.** `make sync_models` (`config/model_manifest.json` lists both
+   sections) runs entirely locally — no GPU instance needed just to sync
+   model content:
+   - `checkpoints`: downloads each from Hugging Face, uploads to
+     `s3://nevergreen-dev-models/checkpoints/` (add a `HF_TOKEN=...` line
+     to a gitignored `.env` if a listed repo is gated). Skips the
+     download/upload entirely for a checkpoint already in the bucket —
+     these are multi-GB files, so this matters; delete the S3 object
+     first to force a re-sync.
+   - `ollama_models`: runs `ollama pull <model>` **on your own machine**
+     (requires Ollama installed locally), then `aws s3 sync`s your local
+     `~/.ollama/models` to `s3://nevergreen-dev-models/ollama/`.
    ```bash
-   sudo -u ubuntu /opt/comfyui/venv/bin/pip install huggingface_hub
-   sudo -u ubuntu /opt/comfyui/venv/bin/hf download \
-     cagliostrolab/animagine-xl-4.0 animagine-xl-4.0-opt.safetensors \
-     --local-dir /opt/comfyui/models/checkpoints
+   make sync_models app_env=dev
    ```
+   Every instance boot (`userdata_gpu_worker.sh`) runs `aws s3 sync` from
+   both of those bucket prefixes — into `/opt/comfyui/models/checkpoints/`
+   and `/usr/share/ollama/.ollama/models/` respectively — instead of
+   downloading checkpoints from Hugging Face or pulling the LLM from
+   Ollama's own registry live at boot. The bucket's own listing is the
+   source of truth for both, so a fresh or relaunched instance is always
+   self-sufficient once the bucket has what it needs; there's no separate
+   manifest to keep in sync. If content is already in the bucket but
+   still missing on a *running* instance, terminate it (the ASG relaunches
+   with the current userdata) rather than syncing by hand.
 3. **If you want a different workflow than the checked-in example** (a
    different checkpoint, prompt, or resolution), build one in ComfyUI's web
    UI (Load Checkpoint → positive/negative CLIP Text Encode → KSampler →
    VAE Decode → Save Image), test it with Queue Prompt, then export via
    **Workflow → Export (API)** (not the plain Export/Save, which produces
    an incompatible schema) to a new file under `workflows/`.
+
+## Test Phase 1 (UAT)
+
+This is the acceptance test for Phase 1 — dropping a job on
+`explore-a-queue` and confirming images land in S3 automatically. `make
+queue_job` resolves the queue's real URL and sends the job in one step:
+
+```bash
+make queue_job app_env=dev seed_prompt="a fox exploring a neon city" batch_size=3
+```
+
+It prints the `job_id` it generated and the exact S3 path to check next
+(`s3://nevergreen-dev-images/explore/<job_id>/`). (Equivalent by hand:
+`aws sqs get-queue-url --queue-name nevergreen-dev-explore-a-queue` then
+`aws sqs send-message --queue-url <url> --message-body '{"seed_prompt":
+"...", "batch_size": 3}'` — with a hand-picked `job_id` in the body, since
+nothing will print one for you.)
+
+Wait a few minutes (Ollama's prompt expansion + 3 ComfyUI generations), then
+confirm the images appeared under that same path — not a plain listing of
+everything under `explore/`, which mixes in every other job's output too:
+
+```bash
+aws s3 ls s3://nevergreen-dev-images/explore/<job_id>/ --recursive
+```
+
+If nothing appears, SSM into the instance and check both services — the
+worker depends on Ollama and ComfyUI already being up (`After`/`Wants` in
+its systemd unit only orders startup, it doesn't retry a dependency that's
+still failing):
+
+```bash
+sudo systemctl status explore-worker.service ollama.service comfyui.service
+sudo journalctl -u explore-worker.service -n 100 --no-pager
+```
+
+A message that keeps reappearing on the queue after ~15 minutes (its
+visibility timeout) instead of being deleted means the worker is failing on
+it — check the log above for the exception; after 3 failed receives it moves
+to `nevergreen-dev-explore-a-queue-dlq`.
 
 ## Cost control
 

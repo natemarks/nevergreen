@@ -10,6 +10,12 @@
 #
 # Models are NOT downloaded here (Phase 0 decision: manual download over an
 # SSM session) — see the Phase 0 ticket's UAT steps.
+#
+# Phase 1 addition: installs Ollama (for seed-prompt expansion) and the
+# explore-a-queue worker (worker/explore_worker.py, embedded onto the
+# instance via SimpleAsgStack's `extra_files` mechanism -- see
+# stack/simple_asg.py -- so the tested repo file is what runs here, not a
+# hand-duplicated copy) as a systemd service.
 set -euxo pipefail
 
 COMFYUI_HOME=/opt/comfyui
@@ -39,11 +45,37 @@ else
 fi
 df -h /
 
-apt-get update -y
-apt-get install -y git python3-venv
+# Ubuntu's own background apt processes (unattended-upgrades, apt-daily)
+# can hold the dpkg lock for the first minute or so after boot, racing
+# this script's own apt-get calls. Under `set -e` a single lock-contention
+# failure here silently aborts everything after it -- the ComfyUI clone,
+# Ollama install, and both systemd units -- leaving no visible symptom
+# beyond "nothing is running" (confirmed live: E: Could not get lock
+# /var/lib/dpkg/lock-frontend killed the whole script before ComfyUI was
+# even cloned). Retry instead of racing it.
+apt_get_retry() {
+  for _attempt in $(seq 1 12); do
+    if "$@"; then
+      return 0
+    fi
+    echo "apt-get busy (dpkg lock?), retrying in 10s..."
+    sleep 10
+  done
+  return 1
+}
 
-if [[ ! -d "${COMFYUI_HOME}" ]]; then
-  git clone https://github.com/comfyanonymous/ComfyUI "${COMFYUI_HOME}"
+apt_get_retry apt-get update -y
+apt_get_retry apt-get install -y git python3-venv
+
+# ${COMFYUI_HOME} already exists and is non-empty by this point --
+# SimpleAsgStack's extra_files mechanism (explore_worker.py, the workflow
+# JSON) writes into it before this script runs -- so check for ComfyUI's
+# own .git dir specifically, and clone to a temp path first, since `git
+# clone` refuses a non-empty destination directory.
+if [[ ! -d "${COMFYUI_HOME}/.git" ]]; then
+  git clone https://github.com/comfyanonymous/ComfyUI /tmp/comfyui-src
+  cp -an /tmp/comfyui-src/. "${COMFYUI_HOME}/"
+  rm -rf /tmp/comfyui-src
 fi
 
 cd "${COMFYUI_HOME}"
@@ -52,6 +84,10 @@ python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+# explore_worker.py's own runtime dependencies (kept in step with
+# requirements.txt at the repo root) -- installed into the same venv so one
+# interpreter runs both ComfyUI and the worker.
+pip install boto3==1.43.92 requests==2.34.2
 
 mkdir -p custom_nodes
 cd custom_nodes
@@ -74,6 +110,40 @@ done
 
 chown -R "${COMFYUI_USER}:${COMFYUI_USER}" "${COMFYUI_HOME}"
 
+# Sync checkpoints from the models bucket -- the bucket's own listing is
+# the source of truth (no separate manifest to drift out of sync with
+# it); MODELS_BUCKET comes from /etc/default/explore-worker, written
+# before this script runs (see stack/simple_asg.py's extra_files).
+# `make sync_models` is what actually populates the bucket from Hugging
+# Face (wayfinder ticket #32) -- this only pulls what's already there.
+# shellcheck source=/dev/null
+source /etc/default/explore-worker
+mkdir -p "${COMFYUI_HOME}/models/checkpoints"
+aws s3 sync "s3://${MODELS_BUCKET}/checkpoints/" "${COMFYUI_HOME}/models/checkpoints/"
+chown -R "${COMFYUI_USER}:${COMFYUI_USER}" "${COMFYUI_HOME}/models"
+
+# Ollama expands each job's seed_prompt into a batch of SD-style prompt
+# variants (research/local-llm-image-generation.md's Advanced Prompt
+# Enhancer pattern). The model itself comes from the models bucket, not
+# a live `ollama pull` from Ollama's own registry at boot -- live UAT hit
+# exactly the failure mode that dependency invites (10 automated pull
+# attempts failed within ~1s combined right after boot, while a manual
+# pull moments later on the same instance succeeded normally). `make
+# sync_models` is what actually populates s3://<bucket>/ollama/, by
+# pulling locally and syncing (wayfinder ticket #32); this only pulls
+# what's already there, same as the checkpoints sync above.
+curl -fsSL https://ollama.com/install.sh | sh
+mkdir -p /usr/share/ollama/.ollama/models
+aws s3 sync "s3://${MODELS_BUCKET}/ollama/" /usr/share/ollama/.ollama/models/
+# chown the whole .ollama dir, not just models/ -- mkdir -p above (run as
+# root, before the ollama daemon has ever started) creates .ollama itself
+# as root-owned; the daemon then can't write its own files (e.g. its
+# id_ed25519 private key) directly inside .ollama as the `ollama` user,
+# and crash-loops on every boot ("permission denied") -- confirmed live.
+chown -R ollama:ollama /usr/share/ollama/.ollama
+systemctl enable ollama
+systemctl restart ollama
+
 cat >/etc/systemd/system/comfyui.service <<UNIT
 [Unit]
 Description=ComfyUI
@@ -90,6 +160,25 @@ Restart=on-failure
 WantedBy=multi-user.target
 UNIT
 
+cat >/etc/systemd/system/explore-worker.service <<UNIT
+[Unit]
+Description=Explore-A queue worker
+After=network.target comfyui.service ollama.service
+Wants=comfyui.service ollama.service
+
+[Service]
+Type=simple
+User=${COMFYUI_USER}
+WorkingDirectory=${COMFYUI_HOME}
+EnvironmentFile=/etc/default/explore-worker
+ExecStart=${COMFYUI_HOME}/venv/bin/python3 ${COMFYUI_HOME}/explore_worker.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
 systemctl daemon-reload
-systemctl enable comfyui.service
+systemctl enable comfyui.service explore-worker.service
 systemctl restart comfyui.service
+systemctl restart explore-worker.service

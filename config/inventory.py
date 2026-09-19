@@ -18,6 +18,7 @@ Customize:
 - Extend shared tags in `set_environment_tags`.
 """
 
+from pathlib import Path
 from typing import ClassVar, cast
 
 from aws_cdk import App, Environment, Stack, Tags
@@ -29,6 +30,7 @@ from stack.app_vpc import AppVpcInput, AppVpcStack
 from stack.secure_s3 import SecureS3Input, SecureS3Stack
 from stack.simple_asg import SimpleAsgInput, SimpleAsgStack
 from stack.simple_s3 import SimpleS3Input, SimpleS3Stack
+from stack.sqs_queue import SqsQueueInput, SqsQueueStack
 
 
 class Inventory:
@@ -150,19 +152,40 @@ class Inventory:
             termination_protection=self.TERMINATION_PROTECTION,
         )
 
-    def _deploy_gpu_worker(
+    def _deploy_sqs_queue(
+        self, app: App, cdk_env: Environment, stack_id: str
+    ) -> SqsQueueStack:
+        """Create and return one SqsQueue stack (no AppVpc dependency)."""
+        s_input = SqsQueueInput.from_config_directory(
+            self.data_path,
+            stack_id,
+            env_setting=self.environment_setting,
+        )
+        return SqsQueueStack(
+            scope=app,
+            cdk_env=cdk_env,
+            s_input=s_input,
+            termination_protection=self.TERMINATION_PROTECTION,
+        )
+
+    def _deploy_gpu_worker(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
         self,
         app: App,
         cdk_env: Environment,
         stack_id: str,
         images_stack_id: str,
+        queue_stack_id: str,
+        models_stack_id: str,
     ) -> SimpleAsgStack:
         """Create and return one GPU worker stack.
 
-        AppVpc and the images SimpleS3 stack must already be deployed: the
-        worker reuses AppVpc for VPC/subnet context (like simple_asg), and
-        gets the images bucket's read-write managed policy attached to its
-        instance role.
+        AppVpc, the images SimpleS3 stack, the explore SqsQueue stack, and
+        the models SimpleS3 stack must already be deployed: the worker
+        reuses AppVpc for VPC/subnet context (like simple_asg), and gets
+        the images bucket's read-write managed policy, the queue's
+        consumer managed policy, and the models bucket's read managed
+        policy (so userdata can `aws s3 sync` checkpoints down at boot)
+        attached to its instance role.
         """
         app_vpc_name = (
             f"{APP_NAME}{self.environment_setting.prefix()}AppVpcStack"
@@ -177,17 +200,57 @@ class Inventory:
             SimpleS3Stack,
             self._get_deployed(f"{images_input.prefix()}Stack"),
         )
+        models_input = SimpleS3Input.from_config_directory(
+            self.data_path,
+            models_stack_id,
+            env_setting=self.environment_setting,
+        )
+        models_stack = cast(
+            SimpleS3Stack,
+            self._get_deployed(f"{models_input.prefix()}Stack"),
+        )
+        queue_input = SqsQueueInput.from_config_directory(
+            self.data_path,
+            queue_stack_id,
+            env_setting=self.environment_setting,
+        )
+        queue_stack = cast(
+            SqsQueueStack,
+            self._get_deployed(f"{queue_input.prefix()}Stack"),
+        )
         s_input = SimpleAsgInput.from_config_directory(
             self.data_path,
             stack_id,
             env_setting=self.environment_setting,
+        )
+        repo_root = Path(__file__).parent.parent
+        env_file = "\n".join(
+            [
+                f"QUEUE_URL={queue_stack.queue.queue_url}",
+                f"OUTPUT_BUCKET={images_stack.bucket.bucket_name}",
+                f"MODELS_BUCKET={models_stack.bucket.bucket_name}",
+                f"AWS_REGION={self.environment_setting.default_region}",
+            ]
         )
         return SimpleAsgStack(
             scope=app,
             cdk_env=cdk_env,
             s_input=s_input,
             app_vpc_stack=app_vpc_stack,
-            managed_policies=[images_stack.read_write_policy],
+            managed_policies=[
+                images_stack.read_write_policy,
+                queue_stack.consumer_policy,
+                models_stack.read_policy,
+            ],
+            extra_files={
+                "/opt/comfyui/explore_worker.py": repo_root
+                / "worker"
+                / "explore_worker.py",
+                "/opt/comfyui/workflows/txt2img-example.json": repo_root
+                / "workflows"
+                / "txt2img-example.json",
+                "/etc/default/explore-worker": env_file,
+            },
             termination_protection=self.TERMINATION_PROTECTION,
         )
 

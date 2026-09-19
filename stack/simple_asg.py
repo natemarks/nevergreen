@@ -21,8 +21,19 @@ Customize:
   isn't reachable from the internet without one)
 - optional extra IAM managed policies on the instance role: pass
   `managed_policies` to `SimpleAsgStack`
+- optional extra files delivered onto the instance before the userdata
+  script runs: pass `extra_files` (a `{remote_path: local_path_or_content}`
+  map) to `SimpleAsgStack`. A `Path` value uploads that local file as a CDK
+  asset and downloads it from S3 at boot, so a tested repo file (e.g. a
+  worker script) is the single source of truth instead of being duplicated
+  inline in a shell script -- and, unlike embedding it in userdata
+  directly, isn't bounded by EC2's 16KB userdata size limit. A `str` value
+  is written via a small inline heredoc instead (an S3 asset must be a
+  real file on disk at synth time, which a value containing a CDK token
+  resolved only at deploy time -- e.g. a queue URL -- cannot be).
 """
 
+import shlex
 from dataclasses import dataclass
 from pathlib import Path
 from aws_cdk import (
@@ -32,10 +43,31 @@ from aws_cdk import (
     aws_autoscaling as autoscaling,
 )
 from aws_cdk import Environment as cdk_environment
+from aws_cdk.aws_s3_assets import Asset
 from constructs import Construct
 from config.helper import APP_NAME
 from config.settings import EnvironmentSetting, SimpleAsgSetting
 from stack.app_vpc import AppVpcStack
+
+
+def _build_inline_file_commands(extra_files: dict[str, str]) -> str:
+    """Return heredoc commands that write each small extra_files entry.
+
+    Each value is written to its remote_path verbatim, so a caller can
+    embed a CDK token (e.g. a queue URL) resolved at deploy time. Only
+    for small content -- see the module docstring's `extra_files` entry
+    for why larger, disk-based files use an S3 asset download instead.
+    """
+    blocks = []
+    for remote_path, content in extra_files.items():
+        remote_dir = shlex.quote(str(Path(remote_path).parent))
+        blocks.append(
+            f"mkdir -p {remote_dir}\n"
+            f"cat > {shlex.quote(remote_path)} <<'EXTRA_FILE_EOF'\n"
+            f"{content}\n"
+            "EXTRA_FILE_EOF\n"
+        )
+    return "\n".join(blocks)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -81,13 +113,14 @@ class SimpleAsgStack(Stack):
     instance would be unreachable from the internet regardless.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
+    def __init__(  # pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
         self,
         scope: Construct,
         cdk_env: cdk_environment,
         s_input: SimpleAsgInput,
         app_vpc_stack: AppVpcStack,
         managed_policies: list[iam.IManagedPolicy] | None = None,
+        extra_files: dict[str, Path | str] | None = None,
         **kwargs,
     ):
         self.s_input = s_input
@@ -134,6 +167,31 @@ class SimpleAsgStack(Stack):
         userdata_file = (Path(__file__).parent) / (
             f"simple_asg/{self.s_input.sa_setting.userdata_filename}"
         )
+        user_data = ec2.UserData.for_linux()
+        asset_files = {
+            remote_path: local_path
+            for remote_path, local_path in (extra_files or {}).items()
+            if isinstance(local_path, Path)
+        }
+        inline_files = {
+            remote_path: content
+            for remote_path, content in (extra_files or {}).items()
+            if isinstance(content, str)
+        }
+        for index, remote_path in enumerate(sorted(asset_files)):
+            asset = Asset(
+                self,
+                f"{prefix}ExtraFile{index}",
+                path=str(asset_files[remote_path]),
+            )
+            asset.grant_read(self.asg_role)
+            user_data.add_s3_download_command(
+                bucket=asset.bucket,
+                bucket_key=asset.s3_object_key,
+                local_file=remote_path,
+            )
+        user_data.add_commands(_build_inline_file_commands(inline_files))
+        user_data.add_commands(userdata_file.read_text(encoding="utf-8"))
         l_tpl = ec2.LaunchTemplate(
             self,
             f"{prefix}LaunchTpl",
@@ -160,9 +218,7 @@ class SimpleAsgStack(Stack):
             http_put_response_hop_limit=1,  # default=1
             require_imdsv2=True,  # default=False
             security_group=instance_sg,
-            user_data=ec2.UserData.custom(
-                userdata_file.read_text(encoding="utf-8")
-            ),
+            user_data=user_data,
             role=self.asg_role,
         )
         autoscaling.AutoScalingGroup(

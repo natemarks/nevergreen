@@ -198,6 +198,16 @@ class SimpleS3Setting(JsonSettingBase):
 
 
 @dataclass(frozen=True, kw_only=True)
+class SqsQueueSetting(JsonSettingBase):
+    """Settings for each SqsQueue stack instance."""
+
+    RELATIVE_PATH_TEMPLATE: ClassVar[str] = "sqs_queue/{0}/sqs_queue.json"
+
+    visibility_timeout_seconds: int = 900
+    max_receive_count: int = 3
+
+
+@dataclass(frozen=True, kw_only=True)
 class AppVpcSetting(JsonSettingBase):
     """Settings for the AppVpc stack template.
 
