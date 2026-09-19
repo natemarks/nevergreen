@@ -67,8 +67,15 @@ apt_get_retry() {
 apt_get_retry apt-get update -y
 apt_get_retry apt-get install -y git python3-venv
 
-if [[ ! -d "${COMFYUI_HOME}" ]]; then
-  git clone https://github.com/comfyanonymous/ComfyUI "${COMFYUI_HOME}"
+# ${COMFYUI_HOME} already exists and is non-empty by this point --
+# SimpleAsgStack's extra_files mechanism (explore_worker.py, the workflow
+# JSON) writes into it before this script runs -- so check for ComfyUI's
+# own .git dir specifically, and clone to a temp path first, since `git
+# clone` refuses a non-empty destination directory.
+if [[ ! -d "${COMFYUI_HOME}/.git" ]]; then
+  git clone https://github.com/comfyanonymous/ComfyUI /tmp/comfyui-src
+  cp -an /tmp/comfyui-src/. "${COMFYUI_HOME}/"
+  rm -rf /tmp/comfyui-src
 fi
 
 cd "${COMFYUI_HOME}"
