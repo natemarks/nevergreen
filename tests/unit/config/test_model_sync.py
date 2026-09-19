@@ -6,11 +6,14 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from botocore.exceptions import ClientError
 
 from config.model_sync import (
     _read_dotenv_value,
+    _s3_object_exists,
     load_manifest,
     local_ollama_models_dir,
+    sync_checkpoint,
     sync_checkpoints,
     sync_ollama_models,
 )
@@ -26,6 +29,13 @@ def data_path(tmp_path):
     _write_environment_json(tmp_path)
     _write_simple_s3_config(tmp_path, "models")
     return tmp_path
+
+
+def _not_found_error() -> ClientError:
+    """Return a ClientError shaped like S3's head_object 404 response."""
+    return ClientError(
+        {"Error": {"Code": "404", "Message": "Not Found"}}, "HeadObject"
+    )
 
 
 @pytest.mark.unit
@@ -96,6 +106,7 @@ def test_sync_checkpoints_downloads_and_uploads_every_manifest_entry(
         encoding="utf-8",
     )
     s3 = MagicMock()
+    s3.head_object.side_effect = _not_found_error()
 
     with patch("config.model_sync.check_aws_account"), patch(
         "config.model_sync.get_actual_path", return_value=data_path
@@ -139,6 +150,7 @@ def test_sync_checkpoints_passes_the_dotenv_hf_token_to_each_download(
         encoding="utf-8",
     )
     s3 = MagicMock()
+    s3.head_object.side_effect = _not_found_error()
 
     with patch("config.model_sync.check_aws_account"), patch(
         "config.model_sync.get_actual_path", return_value=data_path
@@ -153,6 +165,51 @@ def test_sync_checkpoints_passes_the_dotenv_hf_token_to_each_download(
     mock_download.assert_called_once_with(
         repo_id="org/one", filename="one.safetensors", token="hf_abc123"
     )
+
+
+@pytest.mark.unit
+def test_s3_object_exists_true_when_head_object_succeeds():
+    """_s3_object_exists returns True when head_object finds the key."""
+    s3 = MagicMock()
+    assert _s3_object_exists(s3, "bucket", "key") is True
+
+
+@pytest.mark.unit
+def test_s3_object_exists_false_on_404():
+    """_s3_object_exists returns False for a 404 (key not present)."""
+    s3 = MagicMock()
+    s3.head_object.side_effect = _not_found_error()
+    assert _s3_object_exists(s3, "bucket", "key") is False
+
+
+@pytest.mark.unit
+def test_s3_object_exists_reraises_other_client_errors():
+    """A ClientError that isn't a 404 is not swallowed as "doesn't exist"."""
+    s3 = MagicMock()
+    s3.head_object.side_effect = ClientError(
+        {"Error": {"Code": "AccessDenied", "Message": "nope"}}, "HeadObject"
+    )
+    with pytest.raises(ClientError):
+        _s3_object_exists(s3, "bucket", "key")
+
+
+@pytest.mark.unit
+def test_sync_checkpoint_skips_download_and_upload_when_already_in_bucket():
+    """An already-present checkpoint is neither re-downloaded nor re-uploaded.
+
+    These are multi-GB files -- re-syncing an unchanged one is a long
+    wait for no benefit.
+    """
+    s3 = MagicMock()
+
+    with patch("config.model_sync.hf_hub_download") as mock_download:
+        key = sync_checkpoint(
+            "org/one", "one.safetensors", "my-bucket", s3_client=s3
+        )
+
+    assert key == "checkpoints/one.safetensors"
+    mock_download.assert_not_called()
+    s3.upload_file.assert_not_called()
 
 
 @pytest.mark.unit

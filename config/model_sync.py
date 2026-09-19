@@ -46,6 +46,7 @@ import subprocess
 from pathlib import Path
 
 import boto3
+from botocore.exceptions import ClientError
 from huggingface_hub import hf_hub_download
 
 from config.helper import (
@@ -95,6 +96,17 @@ def _models_bucket_name(app_env: str, env_setting: EnvironmentSetting) -> str:
     return models_input.bucket_name()
 
 
+def _s3_object_exists(s3_client, bucket: str, key: str) -> bool:
+    """Return whether key already exists in bucket."""
+    try:
+        s3_client.head_object(Bucket=bucket, Key=key)
+        return True
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] in ("404", "NoSuchKey"):
+            return False
+        raise
+
+
 def sync_checkpoint(
     repo_id: str,
     filename: str,
@@ -102,12 +114,22 @@ def sync_checkpoint(
     hf_token: str | None = None,
     s3_client=None,
 ) -> str:
-    """Download one file from Hugging Face and upload it to the models bucket."""
+    """Download one file from Hugging Face and upload it to the models bucket.
+
+    Skips the download and upload entirely if the bucket already has this
+    checkpoint -- these are multi-GB files, so re-downloading and
+    re-uploading an unchanged one is a long wait for no benefit. To force
+    a re-sync (e.g. the upstream file changed), delete the S3 object
+    first -- the bucket's own listing is the source of truth.
+    """
     s3 = s3_client or boto3.client("s3")
+    key = f"{CHECKPOINTS_S3_PREFIX}/{filename}"
+    if _s3_object_exists(s3, bucket, key):
+        mlog.info("s3://%s/%s already present, skipping", bucket, key)
+        return key
     local_path = hf_hub_download(
         repo_id=repo_id, filename=filename, token=hf_token
     )
-    key = f"{CHECKPOINTS_S3_PREFIX}/{filename}"
     mlog.info("Uploading %s to s3://%s/%s", local_path, bucket, key)
     s3.upload_file(local_path, bucket, key)
     return key

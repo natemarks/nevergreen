@@ -113,7 +113,10 @@ new image.
    model content:
    - `checkpoints`: downloads each from Hugging Face, uploads to
      `s3://nevergreen-dev-models/checkpoints/` (add a `HF_TOKEN=...` line
-     to a gitignored `.env` if a listed repo is gated).
+     to a gitignored `.env` if a listed repo is gated). Skips the
+     download/upload entirely for a checkpoint already in the bucket —
+     these are multi-GB files, so this matters; delete the S3 object
+     first to force a re-sync.
    - `ollama_models`: runs `ollama pull <model>` **on your own machine**
      (requires Ollama installed locally), then `aws s3 sync`s your local
      `~/.ollama/models` to `s3://nevergreen-dev-models/ollama/`.
