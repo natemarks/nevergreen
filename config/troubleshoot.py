@@ -12,9 +12,9 @@ Purpose:
   it actually stopped.
 - Runs one SSM RunShellScript command against the gpu_worker instance
   instead of a manual `aws ssm start-session`, so every relevant signal
-  (systemd status/journals for all three services, the userdata output
-  log, checkpoint/worker-file presence, Ollama's model list, disk space)
-  comes back in one shot.
+  (cloud-init's own status, systemd status/journals for all three
+  services, checkpoint/worker-file presence, Ollama's model list, disk
+  space, and userdata's own progress) comes back in one shot.
 
 Flow:
 - Parse environment/stack ids from CLI args.
@@ -58,18 +58,28 @@ mlog = get_logger(str(__name__))
 
 LOG_PATH = Path("troubleshoot.log")
 
+# Ordered smallest/highest-value first: GetCommandInvocation's
+# StandardOutputContent is capped at 24,000 characters (SSM itself, not
+# this tool), and a raw cloud-init-output.log tail can easily blow past
+# that on its own once a few large custom-node pip installs are in it
+# (onnxruntime-gpu alone is 300MB) -- silently truncating whatever SSM
+# would have put after it. Putting the small, high-value checks first
+# guarantees they survive; the noisy cloud-init log goes last, and is
+# filtered down to `set -x` trace lines (showing exactly which top-level
+# command the script was on) plus obvious error text, instead of dumping
+# every line of pip's download/build chatter.
 DIAGNOSTIC_COMMANDS = [
+    "echo '--- cloud-init status ---'",
+    "sudo cloud-init status --long || true",
     "echo '--- systemctl status ---'",
     "sudo systemctl status comfyui.service ollama.service "
     "explore-worker.service --no-pager || true",
-    "echo '--- explore-worker journal (last 200 lines) ---'",
-    "sudo journalctl -u explore-worker.service -n 200 --no-pager || true",
-    "echo '--- comfyui journal (last 100 lines) ---'",
-    "sudo journalctl -u comfyui.service -n 100 --no-pager || true",
-    "echo '--- ollama journal (last 100 lines) ---'",
-    "sudo journalctl -u ollama.service -n 100 --no-pager || true",
-    "echo '--- cloud-init userdata output (last 300 lines) ---'",
-    "sudo tail -n 300 /var/log/cloud-init-output.log || true",
+    "echo '--- explore-worker journal (last 100 lines) ---'",
+    "sudo journalctl -u explore-worker.service -n 100 --no-pager || true",
+    "echo '--- comfyui journal (last 50 lines) ---'",
+    "sudo journalctl -u comfyui.service -n 50 --no-pager || true",
+    "echo '--- ollama journal (last 50 lines) ---'",
+    "sudo journalctl -u ollama.service -n 50 --no-pager || true",
     "echo '--- checkpoints on disk ---'",
     "ls -la /opt/comfyui/models/checkpoints/ 2>&1 || true",
     "echo '--- worker files on disk ---'",
@@ -81,6 +91,9 @@ DIAGNOSTIC_COMMANDS = [
     "sudo -u ubuntu ollama list 2>&1 || true",
     "echo '--- disk space ---'",
     "df -h / || true",
+    "echo '--- userdata progress (trace lines + errors, last 150) ---'",
+    "sudo grep -E '^\\+ |[Ee]rror|Traceback|not found|could not' "
+    "/var/log/cloud-init-output.log | tail -n 150 || true",
 ]
 
 
