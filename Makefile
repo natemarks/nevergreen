@@ -235,4 +235,16 @@ troubleshoot: .venv ## gather Phase 1 diagnostics (SQS + instance state) into tr
 	   PYTHONPATH="." python3 -m config.troubleshoot $(app_env); \
 	)
 
-.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover asg_down asg_up comfyui_prompt queue_job sync_models troubleshoot
+build_worker_image: .venv ## build worker/Dockerfile and push it to ECR (Phase 2), optional tag=<tag>
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.build_worker_image $(app_env) --tag $(or $(tag),latest); \
+	)
+
+force_refresh: .venv ## force every gpu_worker instance to re-sync models + restart its container
+	( \
+	   $(SHELL_PREAMBLE) \
+	   PYTHONPATH="." python3 -m config.force_refresh $(app_env); \
+	)
+
+.PHONY: help clean-venv update_cdk_libs black black-check pylint mypy shellcheck unit unit-test unit-update-golden unit-update_golden integration aws-test aws-update_golden static static-check test-dependabot-pr pre-commit-install clean-cache git-status undo_edits cdk-ls cdk-diff cdk-diff-all cdk-deploy cdk-deploy-all cdk-destroy cdk-bootstrap discover asg_down asg_up comfyui_prompt queue_job sync_models troubleshoot build_worker_image force_refresh

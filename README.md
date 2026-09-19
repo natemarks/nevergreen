@@ -43,6 +43,33 @@ expanded prompt → S3 upload → delete message. Character A only.
   `llama3.1` model synced from the models bucket at boot (not pulled live
   from Ollama's own registry — see `make sync_models` below).
 
+## Phase 2: auto-scaling worker fleet with a Dockerized worker
+
+Phase 2 replaces the single always-on instance with an ASG that scales
+`0 → N` instances on SQS backlog-per-instance (target ~2 messages/instance),
+and moves the worker (ComfyUI + custom nodes + `explore_worker.py`) into a
+Docker image published to ECR, so a code change no longer requires
+redeploying the instance. Model content delivery is unchanged from Phase 1
+(bucket is the source of truth, synced once at instance/container startup);
+what's new is *when* a running instance picks up a new worker image or new
+bucket content:
+
+- A `refresh-worker.timer` on every instance checks for a new image digest
+  every 5 minutes and restarts the container in place if one's published —
+  never re-syncing models.
+- `make force_refresh` runs that same "sync models + restart container"
+  script on demand, over SSM, against every instance in the fleet — for the
+  rare case new bucket content needs picking up before an instance's next
+  natural restart.
+
+**What it adds** (`dev` environment only):
+- `nevergreen-dev-worker` — the ECR repository. `make build_worker_image`
+  builds `worker/Dockerfile` and pushes it (**outside** `cdk deploy` — the
+  image changes far more often than infrastructure).
+- A target-tracking scaling policy on the `comfyui` ASG (`min=0`, `max=3` —
+  check this against your account's `g4dn.xlarge` service quota before
+  raising it).
+
 ## Prerequisites
 
 - AWS credentials for the target environment's account.
@@ -52,6 +79,7 @@ expanded prompt → S3 upload → delete message. Character A only.
 - [Ollama installed locally](https://ollama.com/download) — only needed to
   run `make sync_models` (it pulls the LLM on your machine, not any AWS
   instance, before syncing it to S3).
+- Docker installed locally — only needed to run `make build_worker_image`.
 
 ## Deploy
 
@@ -60,6 +88,16 @@ make discover app_env=dev          # resolves the real Deep Learning AMI id
 make cdk-diff-all app_env=dev      # review before approving
 make cdk-deploy-all app_env=dev
 ```
+
+**First deploy on a fresh environment (Phase 2 onward):** push a worker
+image to ECR *before* any `comfyui` instance boots for the first time —
+`refresh_worker.sh`'s initial `docker pull ...:latest` fails on an empty
+repository. `cdk-deploy-all` creates the (empty) ECR repository as part of
+the same pass that also launches the ASG, so on a truly first deploy, run
+`make build_worker_image app_env=dev` once between the ECR repo existing
+and the instance actually launching (e.g. right after the first
+`cdk-deploy-all`, then let the ASG's next scale-out pick up the image — or
+just re-run `cdk-deploy-all` once more after pushing, to be sure).
 
 ## Test it (UAT)
 
@@ -179,6 +217,51 @@ A message that keeps reappearing on the queue after ~15 minutes (its
 visibility timeout) instead of being deleted means the worker is failing on
 it — check the log above for the exception; after 3 failed receives it moves
 to `nevergreen-dev-explore-a-queue-dlq`.
+
+## Test Phase 2 (UAT)
+
+Three things to confirm, per [Phase 2's ticket](https://github.com/natemarks/nevergreen/issues/29):
+
+**1. Scale-out and scale-in.** With the ASG idle at 0, submit enough jobs to
+push the SQS backlog-per-instance metric over its target of ~2 (e.g. several
+`make queue_job` calls back to back, or one with a large `batch_size`):
+
+```bash
+for i in 1 2 3 4 5; do
+  make queue_job app_env=dev seed_prompt="a fox exploring scene $i" batch_size=3
+done
+```
+
+Watch the ASG's desired capacity scale up in the console (or
+`aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names
+nevergreen-dev-simple-asg-comfyui-asg`, adjusting the name to what `cdk
+diff` shows), confirm images keep landing in S3 throughout
+(`aws s3 ls s3://nevergreen-dev-images/explore/ --recursive`), and confirm
+it scales back down to 0 once the queue drains — target-tracking scale-in
+is conservative by design, so this can take longer than scale-out.
+
+**2. In-place image update.** With an instance already running, push a new
+worker image and confirm the running instance picks it up without a
+model re-sync or instance replacement:
+
+```bash
+make build_worker_image app_env=dev
+# within ~5 minutes (refresh-worker.timer's interval), over SSM:
+sudo systemctl status refresh-worker.timer
+sudo journalctl -u refresh-worker.service -n 50 --no-pager
+docker ps   # confirm explore-worker's container ID/start time changed
+```
+
+**3. Forced refresh.** Add a new checkpoint to `config/model_manifest.json`,
+run `make sync_models`, then force a running instance to pick it up
+immediately instead of waiting:
+
+```bash
+make force_refresh app_env=dev
+```
+
+Confirm (over SSM) the new checkpoint appears under
+`/opt/comfyui-data/models/checkpoints/` and the container restarted.
 
 ## Cost control
 

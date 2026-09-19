@@ -1,0 +1,5 @@
+{
+  "image_scan_on_push": false,
+  "max_image_count": 3,
+  "removal_policy": "RETAIN"
+}

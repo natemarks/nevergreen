@@ -208,6 +208,17 @@ class SqsQueueSetting(JsonSettingBase):
 
 
 @dataclass(frozen=True, kw_only=True)
+class EcrRepoSetting(JsonSettingBase):
+    """Settings for each EcrRepo stack instance."""
+
+    RELATIVE_PATH_TEMPLATE: ClassVar[str] = "ecr_repo/{0}/ecr_repo.json"
+
+    image_scan_on_push: bool = True
+    max_image_count: int = 10
+    removal_policy: Literal["DESTROY", "RETAIN"] = "DESTROY"
+
+
+@dataclass(frozen=True, kw_only=True)
 class AppVpcSetting(JsonSettingBase):
     """Settings for the AppVpc stack template.
 

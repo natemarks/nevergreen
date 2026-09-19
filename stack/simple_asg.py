@@ -31,6 +31,12 @@ Customize:
   is written via a small inline heredoc instead (an S3 asset must be a
   real file on disk at synth time, which a value containing a CDK token
   resolved only at deploy time -- e.g. a queue URL -- cannot be).
+- optional ASG group metrics collection: pass `enable_group_metrics=True`
+  to publish `GroupInServiceInstances` etc. to CloudWatch, needed as an
+  input to a target-tracking scaling policy on a per-instance metric
+  (e.g. SQS backlog-per-instance) -- attach the policy itself via the
+  exposed `self.asg` after construction, since `scale_to_track_metric` is
+  a post-construction method, not a constructor prop.
 """
 
 import shlex
@@ -121,6 +127,7 @@ class SimpleAsgStack(Stack):
         app_vpc_stack: AppVpcStack,
         managed_policies: list[iam.IManagedPolicy] | None = None,
         extra_files: dict[str, Path | str] | None = None,
+        enable_group_metrics: bool = False,
         **kwargs,
     ):
         self.s_input = s_input
@@ -221,7 +228,7 @@ class SimpleAsgStack(Stack):
             user_data=user_data,
             role=self.asg_role,
         )
-        autoscaling.AutoScalingGroup(
+        self.asg = autoscaling.AutoScalingGroup(
             self,
             f"{prefix}ASG",
             min_capacity=self.s_input.sa_setting.min_instances,
@@ -230,4 +237,13 @@ class SimpleAsgStack(Stack):
             vpc_subnets=ec2.SubnetSelection(subnet_type=subnet_type),
             ssm_session_permissions=True,
             launch_template=l_tpl,
+            group_metrics=(
+                [
+                    autoscaling.GroupMetrics(
+                        autoscaling.GroupMetric.IN_SERVICE_INSTANCES
+                    )
+                ]
+                if enable_group_metrics
+                else None
+            ),
         )

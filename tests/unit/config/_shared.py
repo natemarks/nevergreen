@@ -8,6 +8,8 @@ Purpose:
 - config.queue_job resolves an sqs_queue/simple_s3 instance's physical
   name the same way, so it reuses the environment.json writer plus its
   own sqs_queue.json / simple_s3.json writers below.
+- config.build_worker_image resolves an ecr_repo instance's physical name
+  the same way, reusing its own ecr_repo.json writer below.
 """
 
 import json
@@ -73,6 +75,13 @@ def write_simple_s3_config(data_path: Path, stack_id: str) -> None:
     setting_dir = data_path / "simple_s3" / stack_id
     setting_dir.mkdir(parents=True)
     (setting_dir / "simple_s3.json").write_text(json.dumps({}))
+
+
+def write_ecr_repo_config(data_path: Path, stack_id: str) -> None:
+    """Write a minimal ecr_repo.json for one stack_id under data_path."""
+    setting_dir = data_path / "ecr_repo" / stack_id
+    setting_dir.mkdir(parents=True)
+    (setting_dir / "ecr_repo.json").write_text(json.dumps({}))
 
 
 def asg_resources(physical_id: str) -> dict:
