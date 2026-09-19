@@ -187,7 +187,9 @@ def local_ollama_models_dir() -> Path:
             f"{SYSTEMD_OLLAMA_MODELS_DIR} exists but isn't readable by "
             "this user -- Ollama's Linux installer owns it as the "
             "`ollama` system user. Run `sudo usermod -aG ollama "
-            "$(whoami)` and start a new shell session, then try again."
+            "$(whoami)`, then either run `newgrp ollama` in this shell "
+            "or fully log out and back in (a new shell alone does not "
+            "pick up the updated group), then try again."
         ) from exc
     if systemd_dir_exists:
         return SYSTEMD_OLLAMA_MODELS_DIR
