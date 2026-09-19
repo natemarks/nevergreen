@@ -4,6 +4,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from botocore.exceptions import ClientError
 
 from config.troubleshoot import (
     queue_attributes,
@@ -144,6 +145,53 @@ def test_run_diagnostics_polls_through_in_progress_status():
 
     assert result == "done\n"
     assert ssm.get_command_invocation.call_count == 2
+
+
+@pytest.mark.unit
+def test_run_diagnostics_retries_through_invocation_does_not_exist():
+    """A transient InvocationDoesNotExist right after send_command retries
+    instead of failing -- the invocation record can take a moment to
+    propagate after SendCommand returns."""
+    ssm = MagicMock()
+    ssm.send_command.return_value = {"Command": {"CommandId": "cmd-1"}}
+    not_yet = ClientError(
+        {"Error": {"Code": "InvocationDoesNotExist", "Message": "nope"}},
+        "GetCommandInvocation",
+    )
+    ssm.get_command_invocation.side_effect = [
+        not_yet,
+        {
+            "Status": "Success",
+            "StandardOutputContent": "done\n",
+            "StandardErrorContent": "",
+        },
+    ]
+
+    result = run_diagnostics(
+        "i-123", commands=["echo ok"], ssm_client=ssm, poll_interval_seconds=0
+    )
+
+    assert result == "done\n"
+    assert ssm.get_command_invocation.call_count == 2
+
+
+@pytest.mark.unit
+def test_run_diagnostics_reraises_other_client_errors():
+    """A ClientError that isn't InvocationDoesNotExist is not swallowed."""
+    ssm = MagicMock()
+    ssm.send_command.return_value = {"Command": {"CommandId": "cmd-1"}}
+    ssm.get_command_invocation.side_effect = ClientError(
+        {"Error": {"Code": "AccessDeniedException", "Message": "nope"}},
+        "GetCommandInvocation",
+    )
+
+    with pytest.raises(ClientError):
+        run_diagnostics(
+            "i-123",
+            commands=["echo ok"],
+            ssm_client=ssm,
+            poll_interval_seconds=0,
+        )
 
 
 @pytest.mark.unit

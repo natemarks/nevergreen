@@ -40,6 +40,7 @@ import time
 from pathlib import Path
 
 import boto3
+from botocore.exceptions import ClientError
 
 from config.helper import (
     asg_physical_name,
@@ -135,11 +136,23 @@ def run_diagnostics(  # pylint: disable=too-many-arguments,too-many-positional-a
     )["Command"]["CommandId"]
 
     deadline = time.monotonic() + timeout_seconds
+    invocation = None
     while True:
-        invocation = ssm.get_command_invocation(
-            CommandId=command_id, InstanceId=instance_id
-        )
-        if invocation["Status"] not in ("Pending", "InProgress", "Delayed"):
+        try:
+            invocation = ssm.get_command_invocation(
+                CommandId=command_id, InstanceId=instance_id
+            )
+        except ClientError as exc:
+            # SendCommand's invocation record can take a moment to
+            # propagate -- GetCommandInvocation returning this right after
+            # SendCommand just means "not visible yet", not a failure.
+            if exc.response["Error"]["Code"] != "InvocationDoesNotExist":
+                raise
+        if invocation is not None and invocation["Status"] not in (
+            "Pending",
+            "InProgress",
+            "Delayed",
+        ):
             break
         if time.monotonic() >= deadline:
             raise TimeoutError(
