@@ -135,16 +135,19 @@ queue_job` resolves the queue's real URL and sends the job in one step:
 make queue_job app_env=dev seed_prompt="a fox exploring a neon city" batch_size=3
 ```
 
-It prints the `job_id` it generated and the S3 path to check. (Equivalent
-by hand: `aws sqs get-queue-url --queue-name nevergreen-dev-explore-a-queue`
-then `aws sqs send-message --queue-url <url> --message-body
-'{"seed_prompt": "...", "batch_size": 3}'`.)
+It prints the `job_id` it generated and the exact S3 path to check next
+(`s3://nevergreen-dev-images/explore/<job_id>/`). (Equivalent by hand:
+`aws sqs get-queue-url --queue-name nevergreen-dev-explore-a-queue` then
+`aws sqs send-message --queue-url <url> --message-body '{"seed_prompt":
+"...", "batch_size": 3}'` — with a hand-picked `job_id` in the body, since
+nothing will print one for you.)
 
 Wait a few minutes (Ollama's prompt expansion + 3 ComfyUI generations), then
-confirm the images appeared without touching ComfyUI directly:
+confirm the images appeared under that same path — not a plain listing of
+everything under `explore/`, which mixes in every other job's output too:
 
 ```bash
-aws s3 ls s3://nevergreen-dev-images/explore/ --recursive
+aws s3 ls s3://nevergreen-dev-images/explore/<job_id>/ --recursive
 ```
 
 If nothing appears, SSM into the instance and check both services — the
