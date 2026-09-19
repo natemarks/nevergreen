@@ -26,6 +26,7 @@ from config.project import SUPPORTED_APP_ENVS
 DEFAULT_QUEUE_STACK_ID = "explore-a"
 DEFAULT_IMAGES_STACK_ID = "images"
 DEFAULT_MODELS_STACK_ID = "models"
+DEFAULT_ECR_REPO_STACK_ID = "worker"
 
 
 @dataclass
@@ -75,11 +76,12 @@ def simple_asg(stack_id: str) -> StackFactory:
     return StackFactory(deploy=_deploy, discover=_discover)
 
 
-def gpu_worker(
+def gpu_worker(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     stack_id: str,
     images_stack_id: str = DEFAULT_IMAGES_STACK_ID,
     queue_stack_id: str = DEFAULT_QUEUE_STACK_ID,
     models_stack_id: str = DEFAULT_MODELS_STACK_ID,
+    ecr_repo_stack_id: str | None = None,
 ) -> StackFactory:
     """Return a StackFactory for one GPU worker instance.
 
@@ -91,6 +93,12 @@ def gpu_worker(
     queue's consumer managed policy (receive/delete/get-attributes), and
     the models simple_s3 bucket's read managed policy (so userdata can
     `aws s3 sync` checkpoints down at boot -- wayfinder ticket #32).
+
+    `ecr_repo_stack_id` is optional: leave it unset for a bare-EC2 worker
+    (Phase 0/1's design, unchanged). Set it to also attach the named
+    EcrRepo stack's pull policy and wire a target-tracking scaling policy
+    on SQS backlog-per-instance, scaling the ASG from 0 -- Phase 2,
+    wayfinder ticket #29.
     """
 
     def _deploy(inv, app, cdk_env):
@@ -101,6 +109,7 @@ def gpu_worker(
             images_stack_id,
             queue_stack_id,
             models_stack_id,
+            ecr_repo_stack_id,
         )
 
     def _discover(data_path: Path) -> None:
@@ -131,6 +140,17 @@ def sqs_queue(stack_id: str) -> StackFactory:
     return StackFactory(deploy=_deploy, discover=None)
 
 
+def ecr_repo(stack_id: str) -> StackFactory:
+    """Return a StackFactory for one EcrRepo instance identified by stack_id."""
+
+    def _deploy(inv, app, cdk_env):
+        return inv._deploy_ecr_repo(  # pylint: disable=protected-access
+            app, cdk_env, stack_id
+        )
+
+    return StackFactory(deploy=_deploy, discover=None)
+
+
 STACKS_BY_ENV: dict[str, list[StackFactory]] = {
     "dev": [
         app_vpc,
@@ -138,7 +158,8 @@ STACKS_BY_ENV: dict[str, list[StackFactory]] = {
         simple_s3("models"),
         simple_s3("images"),
         sqs_queue(DEFAULT_QUEUE_STACK_ID),
-        gpu_worker("comfyui"),
+        ecr_repo(DEFAULT_ECR_REPO_STACK_ID),
+        gpu_worker("comfyui", ecr_repo_stack_id=DEFAULT_ECR_REPO_STACK_ID),
     ],
     "staging": [app_vpc, secure_s3("phi")],
     "production": [app_vpc, secure_s3("phi")],

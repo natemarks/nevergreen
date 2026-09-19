@@ -103,6 +103,39 @@ The list of model content `make sync_models` syncs: `{"checkpoints":
 Adding a new checkpoint or Ollama model is a one-line JSON edit, not a
 code change.
 
+## EcrRepo context (Phase 2)
+
+### EcrRepoStack
+A multi-stack CDK stack type that provisions one ECR repository plus a
+pull IAM managed policy. One instance per logical image. Follows the
+factory pattern: `ecr_repo("worker")`. The image itself is built and
+pushed via `make build_worker_image`, deliberately outside `cdk deploy`
+-- it changes far more often than infrastructure.
+
+### refresh_worker.sh
+The on-instance script (delivered via `SimpleAsgStack`'s `extra_files`,
+same as `explore_worker.py`) that both `refresh-worker.timer` and `make
+force_refresh` run. Without `--force-models`: pulls the worker image and
+restarts the `explore-worker` container only if its digest changed --
+never touches models. With `--force-models`: also re-syncs models from
+S3 first and always restarts.
+
+### Forced refresh
+`make force_refresh`'s on-demand path for a running instance to pick up
+new models-bucket content before its next natural container restart --
+runs `refresh_worker.sh --force-models` over `ssm:SendCommand`/
+`AWS-RunShellScript` (the same primitive `config/troubleshoot.py`
+established) against every instance in the gpu_worker ASG, rather than a
+bespoke custom SSM Document CDK resource.
+
+### SQS backlog-per-instance
+The target-tracking scaling metric for the `comfyui` ASG: `SQS's
+ApproximateNumberOfMessagesVisible` divided by the ASG's own
+`GroupInServiceInstances` (a CloudWatch metric-math expression, since
+there's no predefined ASG metric for this and CDK's L2
+`scale_to_track_metric` only accepts a single direct metric -- see the L1
+`CfnScalingPolicy` in `config/inventory.py`). Target value: 2.
+
 ## SecureS3 context
 
 ### SecureS3Stack
