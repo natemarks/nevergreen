@@ -135,7 +135,12 @@ chown -R "${COMFYUI_USER}:${COMFYUI_USER}" "${COMFYUI_HOME}/models"
 curl -fsSL https://ollama.com/install.sh | sh
 mkdir -p /usr/share/ollama/.ollama/models
 aws s3 sync "s3://${MODELS_BUCKET}/ollama/" /usr/share/ollama/.ollama/models/
-chown -R ollama:ollama /usr/share/ollama/.ollama/models
+# chown the whole .ollama dir, not just models/ -- mkdir -p above (run as
+# root, before the ollama daemon has ever started) creates .ollama itself
+# as root-owned; the daemon then can't write its own files (e.g. its
+# id_ed25519 private key) directly inside .ollama as the `ollama` user,
+# and crash-loops on every boot ("permission denied") -- confirmed live.
+chown -R ollama:ollama /usr/share/ollama/.ollama
 systemctl enable ollama
 systemctl restart ollama
 
